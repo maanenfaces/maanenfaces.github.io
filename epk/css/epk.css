@@ -1,0 +1,138 @@
+#navbar {
+  background-color: rgba(10, 10, 10, 1);
+  font-size: 1.2em;
+}
+
+#navbarNav {
+  margin-right: 123px;
+}
+
+#navbarNav li {
+  margin-left: 3em;
+  margin-right: 3em;
+}
+
+#navbarNav .nav-link {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+#fullpage {
+  background-color: rgba(10, 10, 10, 1);
+}
+
+#fp-nav ul li a span {
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+h2 {
+  margin-bottom: 1.5em;
+}
+
+.mf-section::before {
+  content: "";
+  background-size: cover;
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  bottom: 0px;
+  left: 0px;
+  z-index: -999;
+}
+
+/** Intro ********************************************************************/
+
+.mf-section-intro::before {
+  background-image: url('../img/background-3.png');
+  filter: brightness(1.25) contrast(0.8);
+  opacity: 0.2;
+}
+
+/** Bio **********************************************************************/
+
+.mf-section-bio::before {
+  background-image: url('../img/photo-1-c.png');
+  background-position: center -90px;
+}
+
+.mf-section-bio,
+.mf-section-bio .fp-overflow {
+  min-height: 100%;
+}
+
+.mf-section-bio {
+  padding-bottom: 3em;
+}
+
+.mf-section-bio p {
+  background-color: rgba(10, 10, 10, 0.7);
+  font-size: 1.2em;
+  padding: 1em;
+}
+
+/** Project ******************************************************************/
+
+.mf-section-project::before {
+  background-image: url('../img/background-1.png');
+  filter: brightness(1.25) contrast(0.8);
+  opacity: 0.8;
+}
+
+.mf-section-project {
+  padding-left: 5em;
+  padding-right: 5em;
+}
+
+.mf-section-project .project-item {
+  background-color: rgba(10, 10, 10, 0.7);
+  border: 1px #222 solid;
+  font-size: 2em;
+  padding: 0.5em;
+}
+
+/** Members ******************************************************************/
+
+.mf-section-members::before {
+  background-image: url('../img/background-2.jpg');
+}
+
+.mf-section-members {
+  padding-left: 2em;
+  padding-right: 2em;
+}
+
+.mf-section-members .card {
+  margin: 0.3em;
+  padding-left: 0;
+  padding-right: 0;
+  width: 16rem;
+}
+
+/** Contact ******************************************************************/
+
+.mf-section-contact::before {
+  background-image: url('../img/photo-2-c.png');
+  background-position: center -170px;
+}
+
+.mf-section-contact,
+.mf-section-contact .fp-overflow {
+  min-height: 100%;
+}
+
+.mf-section-contact-header {
+  position: relative;
+  top: 0;
+  width: 30%;
+}
+
+.mf-section-contact-header p {
+  background-color: rgba(10, 10, 10, 0.8);
+}
+
+.mf-section-contact-content {
+  background-color: rgba(10, 10, 10, 1);
+  border-top: 20px rgba(10, 10, 10, 0.7) solid;
+  font-size: 1.2em;
+  padding: 1em;
+  background-clip: padding-box;
+}
