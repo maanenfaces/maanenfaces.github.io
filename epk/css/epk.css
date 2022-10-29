@@ -47,6 +47,14 @@ h2 {
   opacity: 0.2;
 }
 
+.mf-section-intro-title {
+  font-size: 1.7em;
+}
+
+.mf-section-intro-info {
+  font-size: 1.4em;
+}
+
 /** Bio **********************************************************************/
 
 .mf-section-bio::before {
