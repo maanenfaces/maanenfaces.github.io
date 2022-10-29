@@ -31,7 +31,7 @@ body {
 }
 
 .custom-container {
-  background-color: rgba(10, 10, 10, 1);
+  background-color: rgba(10, 10, 10, 0.8);
 }
 
 .custom-header {
