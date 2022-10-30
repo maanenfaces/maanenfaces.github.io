@@ -48,11 +48,11 @@ h2 {
 }
 
 .mf-section-intro-title {
-  font-size: 1.7em;
+  font-size: 1.5em;
 }
 
 .mf-section-intro-info {
-  font-size: 1.4em;
+  font-size: 1.2em;
 }
 
 /** Bio **********************************************************************/
@@ -73,7 +73,7 @@ h2 {
 
 .mf-section-bio p {
   background-color: rgba(10, 10, 10, 0.7);
-  font-size: 1.2em;
+  font-size: 1em;
   padding: 1em;
 }
 
@@ -93,7 +93,7 @@ h2 {
 .mf-section-project .project-item {
   background-color: rgba(10, 10, 10, 0.7);
   border: 1px #222 solid;
-  font-size: 2em;
+  font-size: 1.6em;
   padding: 0.5em;
 }
 
