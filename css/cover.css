@@ -1,20 +1,18 @@
-.btn-secondary,
-.btn-secondary:hover,
-.btn-secondary:focus {
-  color: #333;
-  text-shadow: none; /* Prevent inheritance from `body` */
-}
-
 /*
- * Base structure
+ * Structure
  */
 
 body {
   background-color: #000;
-  text-shadow: 0 .05rem .1rem rgba(0, 0, 0, .5);
+  color: #ffd;
 }
 
-.bg-image {
+a, a:hover {
+  color: #ffd;
+  text-decoration: underline;
+}
+
+.mm-bg-image {
   position: fixed;
   top: 0;
   left: 0;
@@ -26,66 +24,122 @@ body {
   z-index: -999;
 }
 
-.cover-container {
-  max-width: 50em;
+.container-mm {
+  max-width: 55em;
 }
 
-.custom-container {
+.container-mm-inner {
+  background-color: rgba(10, 10, 10, 0.2);
+}
+
+.container-mm-header {
   background-color: rgba(10, 10, 10, 0.8);
+  margin-bottom: 0.2em;
+  margin-left: 16px;
+  margin-right: 16px;
+  padding: 10px;
 }
 
-.custom-header {
-  margin-top: -60px;
+.container-mm-header-logo {
+  margin-bottom: 1em;
+  margin-top: 2.5em;
 }
 
-.custom-title {
-  background-color: #222;
-  padding: 15px;
-  margin-bottom: 20px;
-  margin-top: 20px;
+.container-mm-header-menu {
+  margin-bottom: 0.5em;
+  margin-top: 1.5em;
 }
 
-.custom-lead {
-  color: #888;
+.container-mm-video {
+  line-height: 0;
+  margin-bottom: 0.2em;
 }
 
-.custom-email {
-  color: #ddd;
+.container-mm-news {
+  background-color: rgba(10, 10, 10, 0.8);
+  margin-bottom: 4px;
+  padding: 1em;
+  padding-bottom: 0.1em;
+}
+
+.container-mm-info {
+  background-color: rgba(10, 10, 10, 0.8);
+  margin-bottom: 0.3em;
+  padding: 0;
+  text-align: left;
+}
+
+.container-mm-info table {
+  color: #ffd;
+  margin: 1em;
+}
+
+.container-mm-info table td {
+  padding: 0.2em;
+}
+
+.container-mm-info a {
+  color: #ffd;
+}
+
+.container-mm-bandsintown {
+  background-color: rgba(10, 10, 10, 0.8);
+  padding: 20px;
+  padding-bottom: 0px;
+}
+
+.container-mm-networks {
+  padding: 20px;
+}
+
+/**
+ * Utilies
+ */
+
+.btn-mm {
+  border: 0;
+  border-radius: 0;
+  color: #ffd;
+  padding: 0;
+  padding-left: 0.2em;
+  padding-right: 0.2em;
+  text-decoration: underline;
+  vertical-align: top;
+}
+
+.btn-mm:hover {
+  background-color: #eed;
+  color: #222;
+  text-decoration: none;
+}
+
+.btn-mm-menu {
+  margin-left: 1em;
+  margin-right: 1em;
+  padding: 0.2em;
+}
+
+.mm-hidden-email {
+  color: #ffd;
+  padding: 2px;
   text-decoration: underline;
 }
 
-.lang-container {
-  margin: 15px;
-  text-align: right;
-  top: 0;
+.mm-hidden-email:hover {
+  background-color: #eed;
+  color: #222;
+  text-decoration: none;
 }
 
-.lang-container a {
-  color: #FFF;
+.mm-hh {
+  background: #ffd;
+  color: #222;
+  margin-right: 2px;
+  padding-left: 1px;
+  padding-right: 2px;
 }
 
-/*
- * Header
- */
-
-.nav-masthead .nav-link {
-  padding: .25rem 0;
-  font-weight: 700;
-  color: rgba(255, 255, 255, .5);
-  background-color: transparent;
-  border-bottom: .25rem solid transparent;
-}
-
-.nav-masthead .nav-link:hover,
-.nav-masthead .nav-link:focus {
-  border-bottom-color: rgba(255, 255, 255, .25);
-}
-
-.nav-masthead .nav-link + .nav-link {
-  margin-left: 1rem;
-}
-
-.nav-masthead .active {
-  color: #fff;
-  border-bottom-color: #fff;
+.mm-hw {
+  font-family: 'Caveat', serif;
+  font-size: 1.2em;
 }
