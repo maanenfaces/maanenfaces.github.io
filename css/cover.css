@@ -72,6 +72,7 @@ a, a:hover {
 .container-mm-info table {
   color: #ffd;
   margin: 1em;
+  margin-top: 2.5em;
 }
 
 .container-mm-info table td {
