@@ -16,7 +16,7 @@ a, a:hover {
   position: fixed;
   top: 0;
   left: 0;
-  opacity: 0.5;
+  opacity: 1;
 
   /* Preserve aspect ratio */
   min-width: 100%;
@@ -25,7 +25,7 @@ a, a:hover {
 }
 
 .container-mm {
-  max-width: 55em;
+  max-width: 1008px;
 }
 
 .container-mm-inner {
