@@ -33,11 +33,12 @@ a, a:hover {
 }
 
 .container-mm-header {
-  background-color: rgba(10, 10, 10, 0.8);
+  background-color: rgba(10, 10, 10, 1);
   margin-bottom: 0.2em;
   margin-left: 16px;
   margin-right: 16px;
-  padding: 10px;
+  padding-left: 0;
+  padding-right: 0;
 }
 
 .container-mm-header-logo {
@@ -46,8 +47,12 @@ a, a:hover {
 }
 
 .container-mm-header-menu {
+  /**
   margin-bottom: 0.5em;
   margin-top: 1.5em;
+  **/
+  padding: 1em;
+  padding-top: 0;
 }
 
 .container-mm-video {
@@ -69,10 +74,14 @@ a, a:hover {
   text-align: left;
 }
 
+.container-mm-info-bio {
+  padding: 1em;
+  text-align: justify;
+}
+
 .container-mm-info table {
   color: #ffd;
   margin: 1em;
-  margin-top: 2.5em;
 }
 
 .container-mm-info table td {
@@ -109,8 +118,8 @@ a, a:hover {
 }
 
 .btn-mm:hover {
-  background-color: #eed;
-  color: #222;
+  background-color: #c00;
+  color: #ffd;
   text-decoration: none;
 }
 
@@ -127,8 +136,8 @@ a, a:hover {
 }
 
 .mm-hidden-email:hover {
-  background-color: #eed;
-  color: #222;
+  background-color: #c00;
+  color: #ffd;
   text-decoration: none;
 }
 
