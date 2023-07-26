@@ -51,7 +51,7 @@
     <meta name="msapplication-config" content="/favicons/browserconfig.xml">
   </head>
 
-  <body class="d-flex h-100 text-center bg-dark theme-bg-dark">
+  <body class="d-flex h-100 bg-dark theme-bg-dark">
 
     <img class="mm-bg-image"
          src="/img/website-background-02.png"
@@ -63,7 +63,7 @@
         <!-- Mandatory to make the template works -->
         <header class="mb-auto"></header>
 
-        <div class="container-mm-header">
+        <div class="container-mm-header text-center">
           <h1 class="visually-hidden">Maanen Faces</h1>
           <img src="/img/website-header-04.png"
                class="img-fluid" alt="Maanen Faces Website Header">
@@ -75,45 +75,63 @@
                class="btn btn-mm btn-mm-menu">YouTube</a>
             <a href="https://www.instagram.com/maanenfaces/"
                class="btn btn-mm btn-mm-menu">Instagram</a>
+            <a href="https://maanenfaces.bandcamp.com"
+               class="btn btn-mm btn-mm-menu">Bandcamp</a>
             <a href="https://soundcloud.com/maanenfaces"
                class="btn btn-mm btn-mm-menu">SoundCloud</a>
             <a href="https://www.bandsintown.com/a/15511678-maanen-faces"
                class="btn btn-mm btn-mm-menu">Concerts</a>
+            <a href="https://docs.google.com/forms/d/1uS11tAADODTSv52LsQdORTJoqTS79E-xZr8EsjeSDrk"
+               class="btn btn-mm btn-mm-menu">Merch</a>
           </div>
         </div>
 
         <main class="px-3">
 
-          <div>
+          <div class="container-mm-video">
             <iframe
               width="100%"
-              height="300"
-              scrolling="no"
-              frameborder="no"
-              allow="autoplay"
-              src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/playlists/1624197601&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true"></iframe>
+              height="415"
+              src="https://www.youtube.com/embed/mb_DdSe-TIo"
+              title="Destroy This World par Maanen Faces sur YouTube"
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
           </div>
 
-          <div class="container-mm-news">
-            <p>
-              <span class="mm-hh">Checkez les concerts en bas de page!</span>
-              Et suivez-nous sur
-              <a
-                  class="btn btn-mm"
-                  href="https://www.facebook.com/MaanenFaces/">
-                Facebook
-              </a> !
-            </p>
-            <p>
-              🤘
-              Merchandising dispo en ligne:
-              <a
-                  class="btn btn-mm"
-                  href="https://docs.google.com/forms/d/1uS11tAADODTSv52LsQdORTJoqTS79E-xZr8EsjeSDrk">
-                commandez votre t-shirt maintenant !
-              </a>
-              🤘
-            </p>
+          <div class="card container-mm-news">
+            <div class="row g-0">
+              <div class="col-sm">
+                <img src="/img/icon-latest-news.png"
+                     class="img-fluid rounded-start"
+                     alt="Icon latest news">
+              </div>
+              <div class="col-sm-10">
+                <div class="card-body">
+                   🤘 Notre démo est disponible sur
+                    <a
+                        class="btn btn-mm"
+                        href="https://maanenfaces.bandcamp.com">Bandcamp</a> !
+                    <br/>
+                    🤘 Merchandising dispo en ligne:
+                    <a
+                        class="btn btn-mm"
+                        href="https://docs.google.com/forms/d/1uS11tAADODTSv52LsQdORTJoqTS79E-xZr8EsjeSDrk">
+                      commandez votre t-shirt maintenant !
+                    </a>
+                    <br/>
+                    <span class="mm-hh">
+                      Checkez les concerts en bas de page !
+                    </span>
+                    <br/>
+                    Et suivez-nous sur
+                    <a
+                        class="btn btn-mm"
+                        href="https://www.facebook.com/MaanenFaces/">
+                      Facebook
+                    </a> !
+                </div>
+              </div>
+            </div>
           </div>
 
           <div class="container-mm-info">
@@ -176,15 +194,16 @@
             </div>
           </div>
 
-          <div class="container-mm-video">
+          <div>
             <iframe
               width="100%"
-              height="415"
-              src="https://www.youtube.com/embed/mb_DdSe-TIo"
-              title="Destroy This World par Maanen Faces sur YouTube"
-              frameborder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+              height="300"
+              scrolling="no"
+              frameborder="no"
+              allow="autoplay"
+              src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/playlists/1624197601&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true"></iframe>
           </div>
+
           <div class="container-mm-video">
             <iframe
               width="100%"
@@ -195,7 +214,7 @@
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
           </div>
 
-          <div class="container-mm-bandsintown">
+          <div class="container-mm-bandsintown text-center">
             <p>
               Pour une programmation, contactez-nous par email sur
               <span class="mm-hidden-email">maanenfaces<span
@@ -287,7 +306,7 @@
               data-layout-breakpoint="900"
               data-app-id=""
               data-affil-code=""
-              data-bit-logo-position="bottomRight"
+              data-bit-logo-position="hidden"
               data-bit-logo-color="rgba(100,100,100,1)"
 
               data-optin-font="undefined"
@@ -301,7 +320,7 @@
               ></a>
           </div>
 
-          <div class="container-mm-networks">
+          <div class="container-mm-networks text-center">
             <p>
                 Suivez-nous sur les réseaux sociaux:<br/>
                 <a href="https://www.facebook.com/MaanenFaces/" class="link-light" title="Page Facebook"><i data-feather="facebook"></i></a>
