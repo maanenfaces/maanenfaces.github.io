@@ -61,17 +61,28 @@ a, a:hover {
 }
 
 .container-mm-news {
-  background-color: rgba(10, 10, 10, 0.7);
+  background-color: rgba(200, 10, 50, 0.7);
   margin-bottom: 4px;
-  padding: 1em;
-  padding-bottom: 0.1em;
+}
+
+.container-mm-news .card-body {
+  margin-top: -5px;
+  margin-bottom: -1em;
+}
+
+.container-mm-news .btn-mm:hover {
+  background-color: #000;
+}
+
+.container-mm-news-title {
+  background-color: rgba(10, 10, 10, 0.7);
+  font-size: 1em;
 }
 
 .container-mm-info {
   background-color: rgba(10, 10, 10, 0.8);
   margin-bottom: 0.3em;
   padding: 0;
-  text-align: left;
 }
 
 .container-mm-info-bio {
