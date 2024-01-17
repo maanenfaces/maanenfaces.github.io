@@ -51,7 +51,7 @@ a, a:hover {
   margin-bottom: 0.5em;
   margin-top: 1.5em;
   **/
-  padding: 1em;
+  padding-bottom: 1em;
   padding-top: 0;
 }
 
@@ -131,8 +131,8 @@ a, a:hover {
 }
 
 .btn-mm-menu {
-  margin-left: 1em;
-  margin-right: 1em;
+  margin-left: 0.5em;
+  margin-right: 0.5em;
   padding: 0.2em;
 }
 
