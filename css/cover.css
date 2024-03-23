@@ -1,22 +1,17 @@
-/*
- * Structure
- */
+@import url('https://fonts.googleapis.com/css2?family=Libre+Franklin:ital,wght@0,100..900;1,100..900&display=swap')
 
-body {
+.libre-franklin-mf {
+  font-family: "Libre Franklin", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 100;
+  font-style: normal;
+}
+
+.main-bg-image {
   background-color: #000;
-  color: #ffd;
-}
-
-a, a:hover {
-  color: #ffd;
-  text-decoration: underline;
-}
-
-.mm-bg-image {
   position: fixed;
   top: 0;
   left: 0;
-  opacity: 1;
 
   /* Preserve aspect ratio */
   min-width: 100%;
@@ -24,139 +19,172 @@ a, a:hover {
   z-index: -999;
 }
 
-.container-mm {
-  max-width: 1008px;
-}
-
-.container-mm-inner {
-  background-color: rgba(10, 10, 10, 0.2);
-}
-
-.container-mm-header {
-  background-color: rgba(10, 10, 10, 1);
-  margin-bottom: 0.2em;
-  margin-left: 16px;
-  margin-right: 16px;
-  padding-left: 0;
-  padding-right: 0;
-}
-
-.container-mm-header-logo {
-  margin-bottom: 1em;
-  margin-top: 2.5em;
-}
-
-.container-mm-header-menu {
-  /**
-  margin-bottom: 0.5em;
-  margin-top: 1.5em;
-  **/
-  padding-bottom: 1em;
-  padding-top: 0;
-}
-
-.container-mm-video {
-  line-height: 0;
-  margin-bottom: 0.2em;
-}
-
-.container-mm-news {
-  background-color: rgba(200, 10, 50, 0.7);
-  margin-bottom: 4px;
-}
-
-.container-mm-news .card-body {
-  margin-top: -5px;
-  margin-bottom: -1em;
-}
-
-.container-mm-news .btn-mm:hover {
+body {
   background-color: #000;
+  color: #ffd;
 }
 
-.container-mm-info {
-  background-color: rgba(10, 10, 10, 0.8);
-  margin-bottom: 0.3em;
-  padding: 0;
+body > .container {
+  padding-bottom: 3em;
 }
 
-.container-mm-info-bio {
+a, a:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+#bio {
+  padding-top: 2em;
+}
+
+#bio #band-photo img {
+  min-width: 545px;
+}
+
+#bio .container-mf-info-bio {
   padding: 1em;
   text-align: justify;
 }
 
-.container-mm-info table {
-  color: #ffd;
-  margin: 1em;
+#bio .table {
+  background-color: transparent;
   margin-top: 0;
+  margin: 0.5em;
 }
 
-.container-mm-info table td {
-  padding: 0.2em;
+#bio .table > :not(caption) > * > * {
+  background-color: transparent;
+  color: #fff;
 }
 
-.container-mm-info a {
-  color: #ffd;
+#footer {
+  padding-bottom: 0;
 }
 
-.container-mm-bandsintown {
-  background-color: rgba(10, 10, 10, 0.8);
-  padding: 20px;
-  padding-bottom: 0px;
+#footer .footer-image img {
+  margin-bottom: -100px;
+  opacity: 0.8;
+  position: relative;
+  top: -100px;
 }
 
-.container-mm-networks {
-  padding: 20px;
+#navbar-mf,
+#navbar-mf.bg-dark {
+  background-color: rgba(0, 0, 0, 0.7) !important;
+  padding: 0;
+}
+
+#navbar-mf .container {
+  padding-top: 8px;
+}
+
+#navbar-mf .navbar-mf-title {
+  color: #fff;
+  font-size: 1.5em;
+}
+
+#navbar-mf .btn-mf {
+  border: 0;
+  border-radius: 0;
+  color: #fff;
+  font-size: 1.5em;
+  padding: 0.4em;
+  text-decoration: none;
+  vertical-align: top;
+}
+
+#navbar-mf .btn-mf:hover {
+  color: #f92100;
+  text-decoration: none;
+}
+
+#navbar-mf .navbar-nav-links {
+  margin-left: auto;
+  margin-right: 0;
+}
+
+#navbar-mf .show .navbar-nav-links .sn-icon {
+  height: 30px;
+  object-fit: cover;
+  width: 30px;
+}
+
+#navbar-mf .navbar-nav-links li {
+  display: inline;
+  margin-left: 1em;
+}
+
+#navbar-mf .navbar-nav-links .sn-icon {
+  height: 30px;
+  object-fit: cover;
+  width: 30px;
+}
+
+#navbar-mf .show .navbar-nav-links .sn-icon {
+  display: inline;
+  margin-bottom: 0.5em;
+}
+
+#releases {
+  background-size: cover;
+  padding: 0;
+}
+
+#releases .releases-content .col {
+  padding-top: 4em;
+}
+
+#releases .releases-content .col p {
+  font-size: 1.2em;
+}
+
+#releases .releases-cover img {
+  min-width: 500px;
+  margin: 0;
+}
+
+#shows #bandsintown {
+  padding-top: 1em;
+}
+
+#videos .col {
+  border: 0.5em solid #f92100;
+  margin: 0.5em;
+  padding: 0;
 }
 
 /**
  * Utilies
  */
 
-.btn-mm {
-  border: 0;
-  border-radius: 0;
-  color: #ffd;
-  padding: 0;
+.mf-bg-dark {
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.mf-hidden-email {
+  color: #fff;
   padding-left: 0.2em;
   padding-right: 0.2em;
+  line-height: 1.4em;
   text-decoration: underline;
-  vertical-align: top;
+  width: auto;
 }
 
-.btn-mm:hover {
-  background-color: #c00;
-  color: #ffd;
+.mf-hidden-email:hover {
+  background-color: #f92100;
+  color: #fff;
   text-decoration: none;
 }
 
-.btn-mm-menu {
-  margin-left: 0.5em;
-  margin-right: 0.5em;
-  padding: 0.2em;
-}
-
-.mm-hidden-email {
-  color: #ffd;
-  padding: 2px;
-  text-decoration: underline;
-}
-
-.mm-hidden-email:hover {
-  background-color: #c00;
-  color: #ffd;
-  text-decoration: none;
-}
-
-.mm-hh {
-  background: #ffd;
+.mf-hh {
+  background: #fff;
   color: #222;
   margin-right: 2px;
   padding-left: 1px;
   padding-right: 2px;
 }
 
-.mm-hw {
+.mf-hw {
   font-family: 'Caveat', serif;
   font-size: 1.2em;
 }
