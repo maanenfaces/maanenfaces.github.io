@@ -38,7 +38,7 @@ a, a:hover {
 }
 
 #bio #band-photo img {
-  min-width: 400px;
+  min-width: 350px;
 }
 
 #bio .container-mf-info-bio {
@@ -151,7 +151,7 @@ a, a:hover {
 }
 
 #releases .releases-cover img {
-  min-width: 400px;
+  min-width: 350px;
   margin: 0;
 }
 
