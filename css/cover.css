@@ -38,7 +38,7 @@ a, a:hover {
 }
 
 #bio #band-photo img {
-  min-width: 545px;
+  min-width: 400px;
 }
 
 #bio .container-mf-info-bio {
@@ -72,10 +72,6 @@ a, a:hover {
 #navbar-mf.bg-dark {
   background-color: rgba(0, 0, 0, 0.7) !important;
   padding: 0;
-}
-
-#navbar-mf .container {
-  padding-top: 8px;
 }
 
 #navbar-mf .navbar-mf-title {
@@ -114,6 +110,17 @@ a, a:hover {
   margin-left: 1em;
 }
 
+#navbar-mf .show .navbar-nav-links {
+  display: block;
+  margin-left: -5px;
+  margin-top: 10px;
+}
+
+#navbar-mf .show .navbar-nav-links li {
+  float: left;
+  width: 30px;
+}
+
 #navbar-mf .navbar-nav-links .sn-icon {
   height: 30px;
   object-fit: cover;
@@ -130,6 +137,11 @@ a, a:hover {
   padding: 0;
 }
 
+#releases .btn:hover {
+  border: 1px solid #fff;
+  text-decoration: none;
+}
+
 #releases .releases-content .col {
   padding-top: 4em;
 }
@@ -139,7 +151,7 @@ a, a:hover {
 }
 
 #releases .releases-cover img {
-  min-width: 500px;
+  min-width: 400px;
   margin: 0;
 }
 
