@@ -1,5 +1,11 @@
 <!doctype html>
 
+<!--
+Cette page est utilisée par les QR codes imprimés sur stickers
+Damned And Doomed et Maanen Faces.
+Ne pas supprimer, sinon les QR codes ne fonctionneront plus
+-->
+
 <html lang="fr" class="h-100">
   <head>
     <title>Maanen Faces - Audio officiel</title>
@@ -14,19 +20,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="refresh"
        content="0; URL=https://maanenfaces.bandcamp.com">
-
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+      body {
+        background: #000;
+        color: #fff;
+        font-family: sans-serif;
+        font-optical-sizing: auto;
+        font-weight: 100;
+        font-style: normal;
+        text-align: center;
+      }
+      a {
+        color: #fff;
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+    </style>
   </head>
 
-  <body class="text-light bg-black">
+  <body>
 
-    <div class="container-fluid">
-      <div class="row">
-        <div class="col d-flex align-items-center justify-content-center">
-            <a class="link link-light"
-               href="https://maanenfaces.bandcamp.com">Aller sur Bandcamp</a>
-        </div>
-      </div>
+    <div>
+      <a href="https://maanenfaces.bandcamp.com">Aller sur Bandcamp</a>
     </div>
+
   </body>
 </html>
