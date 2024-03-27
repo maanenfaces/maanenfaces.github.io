@@ -1,0 +1,204 @@
+@import url('https://fonts.googleapis.com/css2?family=Libre+Franklin:ital,wght@0,100..900;1,100..900&display=swap')
+
+.libre-franklin-mf {
+  font-family: "Libre Franklin", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 100;
+  font-style: normal;
+}
+
+.main-bg-image {
+  background-color: #000;
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  /* Preserve aspect ratio */
+  min-width: 100%;
+  min-height: 100%;
+  z-index: -999;
+}
+
+body {
+  background-color: #000;
+  color: #ffd;
+}
+
+body > .container {
+  padding-bottom: 3em;
+}
+
+a, a:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+#bio {
+  padding-top: 2em;
+}
+
+#bio #band-photo img {
+  min-width: 350px;
+}
+
+#bio .container-mf-info-bio {
+  padding: 1em;
+  text-align: justify;
+}
+
+#bio .table {
+  background-color: transparent;
+  margin-top: 0;
+  margin: 0.5em;
+}
+
+#bio .table > :not(caption) > * > * {
+  background-color: transparent;
+  color: #fff;
+}
+
+#footer {
+  padding-bottom: 0;
+}
+
+#footer .footer-image img {
+  margin-bottom: -100px;
+  opacity: 0.8;
+  position: relative;
+  top: -100px;
+}
+
+#navbar-mf,
+#navbar-mf.bg-dark {
+  background-color: rgba(0, 0, 0, 0.7) !important;
+  padding: 0;
+}
+
+#navbar-mf .navbar-mf-title {
+  border: 0;
+  color: #fff;
+  font-size: 1.5em;
+}
+
+#navbar-mf .btn-mf {
+  border: 0;
+  border-radius: 0;
+  color: #fff;
+  font-size: 1.5em;
+  padding: 0.4em;
+  text-decoration: none;
+  vertical-align: top;
+}
+
+#navbar-mf .btn-mf:hover {
+  color: #f92100;
+  text-decoration: none;
+}
+
+#navbar-mf .navbar-nav-links {
+  margin-left: auto;
+  margin-right: 0;
+}
+
+#navbar-mf .show .navbar-nav-links .sn-icon {
+  height: 30px;
+  object-fit: cover;
+  width: 30px;
+}
+
+#navbar-mf .navbar-nav-links li {
+  display: inline;
+  margin-left: 1em;
+}
+
+#navbar-mf .show .navbar-nav-links {
+  display: block;
+  margin-left: -5px;
+  margin-top: 10px;
+}
+
+#navbar-mf .show .navbar-nav-links li {
+  float: left;
+  width: 30px;
+}
+
+#navbar-mf .navbar-nav-links .sn-icon {
+  height: 30px;
+  object-fit: cover;
+  width: 30px;
+}
+
+#navbar-mf .show .navbar-nav-links .sn-icon {
+  display: inline;
+  margin-bottom: 0.5em;
+}
+
+#releases {
+  background-size: cover;
+  padding: 0;
+}
+
+#releases .btn:hover {
+  border: 1px solid #fff;
+  text-decoration: none;
+}
+
+#releases .releases-content .col {
+  padding-top: 4em;
+}
+
+#releases .releases-content .col p {
+  font-size: 1.2em;
+}
+
+#releases .releases-cover img {
+  min-width: 350px;
+  margin: 0;
+  margin-top: 1.5em;
+}
+
+#shows #bandsintown {
+  padding-top: 1em;
+}
+
+#videos .col {
+  border: 0.5em solid #f92100;
+  margin: 0.5em;
+  padding: 0;
+}
+
+/**
+ * Utilies
+ */
+
+.mf-bg-dark {
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.mf-hidden-email {
+  color: #fff;
+  padding-left: 0.2em;
+  padding-right: 0.2em;
+  line-height: 1.4em;
+  text-decoration: underline;
+  width: auto;
+}
+
+.mf-hidden-email:hover {
+  background-color: #f92100;
+  color: #fff;
+  text-decoration: none;
+}
+
+.mf-hh {
+  background: #fff;
+  color: #222;
+  margin-right: 2px;
+  padding-left: 1px;
+  padding-right: 2px;
+}
+
+.mf-hw {
+  font-family: 'Caveat', serif;
+  font-size: 1.2em;
+}
