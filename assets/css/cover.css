@@ -202,3 +202,7 @@ a, a:hover {
   font-family: 'Caveat', serif;
   font-size: 1.2em;
 }
+
+.scroll-margin {
+  scroll-margin-top: 5rem;
+}
