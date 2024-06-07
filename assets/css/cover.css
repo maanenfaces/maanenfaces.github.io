@@ -162,9 +162,16 @@ a, a:hover {
 }
 
 #videos .col {
+  background-color: #f92100 !important;
   border: 0.5em solid #f92100;
   margin: 0.5em;
   padding: 0;
+}
+
+#videos .videos-mf-desc {
+  font-size: 0.9em;
+  margin-right: 0.2em;
+  text-align: right;
 }
 
 /**
