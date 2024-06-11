@@ -105,12 +105,6 @@ h2 {
   margin-right: 0;
 }
 
-#navbar-mf .show .navbar-nav-links .sn-icon {
-  height: 30px;
-  object-fit: cover;
-  width: 30px;
-}
-
 #navbar-mf .navbar-nav-links li {
   display: inline;
   margin-left: 1em;
@@ -124,12 +118,6 @@ h2 {
 
 #navbar-mf .show .navbar-nav-links li {
   float: left;
-  width: 30px;
-}
-
-#navbar-mf .navbar-nav-links .sn-icon {
-  height: 30px;
-  object-fit: cover;
   width: 30px;
 }
 
@@ -153,7 +141,7 @@ h2 {
 }
 
 #releases .releases-content .col {
-  padding-top: 4em;
+  padding-top: 2em;
 }
 
 #releases .releases-content .col p {
@@ -223,6 +211,25 @@ h2 {
   margin-bottom: 1em;
 }
 
+.mf-streaming {
+  lit-style: none;
+}
+
+.mf-streaming a {
+  text-decoration: none;
+}
+
+.mf-streaming li {
+  display: inline;
+  margin-left: 1em;
+}
+
 .scroll-margin {
   scroll-margin-top: 5rem;
+}
+
+.sn-icon {
+  height: 30px;
+  object-fit: cover;
+  width: 30px;
 }
