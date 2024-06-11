@@ -143,6 +143,10 @@ h2 {
   padding: 0;
 }
 
+#releases.container-fluid > .container {
+  padding-bottom: 0;
+}
+
 #releases .btn:hover {
   border: 1px solid #fff;
   text-decoration: none;
@@ -166,7 +170,7 @@ h2 {
   padding-top: 1em;
 }
 
-#videos .col {
+#videos .col-video {
   background-color: #f92100 !important;
   border: 0.5em solid #f92100;
   margin: 0.5em;
@@ -213,6 +217,10 @@ h2 {
 .mf-hw {
   font-family: 'Caveat', serif;
   font-size: 1.2em;
+}
+
+.mf-section-title-img {
+  margin-bottom: 1em;
 }
 
 .scroll-margin {
