@@ -212,7 +212,8 @@ h2 {
 }
 
 .mf-streaming {
-  lit-style: none;
+  list-style: none;
+  padding-left: 0;
 }
 
 .mf-streaming a {
@@ -221,7 +222,8 @@ h2 {
 
 .mf-streaming li {
   display: inline;
-  margin-left: 1em;
+  margin-left: 0.5em;
+  margin-right: 0.5em;
 }
 
 .scroll-margin {
