@@ -32,3 +32,11 @@ month:
   october: October
   november: November
   december: December
+
+navbar:
+  audio: Audio
+  biography: Bio
+  news: News
+  shop: Shop
+  shows: Tour
+  videos: Videos

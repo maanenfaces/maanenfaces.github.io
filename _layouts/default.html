@@ -42,7 +42,7 @@
   <body class="text-light bg-black libre-franklin-mf">
 
     <nav id="navbar-mf"
-         class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+         class="navbar navbar-expand-xl navbar-dark bg-dark sticky-top">
       <div class="container">
         <a class="navbar-brand" href="/">
           <img src="/assets/img/maanenfaces-logo-visages.png"
@@ -58,26 +58,26 @@
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav">
             <li class="nav-item">
-              <a class="nav-link btn-mf" href="#releases">RELEASES</a>
+              <a class="nav-link btn-mf" href="#releases">{% t navbar.audio %}</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link btn-mf" href="#bio">BIO</a>
+              <a class="nav-link btn-mf" href="#bio">{% t navbar.biography %}</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link btn-mf" href="#videos">VIDEOS</a>
+              <a class="nav-link btn-mf" href="#videos">{% t navbar.videos %}</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link btn-mf" href="#shows">SHOWS</a>
+              <a class="nav-link btn-mf" href="#shows" id="navbar-item-shows">{% t navbar.shows %}</a>
             </li>
             <li class="nav-item">
               <a class="nav-link btn-mf"
                  href="https://www.facebook.com/MaanenFaces/"
-                 target="_blank">NEWS</a>
+                 target="_blank">{% t navbar.news %}</a>
             </li>
             <li class="nav-item">
               <a class="nav-link btn-mf btn-mf-external"
                  href="https://maanenfaces.bandcamp.com/merch"
-                 target="_blank">MERCH</a>
+                 target="_blank">{% t navbar.shop %}</a>
             </li>
             <li class="nav-item">
               <a class="nav-link btn-mf btn-mf-external"
