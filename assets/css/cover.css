@@ -52,7 +52,8 @@ h2 {
 }
 
 #bio .container-mf-info-bio {
-  padding: 1em;
+  padding-bottom: 1em;
+  padding-top: 1em;
   text-align: justify;
 }
 
@@ -173,6 +174,10 @@ h2 {
   padding-top: 1em;
 }
 
+#videos {
+  padding-left: 1em;
+}
+
 #videos .col-video {
   background-color: #f92100 !important;
   border: 0.5em solid #f92100;
@@ -196,6 +201,7 @@ h2 {
 
 .mf-btn-lang-container {
   padding: 0;
+  padding-right: 1em;
 }
 a.mf-btn-lang {
   text-decoration: none;
