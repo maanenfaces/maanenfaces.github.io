@@ -122,17 +122,20 @@ h2 {
   text-decoration: none;
 }
 
+#navbar-mf .collapsing .navbar-nav-links,
 #navbar-mf .show .navbar-nav-links {
   display: block;
   margin-left: -5px;
   margin-top: 10px;
 }
 
+#navbar-mf .collapsing .navbar-nav-links li,
 #navbar-mf .show .navbar-nav-links li {
   float: left;
   width: 30px;
 }
 
+#navbar-mf .collapsing .navbar-nav-links .sn-icon,
 #navbar-mf .show .navbar-nav-links .sn-icon {
   display: inline;
   margin-bottom: 0.5em;
