@@ -178,13 +178,6 @@ h2 {
   padding-left: 1em;
 }
 
-#videos .col-video {
-  background-color: #f92100 !important;
-  border: 0.5em solid #f92100;
-  margin: 0 1em 1em 0;
-  padding: 0;
-}
-
 #videos .videos-mf-desc {
   font-size: 0.9em;
   margin-right: 0.2em;
@@ -194,6 +187,16 @@ h2 {
 /**
  * Utilies
  */
+
+.col-media {
+  border: 0.5em solid #000;
+  margin: 0 1em 1em 0;
+  padding: 0;
+}
+.col-media-red {
+  background-color: #f92100 !important;
+  border-color: #f92100 !important;
+}
 
 .mf-bg-dark {
   background-color: rgba(0, 0, 0, 0.4);
