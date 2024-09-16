@@ -19,10 +19,6 @@
 
   <body class="text-light bg-black libre-franklin-mf">
 
-    <img class="main-bg-image"
-         src="/assets/img/maanenfaces-background.png"
-         alt="Image de fond du site">
-
     <nav id="navbar-mf"
          class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
       <div class="container">
@@ -115,6 +111,25 @@
           </p>
         </div>
       </div>
+    </div>
+
+    <div>
+      <img class="bg-obj bg-obj-image"
+           src="/assets/img/bg-dad.png"
+           alt="Image de fond du site">
+      <video id="bg-video" class="bg-obj bg-obj-video" autoplay loop muted playsinline>
+        <source src="/assets/video/bg-fire-loop-2-360.mp4" type="video/mp4">
+      </video>
+      <script language="JavaScript">
+        window.addEventListener('load', function() {
+          var bgVideo = document.getElementById('bg-video');
+          bgVideo.addEventListener('ended', function() {
+                this.currentTime = 0;
+                this.play();
+          }, false);
+          bgVideo.play();
+        });
+      </script>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5/dist/js/bootstrap.min.js"></script>
