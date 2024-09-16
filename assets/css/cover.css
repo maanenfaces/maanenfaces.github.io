@@ -7,7 +7,7 @@
   font-style: normal;
 }
 
-.main-bg-image {
+.bg-obj {
   background-color: #000;
   position: fixed;
   top: 0;
@@ -17,6 +17,14 @@
   min-width: 100%;
   min-height: 100%;
   z-index: -999;
+}
+
+.bg-obj-image {
+  opacity: 0.7;
+  z-index: -990;
+}
+.bg-obj-video {
+  z-index: -991;
 }
 
 body {
