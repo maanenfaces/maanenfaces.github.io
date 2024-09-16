@@ -414,9 +414,23 @@ description: Site officiel de Maanen Faces, groupe de Rock Psych Stoner, Nantes,
         ></a>
     </div>
   </div>
+</div>
 
-  <img class="main-bg-image"
-       src="/assets/img/maanenfaces-background.png"
+<div>
+  <img class="bg-obj bg-obj-image"
+       src="/assets/img/bg-dad.png"
        alt="Image de fond du site">
-
+  <video id="bg-video" class="bg-obj bg-obj-video" autoplay loop muted playsinline>
+    <source src="/assets/video/bg-fire-loop-2-360.mp4" type="video/mp4">
+  </video>
+  <script language="JavaScript">
+    window.addEventListener('load', function() {
+      var bgVideo = document.getElementById('bg-video');
+      bgVideo.addEventListener('ended', function() {
+            this.currentTime = 0;
+            this.play();
+      }, false);
+      bgVideo.play();
+    });
+  </script>
 </div>
