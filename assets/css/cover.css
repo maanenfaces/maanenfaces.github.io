@@ -278,3 +278,31 @@ a.mf-btn-lang .sn-icon {
   object-fit: cover;
   width: 30px;
 }
+.btn-sm .sn-icon {
+  height: 22px;
+  width: 22px;
+}
+
+.btn-bandcamp {
+  background-color: #00A1C6;
+  color: #fff;
+}
+.btn-bandcamp:hover {
+  background-color: #0081A6;
+}
+
+.btn-instagram {
+  background-color: #e1306c;
+  color: #fff;
+}
+.btn-instagram:hover {
+  background-color: #c13584;
+}
+
+.btn-facebook {
+  background-color: #4267b2;
+  color: #fff;
+}
+.btn-facebook:hover {
+  background-color: #224792;
+}

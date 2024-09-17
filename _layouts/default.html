@@ -111,7 +111,7 @@
               </a>
             </li>
             <li>
-              <a href="https://maanenfaces.bandcamp.com/">
+              <a href="https://maanenfaces.bandcamp.com/follow_me/">
                 <img alt="Bandcamp" class="sn-icon" fetchpriority="high"
                      src="/assets/img/icon-bandcamp.png">
               </a>
@@ -150,18 +150,22 @@
     <div id="footer" class="container-fluid bg-black">
       <div class="row">
         <div class="col text-center">
-          Email:
-          <span class="mf-hidden-email">maanenfaces<span
-                style="display: none;">ANTISPAM</span>@tuta.io</span>
-          - {% t _.website %}:
-          <a class="link-light"
-             href="https://www.instagram.com/thom.c44"
-             title="Contact Thom on Instagram">
-            <img alt="Instagram" class="sn-icon"
-                 src="/assets/img/icon-instagram.png" height="20">
-          </a>
-          <br/>
-          Maanen Faces @ 2024
+          {% include follow_buttons.html %}
+          <div>
+            Email:
+            <span class="mf-hidden-email">maanenfaces<span
+                  style="display: none;">ANTISPAM</span>@tuta.io</span>
+            - {% t _.website %}:
+            <a class="link-light"
+               href="https://www.instagram.com/thom.c44"
+              title="Contact Thom on Instagram">
+             <img alt="Instagram" class="sn-icon"
+                   src="/assets/img/icon-instagram.png" height="20">
+            </a>
+          </div>
+          <div>
+            Maanen Faces @ 2024
+          </div>
         </div>
       </div>
     </div>
