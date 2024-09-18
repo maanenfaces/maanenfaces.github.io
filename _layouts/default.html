@@ -83,13 +83,23 @@
                  href="https://maanenfaces.bandcamp.com/merch"
                  target="_blank">{% t navbar.shop %}</a>
             </li>
-            <!--
-            <li class="nav-item">
-              <a class="nav-link btn-mf btn-mf-external"
-                 href="https://eviltown.fr"
-                 target="_blank">✪ EVIL TOWN</a>
+            <li class="nav-item dropdown">
+              <a class="nav-link btn-mf dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                {% t navbar.links %}
+              </a>
+              <ul class="dropdown-menu bg-dark">
+                <li>
+                  <a class="dropdown-item"
+                     href="https://maanenfaces.bandcamp.com/follow_me/"
+                     target="_blank">✪ Bandcamp</a>
+                </li>
+                <li>
+                  <a class="dropdown-item"
+                     href="https://eviltown.fr"
+                     target="_blank">✪ Evil Town Party</a>
+                </li>
+              </ul>
             </li>
-            -->
           </ul>
           <ul class="navbar-nav navbar-nav-links">
             <li>
@@ -170,7 +180,7 @@
       </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5/dist/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5/dist/js/bootstrap.bundle.min.js"></script>
 
   </body>
 </html>
