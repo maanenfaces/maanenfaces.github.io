@@ -150,6 +150,20 @@ h2 {
   margin-bottom: 0.5em;
 }
 
+#navbar-mf .dropdown-menu.bg-dark {
+  background-color: rgba(0, 0, 0, 0.7) !important;
+}
+
+#navbar-mf .dropdown-menu.bg-dark a {
+  color: #fff;
+  text-transform: uppercase;
+}
+#navbar-mf .dropdown-menu.bg-dark a:hover {
+  background-color: inherit;
+  color: #f92100;
+  text-decoration: none;
+}
+
 #releases {
   background-size: cover;
   padding: 0;
@@ -286,6 +300,7 @@ a.mf-btn-lang .sn-icon {
 .btn-bandcamp {
   background-color: #00A1C6;
   color: #fff;
+  margin-bottom: 0.5em;
 }
 .btn-bandcamp:hover {
   background-color: #0081A6;
@@ -294,6 +309,7 @@ a.mf-btn-lang .sn-icon {
 .btn-instagram {
   background-color: #e1306c;
   color: #fff;
+  margin-bottom: 0.5em;
 }
 .btn-instagram:hover {
   background-color: #c13584;
@@ -302,6 +318,7 @@ a.mf-btn-lang .sn-icon {
 .btn-facebook {
   background-color: #4267b2;
   color: #fff;
+  margin-bottom: 0.2em;
 }
 .btn-facebook:hover {
   background-color: #224792;
