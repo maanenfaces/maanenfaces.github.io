@@ -286,6 +286,7 @@ a.mf-btn-lang .sn-icon {
 .btn-bandcamp {
   background-color: #00A1C6;
   color: #fff;
+  margin-bottom: 0.5em;
 }
 .btn-bandcamp:hover {
   background-color: #0081A6;
@@ -294,6 +295,7 @@ a.mf-btn-lang .sn-icon {
 .btn-instagram {
   background-color: #e1306c;
   color: #fff;
+  margin-bottom: 0.5em;
 }
 .btn-instagram:hover {
   background-color: #c13584;
@@ -302,6 +304,7 @@ a.mf-btn-lang .sn-icon {
 .btn-facebook {
   background-color: #4267b2;
   color: #fff;
+  margin-bottom: 0.2em;
 }
 .btn-facebook:hover {
   background-color: #224792;
