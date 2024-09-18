@@ -1,138 +1,42 @@
-<!doctype html>
-
-<html lang="fr" class="h-100">
-  <head>
-    <title>Maanen Faces - Jeu Damned And Doomed</title>
-
-    <meta charset="utf-8">
-    <meta name="author" content="Maanen Faces">
-    <meta name="description"
-          content="Jeu Damned And Doomed, Maanen Faces, groupe de Rock Stoner Psychedelic, Nantes, France">
-    <meta name="docsearch:language" content="fr">
-    <meta name="docsearch:version" content="5.0">
-    <meta name="theme-color" content="#000">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/assets/css/cover.css" rel="stylesheet">
-  </head>
-
-  <body class="text-light bg-black libre-franklin-mf">
-
-    <nav id="navbar-mf"
-         class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
-      <div class="container">
-        <a class="navbar-brand" href="/">
-          <img src="/assets/img/maanenfaces-logo-visages.png"
-               alt="Logo Visages Maanen Faces"
-               width="75">
+---
+layout: default
+title: Maanen Faces - Site Officiel
+description: Site officiel de Maanen Faces, groupe de Rock Psych Stoner, Nantes, France
+---
+<div class="container">
+  <div class="row">
+    <div class="col text-center">
+      <h1 class="bebas-neue-regular"
+          style="font-size: 6em; font-weight: bold; margin-top: 1em;">
+        DAMNED AND DOOMED
+      </h1>
+      <p>
+        Jeu conçu par
+        <a href="https://github.com/seishinleblanc" target="_blank">
+          Seishin Leblanc
         </a>
-        <a class="navbar-brand" href="/">
-          <img alt="Logo Text Maanen Faces"
-               src="/assets/img/maanenfaces-logo-nom.png"
-               width="270">
-        </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <div>
-          </div>
-          <ul class="navbar-nav navbar-nav-links">
-            <li>
-              <a href="https://www.facebook.com/MaanenFaces/">
-                <img alt="Facebook" class="sn-icon" fetchpriority="high"
-                     src="../assets/img/icon-facebook.png">
-              </a>
-            </li>
-            <li>
-              <a href="https://instagram.com/maanenfaces/">
-                <img alt="Instagram" class="sn-icon" fetchpriority="high"
-                     src="/assets/img/icon-instagram.png">
-              </a>
-            </li>
-            <li>
-              <a href="https://www.youtube.com/@MaanenFaces">
-                <img alt="Youtube" class="sn-icon" fetchpriority="high"
-                     src="/assets/img/icon-youtube.png">
-              </a>
-            </li>
-            <li>
-              <a href="https://maanenfaces.bandcamp.com/">
-                <img alt="Bandcamp" class="sn-icon" fetchpriority="high"
-                     src="/assets/img/icon-bandcamp.png">
-              </a>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </nav>
-
-    <div class="container">
-      <div class="row">
-        <div class="col text-center">
-          <h1 style="font-size: 5em; font-weight: bold; margin-top: 1em;">
-            DAMNED <span style="font-size:0.8em;">AND</span> DOOMED
-          </h1>
-          <p>
-            Jeu conçu par
-            <a href="https://github.com/seishinleblanc" target="_blank">
-              Seishin Leblanc
-            </a>
-          </p>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-sm text-center">
-          <iframe
-            style="border: 0.5em solid rgba(249, 33, 0, 0.6);"
-            width="80%"
-            height="500"
-            src="https://vampire-run-game.netlify.app/"
-            title="Vampire Run Game (par Seishin Leblanc)"
-            frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col text-center">
-          <p>
-            Email groupe: <span class="mf-hidden-email">maanenfaces<span
-                  style="display: none;">ANTISPAM</span>@tuta.io</span>
-            - Site internet:
-            <a class="link-light"
-               href="https://www.instagram.com/thom.c44"
-               title="Contact Thom on Instagram">
-              <img alt="Instagram" class="sn-icon"
-                   src="/assets/img/icon-instagram.png" height="20">
-            </a>
-            <br/>
-            Maanen Faces @ 2024
-          </p>
-        </div>
-      </div>
+      </p>
     </div>
-
-    <div>
-      <img class="bg-obj bg-obj-image"
-           src="/assets/img/bg-dad.png"
-           alt="Image de fond du site">
-      <video id="bg-video" class="bg-obj bg-obj-video" autoplay loop muted playsinline>
-        <source src="/assets/video/bg-fire-loop-2-360.mp4" type="video/mp4">
-      </video>
-      <script language="JavaScript">
-        window.addEventListener('load', function() {
-          var bgVideo = document.getElementById('bg-video');
-          bgVideo.addEventListener('ended', function() {
-                this.currentTime = 0;
-                this.play();
-          }, false);
-          bgVideo.play();
-        });
-      </script>
+  </div>
+  <div class="row">
+    <div class="col-sm text-center">
+      <iframe
+        style="border: 0.5em solid rgba(249, 33, 0, 0.6);"
+        width="80%"
+        height="500"
+        src="https://vampire-run-game.netlify.app/"
+        title="Vampire Run Game (par Seishin Leblanc)"
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
     </div>
+  </div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5/dist/js/bootstrap.min.js"></script>
+{% include bg_dad.html %}
 
-  </body>
-</html>
+<style>
+  #footer.bg-black {
+    background-color: unset !important;
+    background-image: unset !important;
+  }
+</style>
