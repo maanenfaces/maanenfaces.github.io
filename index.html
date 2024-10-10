@@ -6,17 +6,21 @@ description: Site officiel de Maanen Faces, groupe de Rock Psych Stoner, Nantes,
 <div id="releases" class="container-fluid scroll-margin">
   <div class="container">
     <div class="row releases-content">
-      <div class="col">
-        <div class="releases-cover">
+      <div class="col text-center">
+        <div class="release-cover">
           <img alt="Promo Damned And Doomed EP"
-               class="img-fluid"
-               src="/assets/img/maanenfaces-releases-cover-damned-and-doomed.png">
+               class="release-cover-placeholder"
+               src="/assets/img/maanenfaces-releases-cover-damned-and-doomed.png"
+               style="width: 90%">
+          <img id="dad-listen-button"
+               class="release-cover-play"
+               src="/assets/img/icon-play.png">
         </div>
       </div>
       <div class="col-lg text-center">
         <div>
           <h1 class="visually-hidden">Maanen Faces</h1>
-          <p style="margin-top: 5.5em;">
+          <p style="margin-top: 4.5em;">
             <img alt="Logo Text Maanen Faces"
                  src="/assets/img/maanenfaces-logo-nom.png"
                  width="90%">
@@ -188,18 +192,21 @@ description: Site officiel de Maanen Faces, groupe de Rock Psych Stoner, Nantes,
       </div>
     </div>
     <div class="row">
-      <div class="col-lg col-media col-media-red">
+      <div id="dad-video-container"
+           class="col-lg col-media col-media-red scroll-margin">
         <iframe
+          id="dad-video"
           width="100%"
           height="400"
-          src="https://www.youtube.com/embed/Hmeufh3Gnw0?si=6btOSivH5tNx9HYx&amp;start=180"
+          src="https://www.youtube.com/embed/Hmeufh3Gnw0?si=6btOSivH5tNx9HYx&amp;start=175&enablejsapi=1"
           title="Damned And Doomed EP on 666MrDoom Channel"
           frameborder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           referrerpolicy="strict-origin-when-cross-origin"
           allowfullscreen></iframe>
         <div class="videos-mf-desc">
-          <span class="text-bg-dark p-1">EP</span>
+          <a href="https://maanenfaces.bandcamp.com/"
+             class="btn btn-primary">BUY EP</a>
           Damned And Doomed // 666MrDoom Channel
         </div>
       </div>
@@ -286,7 +293,7 @@ description: Site officiel de Maanen Faces, groupe de Rock Psych Stoner, Nantes,
       </div>
       <div class="col-lg col-media">
         <a target="_blank"
-           href="https://podcasts.jadefm.fr/@reportages/episodes/les-estivales-de-comberge-episode-3/">
+           href="https://jadefm.fr/news/les-estivales-de-comberge-retrospective-119">
           <img class="d-block w-100"
                src="/assets/img/press-2024-radio-jadefm.png"
                alt="">
@@ -409,5 +416,18 @@ description: Site officiel de Maanen Faces, groupe de Rock Psych Stoner, Nantes,
     </div>
   </div>
 </div>
+
+<script language="JavaScript">
+  function onYouTubeIframeAPIReady() {
+    const button = document.getElementById('dad-listen-button');
+    const videoContainer = document.getElementById('dad-video-container');
+    const videoPlayer = new YT.Player('dad-video');
+    button.addEventListener('click', function() {
+      videoContainer.scrollIntoView({ behavior: 'smooth', inline: 'nearest' });
+      videoPlayer.playVideo();
+    });
+  }
+</script>
+<script src="https://www.youtube.com/iframe_api"></script>
 
 {% include dad_bg.html %}

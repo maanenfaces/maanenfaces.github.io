@@ -186,17 +186,18 @@ h2 {
 }
 
 #releases .releases-content .col {
+  font-size: 1.2em;
   padding-top: 2em;
 }
 
-#releases .releases-content .col p {
-  font-size: 1.2em;
+#releases #dad-listen-button {
+  transition: all .2s;
+  width: 128px;
 }
-
-#releases .releases-cover img {
-  min-width: 350px;
-  margin: 0;
-  margin-top: 1.5em;
+#releases #dad-listen-button:hover {
+  cursor: pointer;
+  transform: scale(1.2);
+  transition: all .2s;
 }
 
 #shows #bandsintown {
@@ -211,6 +212,14 @@ h2 {
   font-size: 0.9em;
   margin-right: 0.2em;
   text-align: right;
+}
+
+#videos .videos-mf-desc a.btn {
+  border-radius: 0 !important;
+  display: initial;
+  font-size: 0.98em;
+  padding: 0.2em 0.5em 0.2em 0.5em;
+  vertical-align: initial;
 }
 
 /**
@@ -329,4 +338,28 @@ a.mf-btn-lang .sn-icon {
 }
 .btn-facebook:hover {
   background-color: #224792;
+}
+
+.release-cover {
+  margin-top: 1.5em;
+  position: relative;
+}
+.release-cover img {
+  margin: 0;
+  max-width: 100% !important;
+  vertical-align: middle;
+}
+.release-cover .release-cover-placeholder {
+  position: relative;
+  left: 0;
+  top:0;
+}
+.release-cover .release-cover-play {
+    position: absolute !important;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    margin: auto;
+    width: 20%;
 }
