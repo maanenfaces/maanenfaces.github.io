@@ -17,6 +17,15 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Caveat">
     <link rel="stylesheet" href="/assets/css/cover.css">
 
+    {% for lang in site.languages %}
+    {% if lang == site.languages[0] %}
+    <link rel="alternate" href="https://maanenfaces.com{{ page.url }}" hreflang="x-default" />
+    <link rel="alternate" href="https://maanenfaces.com{{ page.url }}" hreflang="{{ lang }}" />
+    {% else %}
+    <link rel="alternate" href="https://maanenfaces.com/{{ lang }}{{ page.url }}" hreflang="{{ lang }}" />
+    {% endif %}
+    {% endfor %}
+
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
       @import url('https://fonts.googleapis.com/css2?family=Libre+Franklin:ital,wght@0,100..900;1,100..900&display=swap');
