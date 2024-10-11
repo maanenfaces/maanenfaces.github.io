@@ -15,19 +15,39 @@
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav">
         <li class="nav-item">
+          {% if site.lang == site.languages[0] %}
           <a class="nav-link btn-mf" href="/#releases">{% t navbar.audio %}</a>
+          {% else %}
+          <a class="nav-link btn-mf" href="/{{ site.lang }}/#releases">{% t navbar.audio %}</a>
+          {% endif %}
         </li>
         <li class="nav-item">
+          {% if site.lang == site.languages[0] %}
           <a class="nav-link btn-mf" href="/#bio">{% t navbar.biography %}</a>
+          {% else %}
+          <a class="nav-link btn-mf" href="/{{ site.lang }}/#bio">{% t navbar.biography %}</a>
+          {% endif %}
         </li>
         <li class="nav-item">
+          {% if site.lang == site.languages[0] %}
           <a class="nav-link btn-mf" href="/#videos">{% t navbar.videos %}</a>
+          {% else %}
+          <a class="nav-link btn-mf" href="/{{ site.lang }}/#videos">{% t navbar.videos %}</a>
+          {% endif %}
         </li>
         <li class="nav-item">
+          {% if site.lang == site.languages[0] %}
           <a class="nav-link btn-mf" href="/#press">{% t navbar.press %}</a>
+          {% else %}
+          <a class="nav-link btn-mf" href="/{{ site.lang }}/#press">{% t navbar.press %}</a>
+          {% endif %}
         </li>
         <li class="nav-item">
+          {% if site.lang == site.languages[0] %}
           <a class="nav-link btn-mf" href="/#shows" id="navbar-item-shows">{% t navbar.shows %}</a>
+          {% else %}
+          <a class="nav-link btn-mf" href="/{{ site.lang }}/#shows" id="navbar-item-shows">{% t navbar.shows %}</a>
+          {% endif %}
         </li>
         <li class="nav-item">
           <a class="nav-link btn-mf"
