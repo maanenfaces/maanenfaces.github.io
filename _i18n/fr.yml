@@ -43,3 +43,12 @@ navbar:
   shop: Shop
   shows: Dates
   videos: Videos
+
+page:
+  dad:
+    index:
+      description: Page bonus de l'EP Damned And Doomed du groupe Maanen Faces
+      title: EP Damned And Doomed
+  index:
+    description: Site officiel de Maanen Faces, groupe de rock psych doom/stoner originaire de Nantes (France)
+    title: Site officiel
