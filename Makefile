@@ -6,7 +6,8 @@ root_dir := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
 serve:
 	docker run --rm \
-	  --volume="$(root_dir):/srv/jekyll:Z" \
+	  --env GEM_HOME=/srv/jekyll/.jekyll-cache/gemfiles \
 	  --publish 4000:4000 \
+	  --volume="$(root_dir):/srv/jekyll:Z" \
 	  jekyll/jekyll \
 	  jekyll serve --trace
