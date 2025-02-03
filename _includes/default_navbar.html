@@ -4,15 +4,15 @@
     <a class="navbar-brand" href="/">
       <img src="/assets/img/maanenfaces-logo-visages.png"
            alt="Maanen Faces Logo"
-        width="75">
+        width="55">
     </a>
-    <div class="navbar-toggler navbar-mf-title">
+    <div class="navbar-toggler navbar-mf-title font-ho-chi-minh-city">
       Maanen Faces
     </div>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
+    <div class="collapse navbar-collapse font-ho-chi-minh-city" id="navbarNav">
       <ul class="navbar-nav">
         <li class="nav-item">
           {% if site.lang == site.languages[0] %}
@@ -66,13 +66,69 @@
           <ul class="dropdown-menu bg-dark">
             <li>
               <a class="dropdown-item"
+                 href="https://music.amazon.com/artists/B0CYQ9PH57/maanen-faces"
+                 target="_blank">✪ Amazon Music</a>
+            </li>
+            <li>
+              <a class="dropdown-item"
+                 href="https://music.apple.com/artist/maanen-faces/1736745855"
+                 target="_blank">✪ Apple Music</a>
+            </li>
+            <li>
+              <a class="dropdown-item"
                  href="https://maanenfaces.bandcamp.com/follow_me/"
                  target="_blank">✪ Bandcamp</a>
             </li>
             <li>
               <a class="dropdown-item"
+                 href="https://www.deezer.com/artist/259060302"
+                 target="_blank">✪ Deezer</a>
+            </li>
+            <li>
+              <a class="dropdown-item"
                  href="https://www.discogs.com/artist/15180416-Maanen-Faces"
                  target="_blank">✪ Discogs</a>
+            </li>
+            <li>
+              <a class="dropdown-item"
+                 href="https://open.spotify.com/intl-fr/artist/11ke0XMBCgAzA9XzgW9VaY"
+                 target="_blank">✪ Spotify</a>
+            </li>
+            <li>
+              <a class="dropdown-item"
+                 href="https://www.youtube.com/@MaanenFaces"
+                 target="_blank">✪ YouTube</a>
+            </li>
+            <li><hr class="dropdown-divider bg-light"></li>
+            <li>
+              <a class="dropdown-item"
+                 href="https://bsky.app/profile/maanenfaces.bsky.social"
+                 target="_blank">✪ Bluesky</a>
+            </li>
+            <li>
+              <a class="dropdown-item"
+                 href="https://www.facebook.com/MaanenFaces/"
+                 target="_blank">✪ Facebook</a>
+            </li>
+            <li>
+              <a class="dropdown-item"
+                 href="https://instagram.com/maanenfaces/"
+                 target="_blank">✪ Instagram</a>
+            </li>
+            <li>
+              <a class="dropdown-item"
+                 href="https://linktr.ee/maanenfaces"
+                 target="_blank">✪ Linktree</a>
+            </li>
+            <li><hr class="dropdown-divider bg-light"></li>
+            <li>
+              <a class="dropdown-item"
+                {% if site.lang == site.languages[0] %}
+                   href="/dad/">
+                {% else %}
+                   href="/{{ site.lang }}/dad/">
+                {% endif %}
+                ✪ Bonus Damned And Doomed</a>
             </li>
             <li>
               <a class="dropdown-item"
