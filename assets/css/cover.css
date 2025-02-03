@@ -1,9 +1,23 @@
-
+@font-face {
+    font-family: 'Ho-Chi-Minh-City';
+    src:url('/assets/fonts/Ho-Chi-Minh-City/Ho-Chi-Minh-City.ttf.woff') format('woff'),
+        url('/assets/fonts/Ho-Chi-Minh-City/Ho-Chi-Minh-City.ttf.svg#Ho-Chi-Minh-City') format('svg'),
+        url('/assets/fonts/Ho-Chi-Minh-City/Ho-Chi-Minh-City.ttf.eot'),
+        url('/assets/fonts/Ho-Chi-Minh-City/Ho-Chi-Minh-City.ttf.eot?#iefix') format('embedded-opentype');
+    font-weight: normal;
+    font-style: normal;
+}
 
 .bebas-neue-regular {
   font-family: "Bebas Neue", sans-serif;
-  font-weight: 400;
+  font-weight: 200;
+  font-size: 1.1em;
   font-style: normal;
+}
+
+.font-ho-chi-minh-city {
+  font-family: 'Ho-Chi-Minh-City';
+  letter-spacing: 1px;
 }
 
 .libre-franklin-mf {
@@ -33,6 +47,22 @@
   filter: grayscale(1);
   opacity: 0.7;
   z-index: -991;
+}
+
+.bg-obj-image.abf {
+  opacity: 0.5;
+}
+.bg-obj-video.abf {
+  opacity: 0.2;
+}
+
+.bg-obj-image.default {
+  opacity: 0.7;
+  z-index: -991;
+}
+.bg-obj-video.default {
+  opacity: 0.4;
+  z-index: -990;
 }
 
 body {
@@ -107,18 +137,28 @@ h2 {
   border: 0;
   color: #fff;
   margin: 0;
+  margin-right: 10px;
   text-transform: uppercase;
+}
+
+#navbar-mf .navbar-mf-title.font-ho-chi-minh-city {
+  font-size: 2em;
 }
 
 #navbar-mf .btn-mf {
   border: 0;
   border-radius: 0;
   color: #fff;
-  font-size: 1.5em;
-  padding: 0.4em;
+  font-size: 1.1em;
+  padding: 0.7em;
   text-decoration: none;
   text-transform: uppercase;
   vertical-align: top;
+}
+
+#navbar-mf .font-ho-chi-minh-city .btn-mf {
+  font-size: 1.4em;
+  padding: 0.5em;
 }
 
 #navbar-mf .btn-mf:hover {
@@ -138,6 +178,11 @@ h2 {
 
 #navbar-mf .navbar-nav-links a {
   text-decoration: none;
+}
+
+#navbar-mf .collapsing li a,
+#navbar-mf .show li a {
+  padding: 0.2em 1em 0.2em 1em !important;
 }
 
 #navbar-mf .collapsing .navbar-nav-links,
@@ -161,6 +206,10 @@ h2 {
 
 #navbar-mf .dropdown-menu.bg-dark {
   background-color: rgba(0, 0, 0, 0.7) !important;
+}
+
+#navbar-mf .font-ho-chi-minh-city .dropdown-menu a {
+  font-size: 1.4em;
 }
 
 #navbar-mf .dropdown-menu.bg-dark a {

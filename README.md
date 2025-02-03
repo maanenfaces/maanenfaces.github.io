@@ -10,3 +10,8 @@ https://maanenfaces.com
 
 Read the following doc:
 https://jekyllrb.com/docs/continuous-integration/github-actions/
+
+
+## Credits
+
+- *Ho Chi Minh City* font by [Woodcutter](https://www.woodcutter.es/)
