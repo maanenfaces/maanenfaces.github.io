@@ -1,0 +1,27 @@
+<div>
+  <div class="container">
+    <div class="row">
+      <div class="col">
+        <div class="text-end" style="font-size: 0.7em; margin-right: 1.8em; margin-top: 2em;">
+          Photo by <a href="https://www.instagram.com/black_opale_photo_/">Black Opale Photo</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <img class="bg-obj bg-obj-image band"
+       src="/assets/img/bg-band-2-maanenfaces-black-opale-photo.png"
+       alt="Image de fond du site">
+  <video id="bg-video" class="bg-obj bg-obj-video band" autoplay loop muted playsinline>
+    <source src="/assets/video/bg-abstract-train-motion-cinematic-lowglitch-320.mp4" type="video/mp4">
+  </video>
+  <script language="JavaScript">
+    window.addEventListener('load', function() {
+      var bgVideo = document.getElementById('bg-video');
+      bgVideo.addEventListener('ended', function() {
+            this.currentTime = 0;
+            this.play();
+      }, false);
+      bgVideo.play();
+    });
+  </script>
+</div>
