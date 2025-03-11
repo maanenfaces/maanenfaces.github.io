@@ -3,6 +3,9 @@ layout: default
 title: page.index.title
 description: page.index.description
 ---
+
+{% include band_bg.html %}
+
 <div id="releases" class="container-fluid scroll-margin">
   {% include default_release_header.html %}
 </div>
@@ -74,6 +77,39 @@ description: page.index.description
     </div>
   </div>
 
+  <div id="audio" class="container scroll-margin">
+    <div class="row">
+      <div class="col text-center">
+        <h2 class="visually-hidden">AUDIO</h2>
+        <img class="mf-section-title-img"
+             src="/assets/img/section-title-audio-{{ site.lang }}.png" width="200" />
+      </div>
+    </div>
+    <div class="row justify-content-md-center">
+      <div class="col-lg-4 col-media col-media-red">
+        <a href="https://maanenfaces.bandcamp.com/album/a-brilliant-future"
+           target="_blank">
+          <img class="img-fluid mf-img-highlight"
+               src="/assets/img/maanenfaces-release-a-brilliant-future-cover-1024.jpg">
+        </a>
+        <div class="media-mf-desc" style="padding-top: 0.5em;">
+          A Brilliant, EP (6 tracks), 2025 -
+          <a href="https://maanenfaces.bandcamp.com/album/a-brilliant-future">Bandcamp</a>
+        </div>
+      </div>
+      <div class="col-lg-4 col-media col-media-red">
+        <a href="https://maanenfaces.bandcamp.com/album/damned-and-doomed"
+           target="_blank">
+          <img class="img-fluid mf-img-highlight"
+               src="/assets/img/maanenfaces-release-damned-and-doomed-cover-1024.png">
+        </a>
+        <div class="media-mf-desc" style="padding-top: 0.5em;">
+          Damned And Doomed, mini-EP (2 tracks), 2024 -
+          <a href="https://maanenfaces.bandcamp.com/album/damned-and-doomed">Bandcamp</a>
+        </div>
+    </div>
+  </div>
+
   <div id="videos" class="container scroll-margin">
     <div class="row">
       <div class="col text-center">
@@ -95,7 +131,7 @@ description: page.index.description
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           referrerpolicy="strict-origin-when-cross-origin"
           allowfullscreen></iframe>
-        <div class="videos-mf-desc">
+        <div class="media-mf-desc">
           <a href="https://maanenfaces.bandcamp.com/"
              class="btn btn-primary">BUY EP</a>
           Damned And Doomed // 666MrDoom Channel
@@ -109,7 +145,7 @@ description: page.index.description
           title="Robots (Live) @ Supersonic (PARIS, FR) // {% t month.july %} 2024"
           frameborder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-        <div class="videos-mf-desc">
+        <div class="media-mf-desc">
           <span class="text-bg-dark p-1">LIVE</span>
           Supersonic (PARIS, FR) // {% t month.july %} 2024
         </div>
@@ -124,7 +160,7 @@ description: page.index.description
           title="Selfish Block (Live) @ La Gapette (LES EPESSES, FR) // {% t month.december %} 2023"
           frameborder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-        <div class="videos-mf-desc">
+        <div class="media-mf-desc">
           <span class="text-bg-dark p-1">LIVE</span>
           La Gapette (LES EPESSES, FR) // {% t month.december %} 2023
         </div>
@@ -137,7 +173,7 @@ description: page.index.description
           title="Destroy This World (Live) @ Evil Town Party (MALVILLE, FR) // {% t month.july %} 2023"
           frameborder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-        <div class="videos-mf-desc">
+        <div class="media-mf-desc">
           <span class="text-bg-dark p-1">LIVE</span>
           Evil Town Party (MALVILLE, FR) // {% t month.july %} 2023
         </div>
@@ -150,7 +186,7 @@ description: page.index.description
           title="The Black Angel (Live) @ La Jouandière (CARQUEFOU, FR) // {% t month.november %} 2022"
           frameborder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-        <div class="videos-mf-desc">
+        <div class="media-mf-desc">
           <span class="text-bg-dark p-1">LIVE</span>
           La Jouandière (CARQUEFOU, FR) // {% t month.november %} 2022
         </div>
@@ -321,4 +357,3 @@ description: page.index.description
 </script>
 <script src="https://www.youtube.com/iframe_api"></script>
 
-{% include dad_bg.html %}

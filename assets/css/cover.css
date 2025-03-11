@@ -30,8 +30,9 @@
 .bg-obj {
   background-color: #000;
   position: fixed;
-  top: 0;
-  left: 0;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 
   /* Preserve aspect ratio */
   min-width: 100%;
@@ -41,12 +42,21 @@
 
 .bg-obj-image {
   opacity: 0.7;
-  z-index: -990;
+  z-index: -991;
+}
+.bg-obj-text {
+  background-color: transparent !important;
+  opacity: 0.5;
+  min-height: auto;
+  top: 0;
+  left: 0;
+  transform: none;
+  z-index: 0;
 }
 .bg-obj-video {
   filter: grayscale(1);
   opacity: 0.7;
-  z-index: -991;
+  z-index: -992;
 }
 
 .bg-obj-image.abf {
@@ -56,13 +66,20 @@
   opacity: 0.2;
 }
 
+.bg-obj-image.band {
+  opacity: 0.7;
+}
+.bg-obj-video.band {
+  opacity: 0.4;
+}
+
 .bg-obj-image.default {
   opacity: 0.7;
-  z-index: -991;
+  z-index: -992;
 }
 .bg-obj-video.default {
   opacity: 0.4;
-  z-index: -990;
+  z-index: -991;
 }
 
 body {
@@ -87,10 +104,6 @@ a, a:hover {
 
 h2 {
   margin-bottom: 1em;
-}
-
-#bio {
-  padding-top: 2em;
 }
 
 #bio #band-photo img {
@@ -125,6 +138,10 @@ h2 {
   opacity: 0.8;
   position: relative;
   top: -100px;
+}
+
+#main {
+  z-index: 101;
 }
 
 #navbar-mf,
@@ -259,20 +276,6 @@ h2 {
   padding-left: 1em;
 }
 
-#videos .videos-mf-desc {
-  font-size: 0.9em;
-  margin-right: 0.2em;
-  text-align: right;
-}
-
-#videos .videos-mf-desc a.btn {
-  border-radius: 0 !important;
-  display: initial;
-  font-size: 0.98em;
-  padding: 0.2em 0.5em 0.2em 0.5em;
-  vertical-align: initial;
-}
-
 /**
  * Utilies
  */
@@ -285,6 +288,20 @@ h2 {
 .col-media-red {
   background-color: #f92100 !important;
   border-color: #f92100 !important;
+}
+
+.media-mf-desc {
+  font-size: 0.9em;
+  margin-right: 0.2em;
+  text-align: right;
+}
+
+.media-mf-desc a.btn {
+  border-radius: 0 !important;
+  display: initial;
+  font-size: 0.98em;
+  padding: 0.2em 0.5em 0.2em 0.5em;
+  vertical-align: initial;
 }
 
 .mf-bg-dark {
@@ -326,6 +343,10 @@ a.mf-btn-lang .sn-icon {
   padding-right: 2px;
 }
 
+.mf-img-highlight:hover {
+  filter: blur(0.5px) brightness(130%);
+}
+
 .mf-hw {
   font-family: 'Caveat', serif;
   font-size: 1.2em;
@@ -333,6 +354,7 @@ a.mf-btn-lang .sn-icon {
 
 .mf-section-title-img {
   margin-bottom: 1em;
+  margin-top: 2em;
 }
 
 .mf-streaming {
@@ -413,4 +435,27 @@ a.mf-btn-lang .sn-icon {
     right: 0;
     margin: auto;
     width: 20%;
+}
+
+/**
+ * This allows to resize YouTube iframe by keeping width/height ratio.
+ * From https://stackoverflow.com/a/17465040
+ */
+.auto-resize-yt-iframe {
+  margin: 0px auto;
+  max-width: 1275px;
+}
+
+.auto-resize-yt-iframe > div {
+  position: relative;
+  padding-bottom: 55%;
+  height: 0px;
+}
+
+.auto-resize-yt-iframe > div > iframe {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 100%;
 }

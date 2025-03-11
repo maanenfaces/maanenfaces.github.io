@@ -16,16 +16,16 @@
       <ul class="navbar-nav">
         <li class="nav-item">
           {% if site.lang == site.languages[0] %}
-          <a class="nav-link btn-mf" href="/#releases">{% t navbar.audio %}</a>
+          <a class="nav-link btn-mf" href="/#bio">{% t navbar.biography %}</a>
           {% else %}
-          <a class="nav-link btn-mf" href="/{{ site.lang }}/#releases">{% t navbar.audio %}</a>
+          <a class="nav-link btn-mf" href="/{{ site.lang }}/#bio">{% t navbar.biography %}</a>
           {% endif %}
         </li>
         <li class="nav-item">
           {% if site.lang == site.languages[0] %}
-          <a class="nav-link btn-mf" href="/#bio">{% t navbar.biography %}</a>
+          <a class="nav-link btn-mf" href="/#audio">{% t navbar.audio %}</a>
           {% else %}
-          <a class="nav-link btn-mf" href="/{{ site.lang }}/#bio">{% t navbar.biography %}</a>
+          <a class="nav-link btn-mf" href="/{{ site.lang }}/#audio">{% t navbar.audio %}</a>
           {% endif %}
         </li>
         <li class="nav-item">
