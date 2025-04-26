@@ -52,6 +52,10 @@ page:
   404:
     description: Page manquante
     title: Oups, page non trouvée !
+  abf:
+    index:
+      description: Page bonus de l'album A Brilliant Future du groupe Maanen Faces
+      title: A Brilliant Future
   dad:
     index:
       description: Page bonus de l'EP Damned And Doomed du groupe Maanen Faces
