@@ -42,11 +42,10 @@ navbar:
   home: Accueil
   links: Liens
   listen: Écouter
-  news: Actualités
   press: Presse
   shop: Boutique
   shows: Dates
-  videos: Videos
+  videos: Audio & Videos
 
 page:
   404:
