@@ -23,13 +23,6 @@
         </li>
         <li class="nav-item">
           {% if site.lang == site.languages[0] %}
-          <a class="nav-link btn-mf" href="/#audio">{% t navbar.audio %}</a>
-          {% else %}
-          <a class="nav-link btn-mf" href="/{{ site.lang }}/#audio">{% t navbar.audio %}</a>
-          {% endif %}
-        </li>
-        <li class="nav-item">
-          {% if site.lang == site.languages[0] %}
           <a class="nav-link btn-mf" href="/#videos">{% t navbar.videos %}</a>
           {% else %}
           <a class="nav-link btn-mf" href="/{{ site.lang }}/#videos">{% t navbar.videos %}</a>
@@ -48,11 +41,6 @@
           {% else %}
           <a class="nav-link btn-mf" href="/{{ site.lang }}/#shows" id="navbar-item-shows">{% t navbar.shows %}</a>
           {% endif %}
-        </li>
-        <li class="nav-item">
-          <a class="nav-link btn-mf"
-             href="https://www.facebook.com/MaanenFaces/"
-             target="_blank">{% t navbar.news %}</a>
         </li>
         <li class="nav-item">
           <a class="nav-link btn-mf btn-mf-external"
@@ -174,6 +162,9 @@
             <img alt="Linktree" class="sn-icon" fetchpriority="high"
                  src="/assets/img/icon-linktree.png">
           </a>
+        </li>
+        <li class="mf-btn-lang-container-divider">
+          <div class="vr" style="min-height: 1.4em; opacity: 0.75; vertical-align: text-top"></div>
         </li>
         {% for lang in site.languages %}
           {% if lang == site.lang %} {% continue %} {% endif %}

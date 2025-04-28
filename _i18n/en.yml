@@ -37,16 +37,14 @@ month:
   december: December
 
 navbar:
-  audio: Music
   biography: Bio
   home: Home
   links: Links
   listen: Listen
-  news: News
   press: Press
   shop: Shop
   shows: Tour
-  videos: Videos
+  videos: Audio & Videos
 
 page:
   404:
