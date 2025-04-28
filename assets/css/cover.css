@@ -308,6 +308,10 @@ h2 {
   background-color: rgba(0, 0, 0, 0.4);
 }
 
+#navbar-mf .collapsing li.mf-btn-lang-container-divider,
+#navbar-mf .show li.mf-btn-lang-container-divider {
+  display: none !important;
+}
 .mf-btn-lang-container {
   padding: 0;
   padding-right: 1em;
