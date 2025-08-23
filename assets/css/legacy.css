@@ -1,0 +1,38 @@
+#releases .releases-content .col {
+  font-size: 1.2em;
+  padding-top: 2em;
+}
+
+#releases #dad-listen-button {
+  transition: all .2s;
+  width: 128px;
+}
+#releases #dad-listen-button:hover {
+  cursor: pointer;
+  transform: scale(1.2);
+  transition: all .2s;
+}
+
+.release-cover {
+  margin-top: 1.5em;
+  position: relative;
+}
+.release-cover img {
+  margin: 0;
+  max-width: 100% !important;
+  vertical-align: middle;
+}
+.release-cover .release-cover-placeholder {
+  position: relative;
+  left: 0;
+  top:0;
+}
+.release-cover .release-cover-play {
+    position: absolute !important;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    margin: auto;
+    width: 20%;
+}

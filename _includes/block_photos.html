@@ -1,0 +1,101 @@
+<div id="photos" class="container scroll-margin">
+    <div class="row">
+        <div class="col text-center pb-4">
+            <h2 class="visually-hidden">PHOTOS</h2>
+            <img class="mf-section-title-img"
+                 src="/assets/img/section-title-photos.png" width="200" />
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="row g-3">
+                {% for item in site.data.photos %}
+                <div class="col-lg-4">
+                    <div class="card h-100 border border-custom shadow-sm rounded-0">
+                        <img src="{{ item.src }}"
+                             class="img-fluid"
+                             alt="{{ item.title }}"
+                             style="height: 250px; object-fit: cover; cursor: pointer;"
+                             data-bs-toggle="modal"
+                             data-bs-target="#photoModal"
+                             data-photo-src="{{ item.src }}"
+                             data-photo-alt="{{ item.title }}">
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<!-- Photo Modal -->
+<div class="modal fade" id="photoModal" tabindex="-1" aria-labelledby="photoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content bg-black">
+            <div class="modal-header border-0">
+                <h5 class="modal-title text-white" id="photoModalLabel">Photo</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body d-flex justify-content-center align-items-center p-0">
+                <img id="modalPhoto" src="" alt="" class="img-fluid" style="max-height: 90vh; max-width: 90vw; object-fit: contain;">
+            </div>
+            <div class="modal-footer border-0 justify-content-center">
+                <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for Photo Modal -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const photoModal = document.getElementById('photoModal');
+      const modalPhoto = document.getElementById('modalPhoto');
+      const modalTitle = document.getElementById('photoModalLabel');
+
+      photoModal.addEventListener('show.bs.modal', function(event) {
+        const button = event.relatedTarget;
+        const photoSrc = button.getAttribute('data-photo-src');
+        const photoAlt = button.getAttribute('data-photo-alt');
+
+        modalPhoto.src = photoSrc;
+        modalPhoto.alt = photoAlt;
+        modalTitle.textContent = photoAlt;
+      });
+
+      // Close modal on ESC key
+      document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+          const modal = bootstrap.Modal.getInstance(photoModal);
+          if (modal) {
+            modal.hide();
+          }
+        }
+      });
+
+      // Close modal on background click
+      // Close modal when clicking on the modal background (not the photo)
+      photoModal.addEventListener('click', function(event) {
+        // If the click happened directly on the modal-body or modal-content,
+        // but not on the image or its child elements
+        if (event.target.classList.contains('modal-body') ||
+            event.target.classList.contains('modal-content')) {
+          const modal = bootstrap.Modal.getInstance(photoModal);
+          if (modal) {
+            modal.hide();
+          }
+        }
+      });
+
+      photoModal.addEventListener('click', function(event) {
+        if (event.target === photoModal) {
+          const modal = bootstrap.Modal.getInstance(photoModal);
+          if (modal) {
+            modal.hide();
+          }
+        }
+      });
+    });
+</script>

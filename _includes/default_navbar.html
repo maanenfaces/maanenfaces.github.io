@@ -1,7 +1,11 @@
 <nav id="navbar-mf"
      class="navbar navbar-expand-xl navbar-dark bg-dark sticky-top">
   <div class="container">
+    {% if site.lang == site.languages[0] %}
     <a class="navbar-brand" href="/">
+    {% else %}
+    <a class="navbar-brand" href="/{{ site.lang }}/">
+    {% endif %}
       <img src="/assets/img/maanenfaces-logo-visages.png"
            alt="Maanen Faces Logo"
         width="55">
@@ -14,167 +18,104 @@
     </button>
     <div class="collapse navbar-collapse font-ho-chi-minh-city" id="navbarNav">
       <ul class="navbar-nav">
+
+        {% for item in site.data.navbar %}
+        {% if item.title_key == 'divider' %}
+        <li class="nav-item d-flex align-items-center">
+        <div class="mf-btn-lang-container-divider">
+          <div class="vr" style="min-height: 1.4em; opacity: 0.75; vertical-align: text-bottom; margin: 0 0.5em;"></div>
+        </div>
+        </li>
+        {% else %}
         <li class="nav-item">
-          {% if site.lang == site.languages[0] %}
-          <a class="nav-link btn-mf" href="/#bio">{% t navbar.biography %}</a>
-          {% else %}
-          <a class="nav-link btn-mf" href="/{{ site.lang }}/#bio">{% t navbar.biography %}</a>
-          {% endif %}
+          <a  {% if item.highlight && page.title == item.page_key %}
+              class="nav-link btn-mf btn-mf-active"
+              {% else %}
+              class="nav-link btn-mf"
+              {% endif %}
+              {% if site.lang == site.languages[0] %}
+                href="{{ item.url }}"
+              {% else %}
+                href="/{{ site.lang }}{{ item.url }}"
+              {% endif %}
+              {% if item.external %}
+                target="_blank"
+              {% endif %}
+            >{% t item.title_key %}</a>
         </li>
-        <li class="nav-item">
-          {% if site.lang == site.languages[0] %}
-          <a class="nav-link btn-mf" href="/#videos">{% t navbar.videos %}</a>
-          {% else %}
-          <a class="nav-link btn-mf" href="/{{ site.lang }}/#videos">{% t navbar.videos %}</a>
-          {% endif %}
-        </li>
-        <li class="nav-item">
-          {% if site.lang == site.languages[0] %}
-          <a class="nav-link btn-mf" href="/#press">{% t navbar.press %}</a>
-          {% else %}
-          <a class="nav-link btn-mf" href="/{{ site.lang }}/#press">{% t navbar.press %}</a>
-          {% endif %}
-        </li>
-        <li class="nav-item">
-          {% if site.lang == site.languages[0] %}
-          <a class="nav-link btn-mf" href="/#shows" id="navbar-item-shows">{% t navbar.shows %}</a>
-          {% else %}
-          <a class="nav-link btn-mf" href="/{{ site.lang }}/#shows" id="navbar-item-shows">{% t navbar.shows %}</a>
-          {% endif %}
-        </li>
-        <li class="nav-item">
-          <a class="nav-link btn-mf btn-mf-external"
-             href="https://maanenfaces.bandcamp.com/merch"
-             target="_blank">{% t navbar.shop %}</a>
-        </li>
-        <li class="nav-item dropdown">
-          <a class="nav-link btn-mf dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            {% t navbar.listen %}
-          </a>
-          <ul class="dropdown-menu bg-dark">
-            <li>
-              <a class="dropdown-item"
-                 href="https://music.amazon.com/artists/B0CYQ9PH57/maanen-faces"
-                 target="_blank">✪ Amazon Music</a>
-            </li>
-            <li>
-              <a class="dropdown-item"
-                 href="https://music.apple.com/artist/maanen-faces/1736745855"
-                 target="_blank">✪ Apple Music</a>
-            </li>
-            <li>
-              <a class="dropdown-item"
-                 href="https://maanenfaces.bandcamp.com/follow_me/"
-                 target="_blank">✪ Bandcamp</a>
-            </li>
-            <li>
-              <a class="dropdown-item"
-                 href="https://www.deezer.com/artist/259060302"
-                 target="_blank">✪ Deezer</a>
-            </li>
-            <li>
-              <a class="dropdown-item"
-                 href="https://open.spotify.com/intl-fr/artist/11ke0XMBCgAzA9XzgW9VaY"
-                 target="_blank">✪ Spotify</a>
-            </li>
-            <li>
-              <a class="dropdown-item"
-                 href="https://www.youtube.com/@MaanenFaces"
-                 target="_blank">✪ YouTube</a>
-            </li>
-          </ul>
-        </li>
-        <li class="nav-item dropdown">
-          <a class="nav-link btn-mf dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            {% t navbar.links %}
-          </a>
-          <ul class="dropdown-menu bg-dark">
-            <li>
-              <a class="dropdown-item"
-                 href="https://bsky.app/profile/maanenfaces.bsky.social"
-                 target="_blank">✪ Bluesky</a>
-            </li>
-            <li>
-              <a class="dropdown-item"
-                 href="https://www.discogs.com/artist/15180416-Maanen-Faces"
-                 target="_blank">✪ Discogs</a>
-            </li>
-            <li>
-              <a class="dropdown-item"
-                 href="https://linktr.ee/maanenfaces"
-                 target="_blank">✪ Linktree</a>
-            </li>
-            <li><hr class="dropdown-divider bg-light"></li>
-            <li>
-              <a class="dropdown-item"
-                {% if site.lang == site.languages[0] %}
-                   href="/dad/">
-                {% else %}
-                   href="/{{ site.lang }}/dad/">
-                {% endif %}
-                ✪ Bonus Damned And Doomed</a>
-            </li>
-            <li>
-              <a class="dropdown-item"
-                 href="https://eviltown.fr"
-                 target="_blank">✪ Evil Town Party</a>
-            </li>
-          </ul>
-        </li>
+        {% endif %}
+        {% endfor %}
       </ul>
+
+      <span class="navbar-text btn-mf">
+        <span class="mf-booking-email p-1">
+          Booking: maanenfaces<span style="display: none;">ANTISPAM</span>@tuta.io
+        </span>
+      </span>
+
       <ul class="navbar-nav navbar-nav-links">
-        <li>
-          <a href="https://www.facebook.com/MaanenFaces/">
-            <img alt="Facebook" class="sn-icon" fetchpriority="high"
-                 src="/assets/img/icon-facebook.png">
-          </a>
-        </li>
+
         <li>
           <a href="https://instagram.com/maanenfaces/">
             <img alt="Instagram" class="sn-icon" fetchpriority="high"
                  src="/assets/img/icon-instagram.png">
           </a>
         </li>
+
+        <li>
+          <a href="https://www.facebook.com/MaanenFaces/">
+            <img alt="Facebook" class="sn-icon" fetchpriority="high"
+                 src="/assets/img/icon-facebook.png">
+          </a>
+        </li>
+
         <li>
           <a href="https://www.youtube.com/@MaanenFaces">
             <img alt="Youtube" class="sn-icon" fetchpriority="high"
                  src="/assets/img/icon-youtube.png">
           </a>
         </li>
+
         <li>
-          <a href="https://maanenfaces.bandcamp.com/follow_me/">
-            <img alt="Bandcamp" class="sn-icon" fetchpriority="high"
-                 src="/assets/img/icon-bandcamp.png">
-          </a>
-        </li>
-        <li>
-          <a href="https://linktr.ee/maanenfaces">
+          <a href="linktr.ee/maanenfaces">
             <img alt="Linktree" class="sn-icon" fetchpriority="high"
                  src="/assets/img/icon-linktree.png">
           </a>
         </li>
+
         <li class="mf-btn-lang-container-divider">
           <div class="vr" style="min-height: 1.4em; opacity: 0.75; vertical-align: text-top"></div>
         </li>
-        {% for lang in site.languages %}
-          {% if lang == site.lang %} {% continue %} {% endif %}
-          <li class="mf-btn-lang-container">
-            {% if lang == site.languages[0] %}
-              <a class="mf-btn-lang rounded" href="{{ page.url }}">
-                <img alt="Switch to {{ lang }}" class="sn-icon rounded-circle"
-                     fetchpriority="high"
-                     src="/assets/img/icon-flag-{{ lang }}.png">
-              </a>
-            {% else %}
-              <a class="mf-btn-lang" href="/{{ lang }}{{ page.url }}">
-                <img alt="Switch to {{ lang }}" class="sn-icon rounded-circle"
-                     fetchpriority="high"
-                     src="/assets/img/icon-flag-{{ lang }}.png">
-              </a>
-            {% endif %}
-          </li>
-        {% endfor %}
+
+        <li class="nav-item dropdown w-100 mf-btn-lang-list">
+          <a class="nav-link btn-mf dropdown-toggle py-0" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            {{site.lang}}
+          </a>
+          <ul class="dropdown-menu bg-dark w-100 mf-btn-lang-list">
+            {% for lang in site.languages %}
+              <li class="mf-btn-lang-container w-100">
+                {% if lang == site.languages[0] %}
+                  <a class="mf-btn-lang rounded" href="{{ page.url }}">
+                    <img alt="Switch to {{ lang }}" class="sn-icon rounded-circle me-1"
+                         fetchpriority="high" style="display: inline-block; vertical-align: middle;"
+                         src="/assets/img/icon-flag-{{ lang }}.png">
+                    <span style="display: inline-block; vertical-align: middle; white-space: nowrap;">{{lang}}</span>
+                  </a>
+                {% else %}
+                  <a class="mf-btn-lang" href="/{{ lang }}{{ page.url }}">
+                    <img alt="Switch to {{ lang }}" class="sn-icon rounded-circle me-1"
+                         fetchpriority="high" style="display: inline-block; vertical-align: middle;"
+                         src="/assets/img/icon-flag-{{ lang }}.png">
+                    <span style="display: inline-block; vertical-align: middle; white-space: nowrap;">{{lang}}</span>
+                  </a>
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        </li>
+
       </ul>
+
     </div>
   </div>
 </nav>
