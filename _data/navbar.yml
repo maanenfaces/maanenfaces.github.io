@@ -1,7 +1,3 @@
-- page_key: page.index.title
-  title_key: navbar.home
-  url: "/"
-  highlight: false
 - page_key: page.music.index.title
   title_key: navbar.music
   url: "/#music"
