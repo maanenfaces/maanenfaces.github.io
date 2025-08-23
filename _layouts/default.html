@@ -28,16 +28,15 @@
 
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
-      @import url('https://fonts.googleapis.com/css2?family=Libre+Franklin:ital,wght@0,100..900;1,100..900&display=swap');
 
-      .texture-top {
+      .blacked-top-texture {
         background-image: url(/assets/img/texturetop.png);
         background-repeat: repeat-x;
         padding-top: 32px;
       }
-      #footer.bg-black,
-      #main.bg-black {
-        background-image: url(/assets/img/bg-darkwall.png);
+      .blacked-bg {
+        background-image: url({{ page.background }});
+        background-position: center;
       }
     </style>
 
@@ -52,7 +51,7 @@
     <meta name="msapplication-config" content="/browserconfig.xml">
   </head>
 
-  <body class="text-light bg-black">
+  <body id="main" class="text-light bg-black">
 
     {% include default_navbar.html %}
 
