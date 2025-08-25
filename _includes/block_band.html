@@ -1,4 +1,4 @@
-<div id="band" class="container scroll-margin">
+<div id="band" class="container scroll-margin pb-3">
     <div class="row">
         <div class="col text-center">
             <h2 class="visually-hidden">BAND</h2>
@@ -9,7 +9,12 @@
     <div class="row justify-content-center">
         <div class="col-lg-10">
             <div class="bg-dark p-4 mb-3 lh-lg" style="--bs-bg-opacity: 0.6;">
-                <img src="/assets/img/maanenfaces-logo-visages.png" class="float-end ms-4 mb-3" alt="Maanen Faces band photo" width="400" />
+                <div class="d-none d-md-block float-end ms-4 mb-3">
+                    <img src="/assets/img/maanenfaces-logo-visages.png" class="img-fluid" alt="Maanen Faces band photo" width="400" />
+                </div>
+                <div class="d-md-none mb-3 text-center">
+                    <img src="/assets/img/maanenfaces-logo-visages.png" class="img-fluid" alt="Maanen Faces band photo" width="80%" />
+                </div>
                 {% tf bio.html %}
             </div>
         </div>

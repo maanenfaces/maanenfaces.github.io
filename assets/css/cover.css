@@ -47,15 +47,11 @@ h2 {
   margin-bottom: 1em;
 }
 
-#bio #band-photo img {
-  min-width: 350px;
-}
-
 #footer {
   background-color: transparent !important;
   font-size: 0.9em;
   padding-bottom: 5em;
-  padding-top: 3em;
+  padding-top: 5em;
 }
 
 #footer .footer-image img {
