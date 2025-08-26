@@ -1,11 +1,35 @@
 <div class="container">
-    <div class="row justify-content-md-center mt-5 mb-4">
+    <div class="row justify-content-md-center mt-5 mb-5">
         <div class="col-lg-10 text-center mt-3 visually-hidden">
             <h1>Maanen Faces</h1>
         </div>
         <!-- Force next columns to break to new line -->
         <div class="w-100"></div>
         <div class="col-lg-10">
+            <div class="text-center bg-black" style="--bs-bg-opacity: .7;">
+                <p class="m-3 pt-3">
+                    {% t _.next_event %}
+                    (<a href="https://fb.me/e/5Qynwvi6P" class="link link-light" target="_blank" rel="noopener">{% t _.next_event_info_link %}</a>) :
+                </p>
+                <a href="https://fb.me/e/5Qynwvi6P" target="_blank" rel="noopener">
+                    <img class="img-fluid"
+                         src="/assets/img/affiche_floride_FB_oct2025.jpg" alt="Affiche Concert Maanen Faces Octobre 2025 Le Floride Nantes" />
+                </a>
+            </div>
+            <!--
+            <div class="auto-resize-yt-iframe">
+              <div>
+                <iframe src="https://www.youtube.com/embed/ZSJXdmLLRPk"
+                        title="Robots, by Maanen Faces" frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+              </div>
+            </div>
+            -->
+        </div>
+        <!-- Force next columns to break to new line -->
+        <div class="w-100"></div>
+        <div class="col-lg-10 justify-content-md-center">
             <div class="text-center bg-black p-2" style="--bs-bg-opacity: .7;">
                 <ul class="mf-streaming mb-0 p-2">
                     <li>
@@ -44,31 +68,6 @@
                     </li>
                 </ul>
             </div>
-        </div>
-        <!-- Force next columns to break to new line -->
-        <div class="w-100"></div>
-        <div class="col-lg-10">
-            <div class="text-center bg-black" style="--bs-bg-opacity: .7;">
-                <a href="https://fb.me/e/5Qynwvi6P" target="_blank" rel="noopener">
-                    <img class="img-fluid"
-                         src="/assets/img/affiche_floride_FB_oct2025.jpg" alt="Affiche Concert Maanen Faces Octobre 2025 Le Floride Nantes" />
-                </a>
-                <p class="p-3 pb-4">
-                    <a href="https://fb.me/e/5Qynwvi6P" class="btn btn-outline-light" target="_blank" rel="noopener">
-                        Info concert sur Facebook
-                    </a>
-                </p>
-            </div>
-            <!--
-            <div class="auto-resize-yt-iframe">
-              <div>
-                <iframe src="https://www.youtube.com/embed/ZSJXdmLLRPk"
-                        title="Robots, by Maanen Faces" frameborder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-              </div>
-            </div>
-            -->
         </div>
     </div>
 </div>
