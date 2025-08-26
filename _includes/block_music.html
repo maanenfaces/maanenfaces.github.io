@@ -1,4 +1,8 @@
+{% assign show_as_overlays = include.show_as_overlays | default: "true" %}
+{% assign show_section_title = include.show_section_title | default: "true" %}
+
 <div id="music" class="container scroll-margin pb-3">
+    {% if show_section_title == "true" %}
     <div class="row">
         <div class="col text-center pb-4">
             <h2 class="visually-hidden">AUDIO AND VIDEOS</h2>
@@ -9,6 +13,7 @@
             </p>
         </div>
     </div>
+    {% endif %}
     <div class="row justify-content-center">
         <div class="col-lg-5 text-center">
             <div class="album-container">
@@ -16,26 +21,35 @@
                      class="img-fluid album-cover"
                      src="/assets/img/maanenfaces-release-a-brilliant-future-cover-1024.jpg">
                 <div class="album-overlay">
-                    <h3 class="album-title bebas-neue-regular">A Brilliant Future</h3>
-                    <p class="album-year">March 29, 2025</p>
+                    <p class="album-title bebas-neue-regular">A Brilliant Future</p>
+                    <p class="album-year">Album - March 29, 2025 - Digital, CD, Cassette</p>
+                    {% if show_as_overlays == "true" %}
                     <div class="album-links text-uppercase">
-                        <a href="https://maanenfaces.bandcamp.com/album/a-brilliant-future" class="btn btn-sm btn-outline-light" target="_blank">Buy CD & K7</a>
+                        <a href="https://maanenfaces.bandcamp.com/album/a-brilliant-future" class="btn btn-sm btn-outline-light" target="_blank">Bandcamp</a>
+                        <a href="https://www.youtube.com/watch?v=4bgefnqWa5Y" class="btn btn-sm btn-outline-light" target="_blank">YouTube</a>
+                    </div>
+                    <div class="album-links text-uppercase mt-3">
                         <a href="https://open.spotify.com/album/2fsi0pa8gIVzF8nzEVRbsm" class="btn btn-sm btn-outline-light" target="_blank">Spotify</a>
                         <a href="https://music.apple.com/us/album/a-brilliant-future/1812017235" class="btn btn-sm btn-outline-light" target="_blank">Apple Music</a>
-                        <a href="https://www.youtube.com/watch?v=4bgefnqWa5Y" class="btn btn-sm btn-outline-light" target="_blank">YouTube</a>
-                        <a href="https://music.amazon.fr/albums/B0F79CNFLV" class="d-none d-md-block btn btn-sm btn-outline-light" target="_blank">Amazon Music</a>
-                        <a href="https://link.deezer.com/s/30mllTcqgxUTDpQciHyU9" class="btn btn-sm btn-outline-light" target="_blank">Deezer</a>
-                        <a href="https://maanenfaces.bandcamp.com/album/a-brilliant-future" class="d-none d-md-block btn btn-sm btn-outline-light" target="_blank">Bandcamp</a>
+                        <a href="https://music.amazon.fr/albums/B0F79CNFLV" class="d-none d-md-inline btn btn-sm btn-outline-light" target="_blank">Amazon Music</a>
+                        <a href="https://link.deezer.com/s/30mllTcqgxUTDpQciHyU9" class="d-none d-md-inline btn btn-sm btn-outline-light" target="_blank">Deezer</a>
                     </div>
+                    {% endif %}
                 </div>
             </div>
             <div class="text-start bg-dark p-4 lh-lg" style="--bs-bg-opacity: 0.6;">
+                {% if show_as_overlays == "true" %}
                 <h3 class="font-ho-chi-minh-city">A BRILLIANT FUTURE</h3>
+                {% endif %}
                 {% tf music_abf.html %}
                 <p>
+                    {% t _.listen_on %} :
                     <a href="https://maanenfaces.bandcamp.com/album/a-brilliant-future"
-                       class="btn btn-sm btn-outline-light mt-2"
-                       target="_blank">{% t _.listen_on_bandcamp %}</a>
+                       class="link"
+                       target="_blank">Bandcamp</a>,
+                    <a href="https://www.youtube.com/watch?v=4bgefnqWa5Y"
+                       class="link"
+                       target="_blank">YouTube</a>
                 </p>
             </div>
         </div>
@@ -45,30 +59,41 @@
                      class="img-fluid album-cover"
                      src="/assets/img/maanenfaces-release-damned-and-doomed-cover-1024.png">
                 <div class="album-overlay">
-                    <h3 class="album-title bebas-neue-regular">Damned And Doomed</h3>
-                    <p class="album-year">May 17, 2024</p>
+                    <p class="album-title bebas-neue-regular">Damned And Doomed</p>
+                    <p class="album-year">EP - May 17, 2024 - Digital, CD</p>
+                    {% if show_as_overlays == "true" %}
                     <div class="album-links text-uppercase">
-                        <a href="https://maanenfaces.bandcamp.com/album/damned-and-doomed" class="btn btn-sm btn-outline-light" target="_blank">Buy CD</a>
+                        <a href="https://maanenfaces.bandcamp.com/album/damned-and-doomed" class="btn btn-sm btn-outline-light" target="_blank">Bandcamp</a>
+                        <a href="https://www.youtube.com/watch?v=Hmeufh3Gnw0" class="btn btn-sm btn-outline-light" target="_blank">YouTube</a>
+                    </div>
+                    <div class="album-links text-uppercase mt-3">
                         <a href="https://open.spotify.com/album/5cEEy6U1M0egQTOW1jJah6" class="btn btn-sm btn-outline-light" target="_blank">Spotify</a>
                         <a href="https://music.apple.com/us/album/damned-and-doomed-ep/1737223628" class="btn btn-sm btn-outline-light" target="_blank">Apple Music</a>
-                        <a href="https://www.youtube.com/watch?v=Hmeufh3Gnw0" class="btn btn-sm btn-outline-light" target="_blank">YouTube</a>
-                        <a href="https://music.amazon.fr/albums/B0CYQD1KKX" class="d-none d-md-block btn btn-sm btn-outline-light d-md-none" target="_blank">Amazon Music</a>
-                        <a href="https://link.deezer.com/s/30mlmoCmViD15MDlFECIb" class="btn btn-sm btn-outline-light d-md-none" target="_blank">Deezer</a>
-                        <a href="https://maanenfaces.bandcamp.com/album/damned-and-doomed" class="d-none d-md-block btn btn-sm btn-outline-light" target="_blank">Bandcamp</a>
+                        <a href="https://music.amazon.fr/albums/B0CYQD1KKX" class="d-none d-md-inline btn btn-sm btn-outline-light" target="_blank">Amazon Music</a>
+                        <a href="https://link.deezer.com/s/30mlmoCmViD15MDlFECIb" class="d-none d-md-inline btn btn-sm btn-outline-light" target="_blank">Deezer</a>
                     </div>
+                    {% endif %}
                 </div>
             </div>
             <div class="text-start bg-dark p-4 lh-lg" style="--bs-bg-opacity: 0.6;">
+                {% if show_as_overlays == "true" %}
                 <h3 class="font-ho-chi-minh-city">DAMNED AND DOOMED</h3>
+                {% endif %}
                 {% tf music_dad.html %}
                 <p>
+                    {% t _.listen_on %} :
                     <a href="https://maanenfaces.bandcamp.com/album/damned-and-doomed"
-                       class="btn btn-sm btn-outline-light mt-2"
-                       target="_blank">{% t _.listen_on_bandcamp %}</a>
+                       class="link"
+                       target="_blank">Bandcamp</a>,
+                    <a href="https://www.youtube.com/watch?v=Hmeufh3Gnw0"
+                       class="link"
+                       target="_blank">YouTube</a>
                 </p>
             </div>
         </div>
     </div>
 </div>
 
+{% if show_as_overlays == "true" %}
 <link rel="stylesheet" href="/assets/css/album-hover.css">
+{% endif %}
