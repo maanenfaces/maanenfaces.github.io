@@ -205,6 +205,16 @@ a.nav-link.btn-mf.dropdown-toggle.py-0 {
  * Boostrap custom CSS adjustements
  */
 
+.blockquote {
+  border-left: 0.25em solid #f92100;
+  color: #fff;
+  font-size: 1.2em;
+  font-style: italic;
+  line-height: 1.2em;
+  margin-left: 0;
+  padding-left: 1em;
+}
+
 .border.border-custom {
   border-width: 0.5em !important;
   border-color: #f92100 !important;
@@ -213,6 +223,15 @@ a.nav-link.btn-mf.dropdown-toggle.py-0 {
 .btn:hover {
   border: 1px solid #fff;
   text-decoration: none;
+}
+
+.link {
+  padding-left: 0.1em;
+  padding-right: 0.1em;
+}
+.link:hover {
+  color: #f92100 !important;
+  text-decoration-color: #f92100 !important;
 }
 
 /**
@@ -226,6 +245,7 @@ a.nav-link.btn-mf.dropdown-toggle.py-0 {
 .mf-booking-email,
 .mf-booking-email:hover {
   background-color: #f92100 !important;
+  text-transform: uppercase;
 }
 
 .mf-hidden-email {
