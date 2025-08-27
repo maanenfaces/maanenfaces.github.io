@@ -445,23 +445,9 @@ a.nav-link.btn-mf.dropdown-toggle.py-0 {
 .bg-obj-image.band {
   opacity: 0.9;
 }
+.bg-obj-image.band.mobile {
+  filter: brightness(75%) grayscale(100%) saturate(140%);
+}
 .bg-obj-video.band {
   opacity: 1;
-}
-
-.bg-obj-image.default {
-  opacity: 0.7;
-  z-index: -992;
-}
-.bg-obj-video.default {
-  opacity: 0.4;
-  z-index: -991;
-}
-
-.bg-obj-image.fire {
-  opacity: 0.9;
-}
-.bg-obj-video.fire {
-  filter: grayscale(0.8);
-  opacity: 0.1;
 }
