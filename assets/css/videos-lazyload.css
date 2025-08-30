@@ -1,0 +1,40 @@
+.youtube-lite {
+  overflow: hidden;
+}
+
+.youtube-lite > .img-fluid {
+  cursor: pointer;
+}
+
+.youtube-lite::after {
+  background-color: #f92100;
+  content: "▶";
+  position: absolute;
+  font-size: 2rem;
+  color: white;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  border: 1px solid rgba(255, 0, 0, 1);
+  border-radius: 0.6rem;
+  padding: 0rem 1rem;
+}
+
+.youtube-lite:hover::after {
+  box-shadow: 0 0 15px #fff;
+}
+
+.youtube-lite > .youtube-lite-title {
+  position: absolute;
+  top: 0em;
+  left: 0em;
+  color: #fff;
+  font-size: 1.1rem;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+  padding: 0.8em;
+  width: 100%;
+  white-space: nowrap;    /* empêche le retour à la ligne */
+  overflow: hidden;       /* cache le texte qui dépasse */
+  text-overflow: ellipsis;/* ajoute "..." à la fin si ça dépasse */
+}
