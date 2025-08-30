@@ -6,72 +6,46 @@
                  src="/assets/img/section-title-videos-{{ site.lang }}.png" width="200" />
         </div>
     </div>
+    <!--
     <div class="row justify-content-center">
 
-        <div class="col-lg-10">
+        {% for item in site.data.videos %}
+        <div class="{{ item.css_class | default: 'col-lg-5' }}">
             <div class="border border-custom mb-4">
                 <div class="auto-resize-yt-iframe">
                     <div>
-                        <iframe src="https://www.youtube.com/embed/ZSJXdmLLRPk?start=125"
-                                title="Robots, by Maanen Faces" frameborder="0"
+                        <iframe src="https://www.youtube.com/embed/{{ item/yt_video_id }}?start={{ item.start_at_in_seconds | default: 0 }}"
+                                title="{{ item.title }}" frameborder="0"
                                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                                 referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
                     </div>
                 </div>
             </div>
         </div>
+        {% endfor %}
 
-        <div class="col-lg-5">
-            <div class="border border-custom mb-4">
-                <div class="auto-resize-yt-iframe">
-                    <div>
-                        <iframe src="https://www.youtube.com/embed/rlWcj0XZGqk?start=159"
-                                title="Selfish Block, by Maanen Faces" frameborder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-                    </div>
-                </div>
-            </div>
-        </div>
+    </div>
+    -->
+    <div class="row justify-content-center">
 
-        <div class="col-lg-5">
+        {% for item in site.data.videos %}
+        <div class="{{ item.css_class | default: 'col-lg-5' }}">
             <div class="border border-custom mb-4">
                 <div class="auto-resize-yt-iframe">
-                    <div>
-                        <iframe src="https://www.youtube.com/embed/4bgefnqWa5Y?start=880"
-                                title="A Brilliant Future by Maanen Faces on 666MrDoom Channel" frameborder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                    <div class="youtube-lite"
+                         {% if item.preview_img_url %}
+                         data-preview-img-url="{{ item.preview_img_url }}"
+                         {% else %}
+                         data-preview-img-url="https://img.youtube.com/vi/{{ item.yt_video_id }}/maxresdefault.jpg"
+                         {% endif %}
+                         data-yt-video-id="{{ item.yt_video_id }}"
+                         data-start-at-in-seconds="{{ item.start_at_in_seconds | default: 0 }}"
+                         data-title="{{ item.title | default: '' }}">
                     </div>
                 </div>
             </div>
         </div>
-
-        <div class="col-lg-5">
-            <div class="border border-custom mb-4">
-                <div class="auto-resize-yt-iframe">
-                    <div>
-                        <iframe src="https://www.youtube.com/embed/v-e65pddTZQ"
-                                title="Robots (Live) @ Supersonic (PARIS, FR) {% t month.july %} 2024, by Maanen Faces" frameborder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-5">
-            <div class="border border-custom mb-4">
-                <div class="auto-resize-yt-iframe">
-                    <div>
-                        <iframe src="https://www.youtube.com/embed/Hmeufh3Gnw0?start=175"
-                                title="Damned And Doomed EP by Maanen Faces on 666MrDoom Channel" frameborder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-                    </div>
-                </div>
-            </div>
-        </div>
+        {% endfor %}
 
     </div>
     <div class="row">
@@ -82,3 +56,32 @@
         </div>
     </div>
 </div>
+
+<link rel="stylesheet" href="/assets/css/videos-lazyload.css">
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const ytLite = document.querySelectorAll(".youtube-lite");
+
+        ytLite.forEach(el => {
+            const previewImgUrl = el.dataset.previewImgUrl;
+            const startAt = el.dataset.startAtInSeconds;
+            const title = el.dataset.title;
+            const videoId = el.dataset.ytVideoId;
+            el.innerHTML = `<img class="img-fluid object-fit-fill" src="${previewImgUrl}" alt="YouTube preview image"><div class="youtube-lite-title">${title}</div>`;
+
+            el.addEventListener("click", function() {
+                const iframe = document.createElement("iframe");
+                iframe.setAttribute("src", `https://www.youtube.com/embed/${videoId}?autoplay=1&start=${startAt}`);
+                iframe.setAttribute("frameborder", "0");
+                iframe.setAttribute("allowfullscreen", "1");
+                iframe.setAttribute("allow", "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture");
+                iframe.style.width = "100%";
+                iframe.style.height = "100%";
+                el.innerHTML = "";
+                el.appendChild(iframe);
+                el.classList.remove("youtube-lite");
+            });
+        });
+    });
+</script>
