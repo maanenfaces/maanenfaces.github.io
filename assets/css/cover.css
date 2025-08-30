@@ -383,9 +383,11 @@ a.nav-link.btn-mf.dropdown-toggle.py-0 {
 .auto-resize-yt-iframe {
   margin: 0px auto;
   max-width: 1275px;
+  overflow: hidden;
 }
 
 .auto-resize-yt-iframe > div {
+  background-color: #000;
   position: relative;
   padding-bottom: 55%;
   height: 0px;
