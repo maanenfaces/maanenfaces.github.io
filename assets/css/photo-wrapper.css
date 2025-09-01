@@ -1,0 +1,22 @@
+.photo-wrapper::after {
+  background-color: #fff;
+  content: "\1F50D"; /* unicode loupe 🔍 */
+  position: absolute;
+  font-size: 1.7rem;
+  color: rgba(255, 255, 255, 1);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  border: 1px solid rgba(220, 220, 220, 1);
+  border-radius: 0.6rem;
+  padding: 0.2rem 1rem 0.1rem 1rem;
+
+  /** original code **/
+  opacity: 1;
+  transition: opacity 0.2s ease;
+}
+
+.photo-wrapper:hover::after {
+  box-shadow: 0 0 15px #fff;
+}
