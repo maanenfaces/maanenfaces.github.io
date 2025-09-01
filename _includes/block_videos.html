@@ -42,6 +42,7 @@
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         const ytLite = document.querySelectorAll(".youtube-lite");
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
         ytLite.forEach(el => {
             const previewImgUrl = el.dataset.previewImgUrl;
@@ -69,19 +70,32 @@
                 el.innerHTML = "";
                 el.appendChild(video_loadtext);
 
+                const isMute = isMobile ? 1 : 0;
+
                 const iframe = document.createElement("iframe");
-                iframe.setAttribute("src", `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0&playsinline=1&start=${startAt}`);
+                iframe.setAttribute("src", `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${isMute}&playsinline=1&start=${startAt}&enablejsapi=1`);
                 iframe.setAttribute("frameborder", "0");
                 iframe.setAttribute("allowfullscreen", "1");
                 iframe.setAttribute("allow", "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture");
                 iframe.style.width = "100%";
                 iframe.style.height = "100%";
-
-                el.classList.add("loading");
                 iframe.onload = () => {
                     video_loadtext.remove();
                     el.classList.remove("youtube-lite");
+
+                    if (isMute === 1) {
+                        const unmute_btn = document.createElement("button");
+                        unmute_btn.className = "btn btn-light youtube-lite-unmute-btn";
+                        unmute_btn.textContent = "🔊 Unmute";
+                        unmute_btn.onclick = (e) => {
+                            e.stopPropagation();
+                            iframe.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}', '*');
+                            unmute_btn.remove();
+                        };
+                        el.appendChild(unmute_btn);
+                    }
                 };
+
                 el.appendChild(iframe);
             });
         });
