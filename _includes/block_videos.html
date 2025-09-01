@@ -68,7 +68,7 @@
             const startAt = el.dataset.startAtInSeconds;
             const title = el.dataset.title;
             const videoId = el.dataset.ytVideoId;
-            el.innerHTML = `<img class="img-fluid object-fit-fill" src="${previewImgUrl}" alt="YouTube preview image"><div class="youtube-lite-title">${title}</div>`;
+            el.innerHTML = `<img class="img-fluid object-fit-fill" src="${previewImgUrl}" alt="YouTube preview image" loading="lazy"><div class="youtube-lite-title">${title}</div>`;
 
             el.addEventListener("click", function() {
                 const iframe = document.createElement("iframe");
