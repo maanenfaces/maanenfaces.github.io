@@ -15,7 +15,7 @@
 
                 {% for item in site.data.photos %}
                 <div class="col-lg-4">
-                    <div class="card h-100 border border-custom shadow-sm rounded-0">
+                    <div class="card h-100 border border-custom shadow-sm rounded-0 photo-wrapper">
                         <img src="{{ item.src }}"
                              class="img-fluid"
                              loading="lazy"
@@ -51,6 +51,8 @@
         </div>
     </div>
 </div>
+
+<link rel="stylesheet" href="/assets/css/photo-wrapper.css">
 
 <!-- JavaScript for Photo Modal -->
 <script>
