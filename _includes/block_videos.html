@@ -6,26 +6,6 @@
                  src="/assets/img/section-title-videos-{{ site.lang }}.png" width="200" />
         </div>
     </div>
-    <!--
-    <div class="row justify-content-center">
-
-        {% for item in site.data.videos %}
-        <div class="{{ item.css_class | default: 'col-lg-5' }}">
-            <div class="border border-custom mb-4">
-                <div class="auto-resize-yt-iframe">
-                    <div>
-                        <iframe src="https://www.youtube.com/embed/{{ item/yt_video_id }}?start={{ item.start_at_in_seconds | default: 0 }}"
-                                title="{{ item.title }}" frameborder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-                    </div>
-                </div>
-            </div>
-        </div>
-        {% endfor %}
-
-    </div>
-    -->
     <div class="row justify-content-center">
 
         {% for item in site.data.videos %}
@@ -68,19 +48,41 @@
             const startAt = el.dataset.startAtInSeconds;
             const title = el.dataset.title;
             const videoId = el.dataset.ytVideoId;
-            el.innerHTML = `<img class="img-fluid object-fit-fill" src="${previewImgUrl}" alt="YouTube preview image" loading="lazy"><div class="youtube-lite-title">${title}</div>`;
+
+            const video_img = document.createElement("img");
+            video_img.className = "img-fluid object-fit-fill";
+            video_img.src = previewImgUrl;
+            video_img.alt = "YouTube preview image";
+            video_img.loading = "lazy";
+
+            const video_title = document.createElement("div");
+            video_title.className = "youtube-lite-title";
+            video_title.textContent = title;
+
+            el.replaceChildren(video_img, video_title);
 
             el.addEventListener("click", function() {
+                const video_loadtext = document.createElement("div");
+                video_loadtext.className = "youtube-lite-loadtext";
+                video_loadtext.textContent = "Loading video...";
+
+                el.innerHTML = "";
+                el.appendChild(video_loadtext);
+
                 const iframe = document.createElement("iframe");
-                iframe.setAttribute("src", `https://www.youtube.com/embed/${videoId}?autoplay=1&start=${startAt}`);
+                iframe.setAttribute("src", `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0&playsinline=1&start=${startAt}`);
                 iframe.setAttribute("frameborder", "0");
                 iframe.setAttribute("allowfullscreen", "1");
                 iframe.setAttribute("allow", "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture");
                 iframe.style.width = "100%";
                 iframe.style.height = "100%";
-                el.innerHTML = "";
+
+                el.classList.add("loading");
+                iframe.onload = () => {
+                    video_loadtext.remove();
+                    el.classList.remove("youtube-lite");
+                };
                 el.appendChild(iframe);
-                el.classList.remove("youtube-lite");
             });
         });
     });
