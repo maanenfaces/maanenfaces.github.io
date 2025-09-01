@@ -25,6 +25,10 @@
   box-shadow: 0 0 15px #fff;
 }
 
+.youtube-lite.loaded::after {
+  display: none;
+}
+
 .youtube-lite > .youtube-lite-title,
 .youtube-lite > .youtube-lite-loadtext {
   position: absolute;
