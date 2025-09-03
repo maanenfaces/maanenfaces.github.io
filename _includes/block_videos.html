@@ -37,7 +37,7 @@
     </div>
 </div>
 
-<link rel="stylesheet" href="/assets/css/videos-lazyload.css">
+<link rel="stylesheet" href="/assets/css/youtube-lite.css">
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
@@ -81,7 +81,6 @@
                 iframe.style.height = "100%";
                 iframe.onload = () => {
                     video_loadtext.remove();
-                    el.classList.remove("youtube-lite");
 
                     if (isMute === 1) {
                         const unmute_btn = document.createElement("button");
@@ -97,6 +96,7 @@
                 };
 
                 el.appendChild(iframe);
+                el.classList.add("loaded");
             });
         });
     });
