@@ -43,7 +43,9 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body d-flex justify-content-center align-items-center p-0">
+                <button id="prevPhoto" class="btn btn-dark position-absolute top-50 start-0 translate-middle-y">‹</button>
                 <img id="modalPhoto" src="" alt="" class="img-fluid" style="max-height: 90vh; max-width: 90vw; object-fit: contain;">
+                <button id="nextPhoto" class="btn btn-dark position-absolute top-50 end-0 translate-middle-y">›</button>
             </div>
             <div class="modal-footer border-0 justify-content-center">
                 <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Close</button>
@@ -60,24 +62,54 @@
       const photoModal = document.getElementById('photoModal');
       const modalPhoto = document.getElementById('modalPhoto');
       const modalTitle = document.getElementById('photoModalLabel');
+      const prevBtn = document.getElementById('prevPhoto');
+      const nextBtn = document.getElementById('nextPhoto');
+
+      const photos = Array.from(document.querySelectorAll('.photo-wrapper img'))
+        .map(img => ({
+          src: img.getAttribute('data-photo-src'),
+          alt: img.getAttribute('data-photo-alt')
+        }));
+
+      let currentIndex = 0;
+
+      function showPhoto(index) {
+        if (index < 0) index = photos.length - 1;
+        if (index >= photos.length) index = 0;
+        currentIndex = index;
+
+        modalPhoto.src = photos[currentIndex].src;
+        modalPhoto.alt = photos[currentIndex].alt;
+        modalTitle.textContent = photos[currentIndex].alt;
+      }
 
       photoModal.addEventListener('show.bs.modal', function(event) {
         const button = event.relatedTarget;
         const photoSrc = button.getAttribute('data-photo-src');
         const photoAlt = button.getAttribute('data-photo-alt');
 
-        modalPhoto.src = photoSrc;
-        modalPhoto.alt = photoAlt;
-        modalTitle.textContent = photoAlt;
+        currentIndex = photos.findIndex(p => p.src === photoSrc);
+        showPhoto(currentIndex);
+      });
+
+      prevBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        showPhoto(currentIndex - 1);
+      });
+
+      nextBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        showPhoto(currentIndex + 1);
       });
 
       // Close modal on ESC key
       document.addEventListener('keydown', function(event) {
+        if (!photoModal.classList.contains('show')) return;
+        if (event.key === 'ArrowLeft') showPhoto(currentIndex - 1);
+        if (event.key === 'ArrowRight') showPhoto(currentIndex + 1);
         if (event.key === 'Escape') {
           const modal = bootstrap.Modal.getInstance(photoModal);
-          if (modal) {
-            modal.hide();
-          }
+          if (modal) modal.hide();
         }
       });
 
@@ -89,9 +121,7 @@
         if (event.target.classList.contains('modal-body') ||
             event.target.classList.contains('modal-content')) {
           const modal = bootstrap.Modal.getInstance(photoModal);
-          if (modal) {
-            modal.hide();
-          }
+          if (modal) modal.hide();
         }
       });
 
