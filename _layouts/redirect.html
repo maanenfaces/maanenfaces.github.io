@@ -11,7 +11,12 @@
     <meta name="docsearch:version" content="5.0">
     <meta name="theme-color" content="#000">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    {% if page.redirect_url_lang %}
+    <meta http-equiv="refresh" content="0; URL={{ page.redirect_url_lang[site.lang] }}">
+    {% else %}
     <meta http-equiv="refresh" content="0; URL={{ page.redirect_url }}">
+    {% endif %}
 
     <style>
       body {
@@ -35,7 +40,13 @@
   <body>
     <div>
       <p>{{ content }}</p>
-      <a href="{{ page.redirect_url }}">{{ page.title }}</a>
+      {% if page.redirect_url_lang %}
+      <a href="{{ page.redirect_url_lang[site.lang] }}">
+      {% else %}
+      <a href="{{ page.redirect_url }}">
+      {% endif %}
+        {{ page.title }}
+      </a>
     </div>
   </body>
 </html>
