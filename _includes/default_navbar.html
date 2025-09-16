@@ -33,7 +33,7 @@
               {% else %}
               class="nav-link btn-mf"
               {% endif %}
-              {% if site.lang == site.languages[0] %}
+              {% if site.lang == site.languages[0] or item.external %}
                 href="{{ item.url }}"
               {% else %}
                 href="/{{ site.lang }}{{ item.url }}"
