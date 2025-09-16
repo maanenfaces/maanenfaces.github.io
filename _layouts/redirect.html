@@ -13,9 +13,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     {% if page.redirect_url_lang %}
-    <meta http-equiv="refresh" content="3; URL={{ page.redirect_url_lang[site.lang] }}">
+    <meta http-equiv="refresh" content="1; URL={{ page.redirect_url_lang[site.lang] }}">
     {% else %}
-    <meta http-equiv="refresh" content="3; URL={{ page.redirect_url }}">
+    <meta http-equiv="refresh" content="1; URL={{ page.redirect_url }}">
     {% endif %}
 
     <style>
@@ -40,7 +40,7 @@
     <div style="padding: 1em;">
       <p>{{ content }}</p>
       <p>
-        <span style="background: #aaa; padding: 0.3em;">Redirecting to (3 seconds...) :</span>
+        <span style="padding: 0.3em;">Redirecting to :</span>
       </p>
       <p>
         {% if page.redirect_url_lang %}
