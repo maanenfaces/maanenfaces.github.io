@@ -7,6 +7,7 @@ _:
   damned_and_doomed_order_release_info: Édition limitée 100 exemplaires seulement
   damned_and_doomed_promo_sentence: Plus sombre que QOTSA, plus rapide que Deftones, plus psyché qu'Electric Wizard
   damned_and_doomed_release_date: "17&nbsp;Mai&nbsp;2024"
+  download_epk: Télécharger notre EPK
   for_booking_a_show_contact_us_on: Pour une programmation, contactez-nous par email sur
   listen_on: En écoute sur
   next_event: Prochain concert
@@ -34,6 +35,7 @@ month:
 
 navbar:
   biography: Bio
+  epk: EPK
   home: Accueil
   music: Discographie
   photos: Photos

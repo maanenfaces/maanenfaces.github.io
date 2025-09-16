@@ -13,8 +13,12 @@
 - page_key: page.photos.index.title
   title_key: navbar.photos
   url: "/#photos"
+- title_key: divider
 - page_key: page.shop.index.title
   title_key: navbar.shop
   url: "https://maanenfaces.bandcamp.com/merch"
   external: true
-- title_key: divider
+- page_key: page.epk.index.title
+  title_key: navbar.epk
+  url: "/epk/"
+  external: true
