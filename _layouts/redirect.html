@@ -13,9 +13,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     {% if page.redirect_url_lang %}
-    <meta http-equiv="refresh" content="0; URL={{ page.redirect_url_lang[site.lang] }}">
+    <meta http-equiv="refresh" content="3; URL={{ page.redirect_url_lang[site.lang] }}">
     {% else %}
-    <meta http-equiv="refresh" content="0; URL={{ page.redirect_url }}">
+    <meta http-equiv="refresh" content="3; URL={{ page.redirect_url }}">
     {% endif %}
 
     <style>
@@ -30,23 +30,28 @@
       }
       a {
         color: #fff;
-        text-decoration: none;
       }
       a:hover {
-        text-decoration: underline;
+        color: red;
       }
     </style>
   </head>
   <body>
-    <div>
+    <div style="padding: 1em;">
       <p>{{ content }}</p>
-      {% if page.redirect_url_lang %}
-      <a href="{{ page.redirect_url_lang[site.lang] }}">
-      {% else %}
-      <a href="{{ page.redirect_url }}">
-      {% endif %}
-        {{ page.title }}
-      </a>
+      <p>
+        <span style="background: #aaa; padding: 0.3em;">Redirecting to (3 seconds...) :</span>
+      </p>
+      <p>
+        {% if page.redirect_url_lang %}
+        <a href="{{ page.redirect_url_lang[site.lang] }}">
+        {% else %}
+        <a href="{{ page.redirect_url }}">
+        {% endif %}
+          {{ page.title }}
+        </a>
+      </p>
     </div>
+    {% include google_analytics.html %}
   </body>
 </html>
