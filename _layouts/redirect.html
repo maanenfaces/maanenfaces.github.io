@@ -35,8 +35,12 @@
         color: red;
       }
     </style>
+
+    {% include analytics_counter_dev.html %}
   </head>
+
   <body>
+
     <div style="padding: 1em;">
       <p>{{ content }}</p>
       <p>
@@ -52,6 +56,6 @@
         </a>
       </p>
     </div>
-    {% include google_analytics.html %}
+
   </body>
 </html>

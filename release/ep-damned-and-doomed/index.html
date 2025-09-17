@@ -19,7 +19,16 @@ description: page.dad.index.description
           </h1>
         </div>
       </div>
-      {% include dad_purchase_link.html %}
+      <div>
+          <p>
+            <a class="btn btn-lg btn-danger"
+               href="https://maanenfaces.bandcamp.com/album/damned-and-doomed">
+              {% t _.damned_and_doomed_order_release_button %}</a>
+          </p>
+          <p style="font-size: 0.9em; font-style: italic;">
+            ({% t _.damned_and_doomed_order_release_info %})
+          </p>
+      </div>
     </div>
   </div>
   <div class="row">
@@ -46,7 +55,7 @@ description: page.dad.index.description
   </div>
 </div>
 
-{% include dad_bg.html %}
+{% include bg_dad.html %}
 
 <style>
   #footer {
