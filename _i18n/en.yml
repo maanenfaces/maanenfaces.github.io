@@ -8,6 +8,7 @@ _:
   damned_and_doomed_promo_sentence: Darker than QOTSA, faster than Deftones, psychier than Electric Wizard
   damned_and_doomed_release_date: "May&nbsp;17&nbsp;2024"
   download_epk: Download our EPK
+  for_any_contacts: For booking, press or collaborations, drop us a mail on
   for_booking_a_show_contact_us_on: For booking a show, drop us a mail on
   listen_on: Listen on
   next_event: Next gig
@@ -39,6 +40,7 @@ month:
 
 navbar:
   biography: Bio
+  contact: Contact
   epk: EPK
   home: Home
   music: Music
@@ -55,30 +57,19 @@ page:
     index:
       description: Bonus page for the Album A Brilliant Future by Maanen Faces rock band
       title: A Brilliant Future
-  band:
-    index:
-      description: All the history of Maanen Faces rock band, a rock psych doom/stoner band from Nantes (France)
-      title: Maanen Faces band biography
   dad:
     index:
       description: Bonus page for the Damned And Doomed EP by Maanen Faces rock band
       title: Damned And Doomed EP
   index:
-    description: Maanen Faces official website, a rock band from Nantes (France) doing some rock psych doom/stoner music
-    title: Official website
-  music:
-    index:
-      description: Listen to Maanen Faces music on your favorite streaming platform
-      title: Listen to our music
-  networks:
-    index:
-      description: Follow Maanen Faces on the social networks
-      title: Maanen Faces network
-  shows:
-    index:
-      description: List of Maanen Faces live shows
-      title: Go watch Maanen Faces live
-  videos:
-    index:
-      description: Watch Maanen Faces latest videos
-      title: Watch our latest videos
+    description: Maanen Faces, emerging French stoner psych doom band based in Nantes. Discover our music and live shows.
+    title: Maanen Faces | Stoner psych doom band from Nantes, France
+    h1: Maanen Faces – Stoner psych doom band from Nantes, France
+
+h2_sections:
+  band: Bio – Maanen Faces, stoner psych doom band from Nantes, France
+  videos: Videos – Music videos and live performances of Maanen Faces, stoner psych doom
+  music: Discography – Albums Damned and Doomed & A Brilliant Future, stoner psych doom
+  shows: Live Shows – Maanen Faces concerts in Nantes, France and Europe, stoner psych doom
+  photos: Photos – Promo and live photos of Maanen Faces, stoner psych doom band
+  contact: Contact – Booking and press, Maanen Faces, stoner psych doom band from Nantes

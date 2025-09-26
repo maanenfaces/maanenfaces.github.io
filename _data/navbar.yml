@@ -1,24 +1,19 @@
-- page_key: page.band.index.title
-  title_key: navbar.biography
+- title_key: navbar.biography
   url: "/#band"
-- page_key: page.videos.index.title
-  title_key: navbar.videos
+- title_key: navbar.videos
   url: "/#videos"
-- page_key: page.music.index.title
-  title_key: navbar.music
+- title_key: navbar.music
   url: "/#music"
-- page_key: page.shows.index.title
-  title_key: navbar.shows
+- title_key: navbar.shows
   url: "/#shows"
-- page_key: page.photos.index.title
-  title_key: navbar.photos
+- title_key: navbar.photos
   url: "/#photos"
+- title_key: navbar.contact
+  url: "/#contact"
 - title_key: divider
-- page_key: page.shop.index.title
-  title_key: navbar.shop
+- title_key: navbar.shop
   url: "https://maanenfaces.bandcamp.com/merch"
   external: true
-- page_key: page.epk.index.title
-  title_key: navbar.epk
+- title_key: navbar.epk
   url: "/epk/"
   external: true
