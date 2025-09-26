@@ -2,7 +2,7 @@
 
 <html lang="fr" class="h-100">
   <head>
-    <title>Maanen Faces ⋆ {% t page.title %}</title>
+    <title>{% t page.title %}</title>
 
     <meta charset="utf-8">
     <meta name="author" content="Maanen Faces">
@@ -11,6 +11,19 @@
     <meta name="docsearch:version" content="5.0">
     <meta name="theme-color" content="#000">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <meta property="og:title" content="{% t page.title %}">
+    <meta property="og:description" content="{% t page.description %}">
+    <meta property="og:type" content="website">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{% t page.title %}">
+    <meta name="twitter:description" content="{% t page.description %}">
+
+    {% if page.og_image %}
+    <meta property="og:image" content="{{ page.og_image }}">
+    <meta name="twitter:image" content="{{ page.og_image }}">
+    {% endif %}
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1/font/bootstrap-icons.css" rel="stylesheet">
@@ -23,6 +36,7 @@
     <link rel="alternate" href="https://maanenfaces.com{{ page.url }}" hreflang="{{ lang }}" />
     {% else %}
     <link rel="alternate" href="https://maanenfaces.com/{{ lang }}{{ page.url }}" hreflang="{{ lang }}" />
+    <meta property="og:url" content="https://maanenfaces.com/{{ lang }}{{ page.url }}">
     {% endif %}
     {% endfor %}
 
