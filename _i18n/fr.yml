@@ -8,6 +8,7 @@ _:
   damned_and_doomed_promo_sentence: Plus sombre que QOTSA, plus rapide que Deftones, plus psyché qu'Electric Wizard
   damned_and_doomed_release_date: "17&nbsp;Mai&nbsp;2024"
   download_epk: Télécharger notre EPK
+  for_any_contacts: Pour toute demande de concert, presse ou collaboration, contactez-nous par email sur
   for_booking_a_show_contact_us_on: Pour une programmation, contactez-nous par email sur
   listen_on: En écoute sur
   next_event: Prochain concert
@@ -35,6 +36,7 @@ month:
 
 navbar:
   biography: Bio
+  contact: Contact
   epk: EPK
   home: Accueil
   music: Discographie
@@ -51,34 +53,19 @@ page:
     index:
       description: Page bonus de l'album A Brilliant Future du groupe Maanen Faces
       title: A Brilliant Future
-  band:
-    index:
-      description: Toute l'histoire du groupe Maanen Faces, ses membres, sa musique et ses influences
-      title: Biographie de Maanen Faces
   dad:
     index:
       description: Page bonus de l'EP Damned And Doomed du groupe Maanen Faces
       title: EP Damned And Doomed
   index:
-    description: Site officiel de Maanen Faces, groupe de rock psych doom/stoner originaire de Nantes (France)
-    title: Site officiel
-  merch:
-    index:
-      description: Écouter la musique de Maanen Faces sur votre plateforme de streaming préférée
-      title: Écouter notre musique
-  music:
-    index:
-      description: Écouter la musique de Maanen Faces sur votre plateforme de streaming préférée
-      title: Écouter notre musique
-  networks:
-    index:
-      description: Suivre Maanen Faces sur les réseaux sociaux
-      title: Suivre Maanen Faces
-  shows:
-    index:
-      description: Liste des concerts de Maanen Faces
-      title: Voir Maanen Faces en concert
-  videos:
-    index:
-      description: Regarder les dernières vidéos de Maanen Faces
-      title: Regarder nos dernières vidéos
+    description: Maanen Faces, groupe émergent de stoner psyché doom français basé à Nantes. Découvrez notre musique et nos concerts.
+    title: Maanen Faces | Groupe stoner psyché doom à Nantes
+    h1: Maanen Faces – Groupe stoner psyché doom à Nantes, France
+
+h2_sections:
+  band: Bio – Maanen Faces, groupe stoner psyché doom à Nantes, France
+  videos: Vidéos – Clips et lives de Maanen Faces, stoner psyché doom
+  music: Discographie – Albums Damned and Doomed et A Brilliant Future, stoner psyché doom
+  shows: Concerts – Dates et lieux de Maanen Faces, stoner psyché doom Nantes, France et Europe
+  photos: Photos – Promo et live de Maanen Faces, groupe stoner psyché doom
+  contact: Contact – Booking et presse, Maanen Faces, groupe stoner psyché doom Nantes

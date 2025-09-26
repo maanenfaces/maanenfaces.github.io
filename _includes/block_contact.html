@@ -1,0 +1,25 @@
+<div id="contact" class="container scroll-margin pb-2">
+    {% if show_section_title == "true" %}
+    <div class="row">
+        <div class="col text-center">
+            <h2 class="visually-hidden">{% t h2_sections.contact %}</h2>
+            <img class="mf-section-title-img"
+                 src="/assets/img/section-title-contact.png" width="200" />
+        </div>
+    </div>
+    {% endif %}
+    <div class="row justify-content-center">
+        <div class="col-lg-10 text-center">
+            <p>
+                {% t _.for_any_contacts %}
+                <span class="mf-hidden-email p-1">maanenfaces<span
+                    style="display: none;">ANTISPAM</span>@tuta.io</span>
+            </p>
+            <p class="pt-5 mt-5">
+                <img class="img-fluid"
+                   src="/assets/img/maanenfaces-logo-visages.png"
+                   width="30%" />
+            </p>
+        </div>
+    </div>
+</div>
