@@ -8,12 +8,12 @@
   url: "/#shows"
 - title_key: navbar.photos
   url: "/#photos"
-- title_key: navbar.contact
-  url: "/#contact"
-- title_key: divider
 - title_key: navbar.shop
   url: "https://maanenfaces.bandcamp.com/merch"
   external: true
+- title_key: navbar.contact
+  url: "/#contact"
+- title_key: divider
 - title_key: navbar.epk
   url: "/epk/"
   external: true
