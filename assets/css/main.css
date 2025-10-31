@@ -462,3 +462,11 @@ a.nav-link.btn-mf.dropdown-toggle.py-0 {
 .bg-obj-video.band {
   opacity: 1;
 }
+
+.bg-obj-image.band-video {
+  display: none;
+}
+.bg-obj-video.band-video {
+  opacity: 1;
+  filter: brightness(150%) saturate(70%);
+}
