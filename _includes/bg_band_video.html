@@ -1,0 +1,47 @@
+<div>
+  <video id="bg-video" class="bg-obj bg-obj-video band-video" autoplay loop muted playsinline>
+    <source src="/assets/video/Maanen-Faces-Extrait-Live-Darkness-Floride-25-10-360.mp4" type="video/mp4">
+  </video>
+  <!--
+  <script language="JavaScript">
+    window.addEventListener('load', function() {
+      var bgVideo = document.getElementById('bg-video');
+      bgVideo.addEventListener('ended', function() {
+            this.currentTime = 0;
+            this.play();
+      }, false);
+      bgVideo.play();
+    });
+  </script>
+  -->
+
+  <script language="JavaScript">
+    window.addEventListener('load', function() {
+      const bgVideo = document.getElementById('bg-video');
+      bgVideo.addEventListener('ended', function() {
+        this.currentTime = 0;
+        this.play();
+      });
+      bgVideo.play().catch(()=>{});
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            bgVideo.play().catch(() => {});
+          }
+        });
+      }, {
+        threshold: 0.1
+      });
+      observer.observe(bgVideo);
+
+      const fallbackInterval = setInterval(() => {
+        const rect = bgVideo.getBoundingClientRect();
+        const visible = rect.bottom > 0 && rect.top < (window.innerHeight || document.documentElement.clientHeight);
+        if (visible && (bgVideo.paused || bgVideo.readyState < 2)) {
+          bgVideo.play().catch(()=>{});
+        }
+      }, 1000);
+    });
+  </script>
+</div>
