@@ -10,38 +10,58 @@
         <!-- Force next columns to break to new line -->
         <div class="w-100"></div>
         <div class="col-auto justify-content-md-center mb-5">
-            <div class="text-center bg-black p-2" style="--bs-bg-opacity: .7;">
-                <ul class="mf-streaming mb-0 p-2">
-                    <li>
-                        {% t _.available_on_all_streaming_platforms %} :
-                        <p class="d-md-none mb-1"></p>
-                    </li>
-                    <li>
-                        <a href="https://music.apple.com/artist/maanen-faces/1736745855" target="_blank" rel="noopener">
-                            <img alt="Apple Music" class="sn-icon" fetchpriority="high"
-                               src="/assets/img/icon-applemusic.png">
+            <button type="button" class="btn btn-lg btn-outline-light btn-streaming-main" data-bs-toggle="modal" data-bs-target="#streamingModal">
+                {% t _.available_on_all_streaming_platforms %}
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="streamingModal" tabindex="-1" aria-labelledby="streamingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+        <div class="modal-content text-white" style="background-color: rgba(0, 0, 0, 0.8);">
+            <div class="modal-header border-0">
+                <h5 class="modal-title" id="streamingModalLabel">{% t _.available_on_all_streaming_platforms %}</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body d-flex align-items-center justify-content-center">
+                <div class="row g-4" onclick="event.stopPropagation();">
+                    <div class="col-12 col-md-6">
+                        <a href="https://music.apple.com/artist/maanen-faces/1736745855" target="_blank" rel="noopener" class="btn btn-lg btn-outline-light btn-streaming w-100 d-flex align-items-center justify-content-start p-3">
+                            <img alt="Apple Music" class="me-3" src="/assets/img/icon-applemusic.png" style="width: 48px; height: 48px;">
+                            <span class="fs-5">Apple Music</span>
                         </a>
-                    </li>
-                    <li>
-                        <a href="https://music.amazon.com/artists/B0CYQ9PH57/maanen-faces" target="_blank" rel="noopener">
-                            <img alt="Amazon Music" class="sn-icon" fetchpriority="high"
-                               src="/assets/img/icon-amazonmusic.png">
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <a href="https://music.amazon.com/artists/B0CYQ9PH57/maanen-faces" target="_blank" rel="noopener" class="btn btn-lg btn-outline-light btn-streaming w-100 d-flex align-items-center justify-content-start p-3">
+                            <img alt="Amazon Music" class="me-3" src="/assets/img/icon-amazonmusic.png" style="width: 48px; height: 48px;">
+                            <span class="fs-5">Amazon Music</span>
                         </a>
-                    </li>
-                    <li>
-                        <a href="https://maanenfaces.bandcamp.com/" target="_blank" rel="noopener">
-                            <img alt="Bandcamp" class="sn-icon" fetchpriority="high"
-                               src="/assets/img/icon-bandcamp.png">
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <a href="https://maanenfaces.bandcamp.com/" target="_blank" rel="noopener" class="btn btn-lg btn-outline-light btn-streaming w-100 d-flex align-items-center justify-content-start p-3">
+                            <img alt="Bandcamp" class="me-3" src="/assets/img/icon-bandcamp.png" style="width: 48px; height: 48px;">
+                            <span class="fs-5">Bandcamp</span>
                         </a>
-                    </li>
-                    <li>
-                        <a href="https://www.deezer.com/artist/259060302" target="_blank" rel="noopener">
-                            <img alt="Deezer" class="sn-icon" fetchpriority="high"
-                               src="/assets/img/icon-deezer.png">
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <a href="https://www.deezer.com/artist/259060302" target="_blank" rel="noopener" class="btn btn-lg btn-outline-light btn-streaming w-100 d-flex align-items-center justify-content-start p-3">
+                            <img alt="Deezer" class="me-3" src="/assets/img/icon-deezer.png" style="width: 48px; height: 48px;">
+                            <span class="fs-5">Deezer</span>
                         </a>
-                    </li>
-                </ul>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const modalBody = document.querySelector('#streamingModal .modal-body');
+        modalBody.addEventListener('click', function() {
+            bootstrap.Modal.getInstance(document.getElementById('streamingModal')).hide();
+        });
+    });
+</script>
