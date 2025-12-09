@@ -355,10 +355,11 @@ a.nav-link.btn-mf.dropdown-toggle.py-0 {
     border-color: #fff;
     color: #fff;
     font-size: 1.25rem;
+    padding-top: 0.5em;
 }
 
 .btn-streaming-main:hover {
-    box-shadow: 0 0 40px rgba(255, 255, 255, 0.8);
+    box-shadow: 0 0 40px rgba(255, 255, 255, 1);
 }
 
 /**
