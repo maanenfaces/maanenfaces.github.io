@@ -6,6 +6,7 @@
   cursor: default;
   background-color: #f92100;
   border: 10px solid #f92100;
+  border-radius: 3px;
 }
 
 .album-container:hover {
