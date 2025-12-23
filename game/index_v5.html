@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Maanen Faces - Robots: Master Control</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Courier New', monospace;
+            color: #00ff00;
+            background: #000;
+            touch-action: none;
+        }
+
+        /* --- GESTION DES FONDS DYNAMIQUES --- */
+        #bg-container {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -5; background: #000;
+            overflow: hidden;
+        }
+
+        .bg-layer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-size: cover; background-position: center top;
+            opacity: 0; transition: opacity 1s ease-in-out;
+        }
+        .bg-visible { opacity: 1; }
+
+        /* YOUTUBE LAYER */
+        #yt-layer {
+            z-index: 0; /* Au-dessus des images si actif */
+            pointer-events: none; /* Pas d'interaction souris */
+        }
+        /* Centrage et zoom vidéo pour remplir l'écran (simili cover) */
+        #yt-player {
+            position: absolute; top: 50%; left: 50%;
+            width: 100vw; height: 56.25vw; /* 16:9 */
+            min-height: 100vh; min-width: 177.77vh;
+            transform: translate(-50%, -50%);
+        }
+
+        /* MASQUE HORIZON & FOND NOIR */
+        #horizon-mask {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 55%;
+            background: #000;
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        /* CANVAS 2D (ECLAIRS / HUD) */
+        #lightning-canvas {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 10;
+        }
+
+        /* FLASH OVERLAY */
+        #flash-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #fff;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 15;
+            transition: opacity 0.1s;
+        }
+
+        /* UI PANELS */
+        .ui-panel { position: absolute; z-index: 20; text-shadow: 2px 2px #000; pointer-events: none; display: none; }
+        #ui-left { top: 20px; left: 20px; font-size: 30px; font-weight: bold; border-left: 4px solid #00ff00; padding-left: 10px; }
+        #ui-right { top: 20px; right: 20px; font-size: 20px; text-align: right; border-right: 4px solid #ffff00; padding-right: 10px; }
+        #ui-bottom {
+            bottom: 30px; left: 50%; transform: translateX(-50%);
+            font-size: 24px; font-weight: bold; color: #ff0000;
+            background: rgba(0,0,0,0.8); padding: 10px 30px; border: 2px solid #550000;
+            text-transform: uppercase; white-space: nowrap; letter-spacing: 4px;
+        }
+
+        /* THREE.JS CANVAS */
+        canvas#gl-canvas {
+            display: block;
+            transition: filter 0.1s, transform 1s ease-in-out;
+            z-index: 0; position: absolute; top: 0; left: 0;
+        }
+        .reverse-canvas { transform: rotate(180deg); }
+
+        /* SCREENS */
+        .screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            background: rgba(0,0,0,0.95); z-index: 50;
+            transition: opacity 0.5s;
+        }
+        .hidden { display: none !important; opacity: 0; pointer-events: none; }
+
+        h1 { font-size: 40px; text-transform: uppercase; letter-spacing: 8px; margin: 0 0 20px 0; text-align: center; color: #fff; text-shadow: 0 0 10px #00ff00; }
+        p { color: #ccc; text-align: center; margin-bottom: 20px; }
+
+        /* INPUT & CHAR SELECTION */
+        #player-name-input {
+            background: #000; border: 2px solid #00ff00; color: #00ff00;
+            font-family: 'Courier New', monospace; font-size: 24px;
+            padding: 10px; text-transform: uppercase; text-align: center;
+            margin-bottom: 30px; width: 280px; outline: none;
+        }
+        #player-name-input:focus { box-shadow: 0 0 15px #00ff00; border-color: #fff; }
+
+        .char-container { display: flex; gap: 15px; margin-bottom: 30px; flex-wrap: wrap; justify-content: center; }
+        .char-card {
+            border: 2px solid #333; padding: 15px; width: 80px; text-align: center;
+            background: #111; cursor: pointer; transition: 0.2s; color: #666;
+        }
+        .char-card.selected { border-color: currentColor; box-shadow: 0 0 15px currentColor; transform: scale(1.1); color: #fff; font-weight: bold; }
+
+        /* LEADERBOARD */
+        #leaderboard {
+            border: 1px solid #444; padding: 15px; width: 300px; background: #050505;
+            max-height: 150px; overflow-y: auto; margin-bottom: 20px;
+        }
+        .score-entry { display: flex; justify-content: space-between; border-bottom: 1px dotted #333; padding: 4px 0; font-size: 14px; }
+        .score-val { color: #00ff00; }
+
+        /* COUNTDOWN */
+        #countdown {
+            font-size: 150px; color: #fff; font-weight: bold;
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            z-index: 100; display: none; text-shadow: 0 0 30px #ff0000;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            h1 { font-size: 24px; letter-spacing: 2px; }
+            #ui-left, #ui-right { font-size: 16px; top: 10px; padding: 5px; }
+            #ui-bottom { font-size: 14px; bottom: 10px; padding: 8px 15px; }
+            .char-card { width: 60px; font-size: 12px; padding: 10px; }
+            #player-name-input { width: 80%; font-size: 18px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NOUVEAU CONTENEUR DE FOND -->
+    <div id="bg-container">
+        <!-- Calque 1 (Image par défaut) -->
+        <div id="bg-layer-1" class="bg-layer bg-visible" style="background-image: url('https://f4.bcbits.com/img/a2164237503_10.jpg');"></div>
+        <!-- Calque 2 (Pour transition) -->
+        <div id="bg-layer-2" class="bg-layer"></div>
+        <!-- Calque YouTube -->
+        <div id="yt-layer" class="bg-layer">
+            <div id="yt-player"></div>
+        </div>
+    </div>
+
+    <div id="horizon-mask"></div>
+    <canvas id="lightning-canvas"></canvas>
+
+    <!-- FLASH OVERLAY -->
+    <div id="flash-overlay"></div>
+
+    <div id="countdown">5</div>
+
+    <!-- HUD -->
+    <div id="ui-left" class="ui-panel">
+        SCORE: <span id="score">0</span>
+        <span style="font-size: 20px;">TIME: <span id="time-display">0:00</span></span>
+    </div>
+    <div id="ui-right" class="ui-panel">JACKS: <span id="ammo-count" style="color: #ffff00;">0</span></div>
+    <div id="ui-bottom" class="ui-panel"><span id="song-part">SYSTEM: READY</span></div>
+
+    <!-- DEV TOOLS -->
+    <div id="dev-tools" style="display:none; position: absolute; top: 100px; left: 20px; z-index: 9999; background: rgba(0,0,0,0.8); padding: 10px; border: 1px solid #00ff00; color: #00ff00; font-family: monospace; font-size: 12px;">
+        <div style="margin-bottom: 5px; font-weight: bold; border-bottom: 1px solid #00ff00; padding-bottom: 5px;">DEV MODE</div>
+        <div style="margin-bottom: 10px;">
+            <input type="checkbox" id="dev-invincible" style="vertical-align: middle;" checked>
+            <label for="dev-invincible">INVINCIBLE</label>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <span>T:</span>
+            <input type="range" id="dev-slider" min="0" value="0" step="0.1" style="width: 200px; cursor: pointer;">
+            <span id="dev-time-val">000</span>
+        </div>
+    </div>
+
+    <!-- MENU PRINCIPAL -->
+    <div id="selection-screen" class="screen">
+        <h1>Maanen Faces<br><span style="font-size:0.6em; color:#ff0000;">Robots: Master Control</span></h1>
+        <input type="text" id="player-name-input" placeholder="PILOTE (MAX 10)" maxlength="10" autocomplete="off">
+        <div class="char-container">
+            <div class="char-card selected" style="color:#00ffff" data-color="0x00ffff">BASSE</div>
+            <div class="char-card" style="color:#ff00ff" data-color="0xff00ff">BATTERIE</div>
+            <div class="char-card" style="color:#ffff00" data-color="0xffff00">GUITARE</div>
+            <div class="char-card" style="color:#ffffff" data-color="0xffffff">CLAVIER</div>
+        </div>
+        <div id="leaderboard">
+            <div style="text-align:center; color:#ffff00; margin-bottom:10px; text-decoration:underline;">TOP PILOTES</div>
+            <div id="score-list">Chargement...</div>
+        </div>
+        <p style="font-size: 12px; color: #666;">
+            [PC] Flèches: Bouger/Sauter | Espace: Tirer | Echap: Pause<br>
+            [MOBILE] Toucher Gauche/Droite: Bouger | Haut: Sauter | Double Tap: Tirer
+        </p>
+        <p style="color: #00ff00; animation: blink 1s infinite;">APPUYEZ SUR [ENTREE] POUR LANCER</p>
+    </div>
+
+    <!-- GAME OVER -->
+    <div id="gameover-screen" class="screen hidden">
+        <h1 style="color: #ff0000;">ECHEC CRITIQUE</h1>
+        <p>SCORE FINAL: <span id="final-score" style="color:#fff; font-size:24px;">0</span></p>
+        <p>[ENTREE] REESSAYER | [ECHAP] MENU</p>
+    </div>
+
+    <!-- VICTOIRE -->
+    <div id="win-screen" class="screen hidden">
+        <h1 style="color: #00ff00;">MISSION ACCOMPLIE</h1>
+        <p>SCORE FINAL: <span id="win-score" style="color:#fff; font-size:24px;">0</span></p>
+        <p>[ENTREE] REJOUER | [ECHAP] MENU</p>
+    </div>
+
+    <!-- PAUSE -->
+    <div id="pause-screen" class="screen hidden" style="background: rgba(0,0,0,0.6);">
+        <h1 style="color: #ffff00;">PAUSE</h1>
+        <p>[ECHAP] REPRENDRE</p>
+    </div>
+
+    <audio id="game-audio" src="track.mp3" preload="auto"></audio>
+
+    <script type="importmap">
+        { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+    </script>
+    <script type="module" src="./game.js"></script>
+
+</body>
+</html>
