@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { DREAMLO_PUBLIC, DREAMLO_PRIVATE, DEV_MODE, CHARACTERS } from './Config.js';
-import { Selenite, Square } from './Entities.js';
+import { PLAYER_CLASSES } from './Players.js';
 
 export class Screen {
     constructor(app) { this.app = app; }
@@ -196,15 +196,12 @@ export class GameScreen extends Screen {
             }
         });
         toRemove.forEach(obj => this.app.env.scene.remove(obj));
+
         this.player = null;
-
         const config = this.app.characterConfig || CHARACTERS[0];
+        const PlayerClass = PLAYER_CLASSES[config.type] || PLAYER_CLASSES['SquareV1Player'];
 
-        if (config.type === 'Selenite') {
-            this.player = new Selenite(config.color);
-        } else {
-            this.player = new Square(config.color);
-        }
+        this.player = new PlayerClass(config.color);
 
         this.player.position.set(0, 0, 3);
         this.app.env.scene.add(this.player);
@@ -267,7 +264,7 @@ export class GameScreen extends Screen {
         this.smoothParams.waveHeight += (phase.waveHeight - this.smoothParams.waveHeight) * lerpSpeed;
         this.smoothParams.curveStrength += (phase.curveStrength - this.smoothParams.curveStrength) * lerpSpeed;
 
-        const targetColor = new THREE.Color(phase.color);
+        const targetColor = new THREE.Color(phase.color || 0x00ff00);
         this.smoothParams.color.lerp(targetColor, lerpSpeed);
 
         const renderPhase = {
@@ -276,17 +273,14 @@ export class GameScreen extends Screen {
             density: this.smoothParams.density,
             waveHeight: this.smoothParams.waveHeight,
             curveStrength: this.smoothParams.curveStrength,
-            color: this.smoothParams.color.getHex()
+            color: this.smoothParams.color.getHex(),
+            effects: phase.effects || []
         };
 
         // Calcul de la vitesse avec Bonus
         let baseSpeed = 20 * renderPhase.speed;
         if (this.speedBonusTimer > 0) {
             baseSpeed *= 1.5; // 50% plus vite
-            // Effet visuel de vitesse (FOV ou Shake léger)
-            this.app.env.camera.fov = 70;
-        } else {
-            this.app.env.camera.fov = 60;
         }
         this.app.env.camera.updateProjectionMatrix();
 
@@ -309,15 +303,13 @@ export class GameScreen extends Screen {
         const timeEl = document.getElementById('time-display');
         if (timeEl) timeEl.innerText = timeStr;
 
-        if (!this.isDraggingSlider) {
-            const devSlider = document.getElementById('dev-slider');
-            const devTimeVal = document.getElementById('dev-time-val');
-            if (devSlider) {
-                if (devSlider.max != this.app.music.audio.duration) devSlider.max = this.app.music.audio.duration || 100;
-                devSlider.value = curTime;
-            }
-            if (devTimeVal) devTimeVal.innerText = Math.floor(curTime).toString().padStart(3, '0');
+        const devSlider = document.getElementById('dev-slider');
+        const devTimeVal = document.getElementById('dev-time-val');
+        if (devSlider) {
+            if (devSlider.max != this.app.music.audio.duration) devSlider.max = this.app.music.audio.duration || 100;
+            devSlider.value = curTime;
         }
+        if (devTimeVal) devTimeVal.innerText = Math.floor(curTime).toString().padStart(3, '0');
 
         document.getElementById('ammo-count').innerText = this.ammo;
         document.getElementById('song-part').innerText = phase.label;
@@ -325,41 +317,8 @@ export class GameScreen extends Screen {
         this.score += baseSpeed * delta * 0.1;
 
         this.app.env.update(delta, baseSpeed, renderPhase, time);
-
-        this.app.env.roadSegments.forEach(seg => {
-            if (seg.userData.needsContent) {
-                this.populateSegment(seg, this.app.music.audio.currentTime);
-                seg.userData.needsContent = false;
-            }
-        });
-
         this.updatePlayer(delta, baseSpeed);
         this.updateEntities(delta);
-    }
-
-    populateSegment(group, songTime) {
-        // Legacy / Fallback si Environment.js ne remplit pas
-        const isWarpTime = false;
-        const isHoleTime = false;
-
-        if (isWarpTime && Math.random() < 0.1) {
-            const warp = new THREE.Mesh(new THREE.TorusGeometry(2, 0.2, 16, 100), new THREE.MeshBasicMaterial({color: 0x00ffff}));
-            warp.position.set(0, 2, 0);
-            group.add(warp);
-            warp.userData.isWarp = true;
-        } else if (isHoleTime) {
-            group.userData.isHole = true;
-            const ground = group.children.find(c => c.geometry.type === 'PlaneGeometry' && c.position.y === 0.02);
-            if(ground) ground.visible = false;
-        }
-    }
-
-    addObstacleToGroup(group, x) {
-        // Legacy
-    }
-
-    addBonusToGroup(group, x) {
-        // Legacy
     }
 
     updatePlayer(delta, speed) {
@@ -385,15 +344,25 @@ export class GameScreen extends Screen {
         // 3. Positionnement final (Suivi du terrain)
         // On cherche le segment sous le joueur (Z=3)
         const playerZ = 3;
-        const segmentUnderPlayer = this.app.env.roadSegments.find(s => Math.abs(s.position.z - playerZ) < 5);
+        const segments = this.app.env.roadSegments;
+        const segmentUnderPlayer = segments.find(s => Math.abs(s.position.z - playerZ) < 5);
 
         let groundHeight = 0;
         if (segmentUnderPlayer) {
             groundHeight = segmentUnderPlayer.position.y;
         }
 
-        this.player.position.x = this.currentLaneX + curveX;
-        this.player.position.y = groundHeight + this.playerJumpY; // Le joueur suit la vague + son saut
+        this.player.position.x = isNaN(this.currentLaneX + curveX) ? 0 : (this.currentLaneX + curveX);
+        this.player.position.y = isNaN(groundHeight + this.playerJumpY) ? 0 : (groundHeight + this.playerJumpY);
+        this.player.position.z = playerZ;
+
+        const targetCamX = this.player.position.x * 0.3;
+        this.app.env.camera.position.x += (targetCamX - this.app.env.camera.position.x) * 2 * delta;
+        this.app.env.camera.position.y = 4;
+        this.app.env.camera.position.z = 14;
+
+        const lookTargetX = this.player.position.x * 0.5;
+        this.app.env.camera.lookAt(isNaN(lookTargetX) ? 0 : lookTargetX, 0, -20);
 
         // Animation
         const time = this.app.music.audio.currentTime;
@@ -402,8 +371,8 @@ export class GameScreen extends Screen {
         // Caméra
         let shake = 0;
         if (this.currentPhase && this.currentPhase.effects.includes("shake")) shake = 0.5;
-        this.app.env.camera.position.x += (this.player.position.x * 0.3 - this.app.env.camera.position.x) * 2 * delta + (Math.random()-0.5)*shake;
-        this.app.env.camera.lookAt(this.player.position.x * 0.5, 0, -20);
+        //this.app.env.camera.position.x += (this.player.position.x * 0.3 - this.app.env.camera.position.x) * 2 * delta + (Math.random()-0.5)*shake;
+        //this.app.env.camera.lookAt(this.player.position.x * 0.5, 0, -20);
 
         // 4. Collisions
         if (segmentUnderPlayer) {

@@ -1,87 +1,33 @@
 import * as THREE from 'three';
 
-export class Selenite extends THREE.Group {
-    constructor(color) {
-        super();
-        this.userData.isPlayer = true;
-
-        const bodyMat = new THREE.MeshBasicMaterial({ color: color });
-        const limbMat = new THREE.MeshBasicMaterial({ color: color });
-
-        const texLoader = new THREE.TextureLoader();
-        const headTex = texLoader.load('https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Synthese%2B.svg/200px-Synthese%2B.svg.png');
-        const headMat = new THREE.MeshBasicMaterial({ map: headTex, color: 0xffffff });
-
-        // CORPS
-        const body = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.0, 0.5), bodyMat);
-        body.position.y = 1.0;
-        this.add(body);
-
-        // TÊTE
-        const head = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.6, 0.1), headMat);
-        head.position.y = 1.8;
-        this.add(head);
-
-        // MEMBRES
-        // On prépare la géométrie une seule fois pour éviter les décalages cumulés
-        const limbGeo = new THREE.BoxGeometry(0.25, 0.9, 0.25);
-        limbGeo.translate(0, -0.45, 0); // Pivot en haut
-
-        this.leftLeg = new THREE.Mesh(limbGeo, limbMat);
-        this.leftLeg.position.set(-0.25, 0.5, 0);
-        this.add(this.leftLeg);
-
-        this.rightLeg = new THREE.Mesh(limbGeo, limbMat);
-        this.rightLeg.position.set(0.25, 0.5, 0);
-        this.add(this.rightLeg);
-
-        this.leftArm = new THREE.Mesh(limbGeo, limbMat);
-        this.leftArm.position.set(-0.55, 1.4, 0);
-        this.add(this.leftArm);
-
-        this.rightArm = new THREE.Mesh(limbGeo, limbMat);
-        this.rightArm.position.set(0.55, 1.4, 0);
-        this.add(this.rightArm);
-    }
-
-    update(time, isJumping) {
-        const runSpeed = 8;
-        const amp = 0.8;
-
-        if (isJumping) {
-            // Pose de saut
-            this.leftLeg.rotation.x = 0.5;
-            this.rightLeg.rotation.x = -0.5;
-            this.leftArm.rotation.x = -0.5;
-            this.rightArm.rotation.x = 0.5;
+export class Bonus extends THREE.Mesh {
+    constructor(type) {
+        let geo, mat;
+        if (type === 'invincible') {
+            geo = new THREE.IcosahedronGeometry(0.4, 0);
+            mat = new THREE.MeshBasicMaterial({ color: 0xff00ff, wireframe: true });
+        } else if (type === 'speed') {
+            geo = new THREE.ConeGeometry(0.3, 0.7, 4);
+            mat = new THREE.MeshBasicMaterial({ color: 0x00ffff, wireframe: true });
         } else {
-            // Animation de course
-            this.leftLeg.rotation.x = Math.sin(time * runSpeed) * amp;
-            this.rightLeg.rotation.x = Math.cos(time * runSpeed) * amp;
-            this.leftArm.rotation.x = Math.cos(time * runSpeed) * amp;
-            this.rightArm.rotation.x = Math.sin(time * runSpeed) * amp;
+            geo = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+            mat = new THREE.MeshBasicMaterial({ color: 0xffff00 });
         }
-    }
-}
 
-export class Square extends THREE.Mesh {
-    constructor(color) {
-        super(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshBasicMaterial({ color: color }));
-        this.userData.isPlayer = true;
-        this.position.y = 0.5;
+        super(geo, mat);
+
+        this.userData.isBonus = true;
+        this.userData.bonusType = type;
+        this.userData.initialY = (type === 'invincible') ? 1.5 : 1.0;
+        this.position.y = this.userData.initialY;
     }
 
-    update(time, isJumping) {
-        if (isJumping) {
-            // Rotation rapide pendant le saut
-            this.rotation.x += 0.2;
-            this.rotation.y += 0.2;
-        } else {
-            // Reset et petit rebond au sol
-            this.rotation.x = 0;
-            this.rotation.y = 0;
-            this.position.y = 0.5 + Math.abs(Math.sin(time * 10)) * 0.1;
-        }
+    update(time) {
+        // Rotation
+        this.rotation.x = time;
+        this.rotation.y = time * 2;
+        // Flottaison
+        this.position.y = this.userData.initialY + Math.sin(time * 3) * 0.2;
     }
 }
 
@@ -155,45 +101,129 @@ export class Robot extends THREE.Group {
     }
 }
 
-export class Wall extends THREE.Mesh {
+export class RobotEntity extends THREE.Group {
     constructor() {
-        // Mur large (4.5) et haut (2.5)
-        super(new THREE.BoxGeometry(4.5, 2.5, 1), new THREE.MeshBasicMaterial({ color: 0x4444ff, wireframe: true }));
-        this.userData.isObstacle = true;
-        // Le centre est à Y=1.25 pour que le bas soit à 0
-        this.position.y = 1.25;
+        super();
+
+        // Grain de sel aléatoire pour que chaque instance soit unique
+        this.seed = Math.random() * 100;
+        this.vitesseVariation = 0.5 + Math.random();
+
+        // Matériaux : Blanc brillant pour ressortir dans l'obscurité
+        const bodyMat = new THREE.MeshStandardMaterial({
+            color: 0xf0f0f0,
+            roughness: 0.2,
+            metalness: 0.5
+        });
+        const glowMat = new THREE.MeshStandardMaterial({
+            color: 0x00f3ff,
+            emissive: 0x00f3ff,
+            emissiveIntensity: 2
+        });
+
+        // --- Design du corps (plus élancé) ---
+        // Buste en forme de diamant
+        const torsoGeom = new THREE.CylinderGeometry(0.3, 0.1, 0.7, 4);
+        this.torso = new THREE.Mesh(torsoGeom, bodyMat);
+        this.torso.position.y = 1.3;
+        this.add(this.torso);
+
+        // Tête profilée
+        const headGeom = new THREE.CapsuleGeometry(0.15, 0.2, 4, 8);
+        this.head = new THREE.Mesh(headGeom, bodyMat);
+        this.head.position.y = 0.6; // Relatif au torso
+        this.torso.add(this.head);
+
+        // Visière lumineuse fine
+        const visor = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.05, 0.1), glowMat);
+        visor.position.set(0, 0.1, 0.12);
+        this.head.add(visor);
+
+        // --- Membres flottants (Magnétiques) ---
+        this.leftArm = this._createLimb(0.1, 0.6, bodyMat, glowMat);
+        this.leftArm.position.set(0.45, 0.3, 0);
+        this.torso.add(this.leftArm);
+
+        this.rightArm = this._createLimb(0.1, 0.6, bodyMat, glowMat);
+        this.rightArm.position.set(-0.45, 0.3, 0);
+        this.torso.add(this.rightArm);
+
+        this.leftLeg = this._createLimb(0.12, 0.8, bodyMat, null);
+        this.leftLeg.position.set(0.2, -0.4, 0);
+        this.torso.add(this.leftLeg);
+
+        this.rightLeg = this._createLimb(0.12, 0.8, bodyMat, null);
+        this.rightLeg.position.set(-0.2, -0.4, 0);
+        this.torso.add(this.rightLeg);
     }
 
-    update(time) { return; }
-}
+    _createLimb(width, height, mat, lightMat) {
+        const group = new THREE.Group();
+        const part = new THREE.Mesh(new THREE.CapsuleGeometry(width, height, 4, 8), mat);
+        part.position.y = -height / 2;
+        group.add(part);
 
-export class Bonus extends THREE.Mesh {
-    constructor(type) {
-        let geo, mat;
-        if (type === 'invincible') {
-            geo = new THREE.IcosahedronGeometry(0.4, 0);
-            mat = new THREE.MeshBasicMaterial({ color: 0xff00ff, wireframe: true });
-        } else if (type === 'speed') {
-            geo = new THREE.ConeGeometry(0.3, 0.7, 4);
-            mat = new THREE.MeshBasicMaterial({ color: 0x00ffff, wireframe: true });
-        } else {
-            geo = new THREE.BoxGeometry(0.5, 0.5, 0.5);
-            mat = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+        if (lightMat) {
+            const joint = new THREE.Mesh(new THREE.SphereGeometry(width * 1.2), lightMat);
+            group.add(joint);
         }
-
-        super(geo, mat);
-
-        this.userData.isBonus = true;
-        this.userData.bonusType = type;
-        this.userData.initialY = (type === 'invincible') ? 1.5 : 1.0;
-        this.position.y = this.userData.initialY;
+        return group;
     }
 
     update(time) {
-        // Rotation
-        this.rotation.x = time;
-        this.rotation.y = time * 2;
-        // Flottaison
-        this.position.y = this.userData.initialY + Math.sin(time * 3) * 0.2;
+        const t = time * this.vitesseVariation + this.seed;
+
+        // Mouvement de flottement complexe (somme de sinus pour l'irrégularité)
+        const hover = Math.sin(t) * 0.1 + Math.sin(t * 2.5) * 0.02;
+        this.torso.position.y = 1.3 + hover;
+
+        // Rotation aléatoire de la tête (cherche du regard)
+        this.head.rotation.y = Math.sin(t * 0.5) * 0.5 + Math.cos(t * 1.2) * 0.2;
+        this.head.rotation.x = Math.sin(t * 0.3) * 0.1;
+
+        // Mouvement asymétrique des bras
+        this.leftArm.rotation.z = Math.sin(t) * 0.1 - 0.2;
+        this.rightArm.rotation.z = -Math.sin(t * 1.1) * 0.1 + 0.2;
+
+        this.leftArm.rotation.x = Math.cos(t * 0.5) * 0.2;
+        this.rightArm.rotation.x = Math.sin(t * 0.7) * 0.2;
+
+        // Inclinaison légère du corps selon le mouvement
+        this.torso.rotation.z = Math.sin(t * 0.5) * 0.05;
     }
+}
+
+export class Wall extends THREE.Group {
+    constructor() {
+        super();
+        this.userData.isObstacle = true;
+
+        // Couleur plus vive (Bleu électrique)
+        const color = 0x0066ff;
+
+        // Géométrie partagée
+        const geometry = new THREE.BoxGeometry(4.5, 2.5, 1);
+        // On déplace le pivot en bas (hauteur/2 = 1.25) pour que y=0 soit le sol
+        geometry.translate(0, 1.25, 0);
+
+        // 1. Le volume intérieur (Transparent)
+        const fillMaterial = new THREE.MeshBasicMaterial({
+            color: color,
+            transparent: true,
+            opacity: 0.5,
+            wireframe: false
+        });
+        this.add(new THREE.Mesh(geometry, fillMaterial));
+
+        // 2. Les contours (Wireframe)
+        const wireMaterial = new THREE.MeshBasicMaterial({
+            color: color,
+            wireframe: true,
+            transparent: true,
+            opacity: 0.9
+        });
+        this.add(new THREE.Mesh(geometry, wireMaterial));
+    }
+
+    update(time) { return; }
 }
