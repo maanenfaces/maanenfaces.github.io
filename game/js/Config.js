@@ -4,10 +4,10 @@ export const DREAMLO_PRIVATE = "hs-2UxzkEE63Qe2M03wFnw54oKmXEjbE24PZxu_IlWYA";
 export const DEV_MODE = true;
 
 export const CHARACTERS = [
-    { type: "Square",   color: 0xff0000, name: "Basse"    },
-    { type: "Square",   color: 0x00ff00, name: "Batterie" },
-    { type: "Selenite", color: 0xffffff, name: "Guitare"  },
-    { type: "Square",   color: 0x0000ff, name: "Synthés"  }
+    { type: "SquareV1Player", color: 0xff0000, name: "Basse"    },
+    { type: "SquareV2Player", color: 0x00ff00, name: "Batterie" },
+    { type: "SelenitePlayer", color: 0xffffff, name: "Guitare"  },
+    { type: "SquareV2Player", color: 0x0000ff, name: "Synthés"  }
 ];
 
 export const OBSTACLE_RATIOS = {
@@ -17,21 +17,21 @@ export const OBSTACLE_RATIOS = {
 
 export const SONG_STRUCTURE = [
     // INTRO
-    { start: 0,  end: 28, label: "INTRO", speed: 0.4, density: 0.1, effects: [], waveHeight: 0, curveStrength: 0, color: 0x00ff00 },
+    { start: 0,  end: 28, label: "INTRO", speed: 1, density: 0.1, effects: [], waveHeight: 0, curveStrength: 0, color: 0x00ff00 },
 
     // VERSE 1 WARMUP: DISCOVERING THE GAME
-    { start: 28, end: 31, label: "VERSE 1 WARMUP", speed: 0.4, density: 0.1,  effects: [], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
-    { start: 31, end: 41, label: "VERSE 1 WARMUP", speed: 0.4, density: 0.15, effects: [], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
-    { start: 41, end: 55, label: "VERSE 1 WARMUP", speed: 0.4, density: 0.17, effects: [], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
+    { start: 28, end: 31, label: "VERSE 1 WARMUP", speed: 1, density: 0.1,  effects: [], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
+    { start: 31, end: 41, label: "VERSE 1 WARMUP", speed: 1, density: 0.15, effects: [], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
+    { start: 41, end: 55, label: "VERSE 1 WARMUP", speed: 1, density: 0.17, effects: [], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
 
     // VERSE 1: GETTING INTO THE FLOW + A FEW EFFECTS
-    { start: 55, end: 74, label: "VERSE 1",          speed: 0.5, density: 0.17, effects: ["fog"], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
-    { start: 74, end: 81, label: "VERSE 1",          speed: 0.5, density: 0.2,  effects: [], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
-    { start: 81, end: 95, label: "VERSE 1 BUILD-UP", speed: 0.5, density: 0.08, effects: [], waveHeight: 0.3, curveStrength: 3, color: 0xffff00 },
+    { start: 55, end: 74, label: "VERSE 1",          speed: 0.8, density: 0.17, effects: ["fog"], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
+    { start: 74, end: 81, label: "VERSE 1",          speed: 0.8, density: 0.2,  effects: [], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
+    { start: 81, end: 95, label: "VERSE 1 BUILD-UP", speed: 1, density: 0.08, effects: [], waveHeight: 0.3, curveStrength: 3, color: 0xffff00 },
 
     // BRIDGE 1
-    { start: 95,  end: 109, label: "BRIDE 1",          speed: 0.6,  density: 0.05, effects: [], waveHeight: 0.5, curveStrength: 5, color: 0xffff00 },
-    { start: 109, end: 116, label: "BRIDE 1 BUILD-UP", speed: 0.85, density: 0.02, effects: [], waveHeight: 0, curveStrength: 0, color: 0xffff00, slopeStrength: 15, rollStrength: 0.5 },
+    { start: 95,  end: 109, label: "BRIDE 1",          speed: 1,  density: 0.05, effects: [], waveHeight: 0.5, curveStrength: 5, color: 0xffff00 },
+    { start: 109, end: 116, label: "BRIDE 1 BUILD-UP", speed: 1, density: 0.02, effects: [], waveHeight: 0, curveStrength: 0, color: 0xffff00, slopeStrength: 15, rollStrength: 0.5 },
     { start: 116, end: 122, label: "BRIDE 1 BUILD-UP", speed: 1,    density: 0.02, effects: [], waveHeight: 0.2, waveType: 2, curveStrength: 0, color: 0xffff00, slopeStrength: 25, rollStrength: 0.7 },
 
     // CHORUS 1
