@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TERMINAL VELOCITY</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --neon-red: #ff0000;
+            --dark-red: #440000;
+            --neon-blue: #00ffff;
+            --neon-yellow: #ffff00;
+            --neon-pink: #ff00ff;
+        }
+
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; color: #fff; font-family: 'Rajdhani', sans-serif; }
+
+        /* General UI Elements */
+        input { background: transparent; border: 1px solid var(--neon-red); padding: 10px; color: white; font-size: 1.2rem; text-align: center; outline: none; }
+
+        #game-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+
+        #screens-container {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: none;
+        }
+
+        /* Full Screen Overlay */
+        .screen {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: radial-gradient(circle, #1a0000 0%, #000000 100%);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            pointer-events: auto;
+        }
+
+        .screen.active { display: flex; }
+
+        /* Menu Box */
+        .screen-content {
+            background: rgba(30, 0, 0, 0.98);
+            padding: 50px;
+            border: 3px solid var(--neon-red);
+            box-shadow: 0 0 20px var(--neon-red), inset 0 0 15px var(--dark-red);
+            text-align: center;
+            width: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+            position: relative;
+            animation: redPulse 2s infinite ease-in-out;
+        }
+
+        .screen-content h1 {
+            font-family: 'Orbitron', sans-serif;
+            color: #fff;
+            text-shadow: 0 0 10px var(--neon-red), 0 0 20px var(--neon-red), 0 0 40px var(--dark-red);
+            font-size: 3.5rem;
+            margin: 0;
+            letter-spacing: 8px;
+        }
+
+        .screen-content p {
+            color: #ff9999;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 0;
+        }
+
+        @keyframes redPulse {
+            0% { box-shadow: 0 0 15px var(--neon-red); }
+            50% { box-shadow: 0 0 30px var(--neon-red), inset 0 0 10px var(--neon-red); }
+            100% { box-shadow: 0 0 15px var(--neon-red); }
+        }
+
+        /* Selection Grid */
+        .instrument-grid {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        .instrument {
+            padding: 15px;
+            border: 1px solid var(--dark-red);
+            background: rgba(0,0,0,0.5);
+            color: #888;
+            flex: 1;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .instrument.active {
+            border-color: #fff;
+            color: #fff;
+            background: var(--dark-red);
+            box-shadow: 0 0 15px var(--neon-red);
+        }
+
+        .horizontal-divider {
+            width: 100%;
+            height: 0px;
+            background: var(--dark-red);
+            box-shadow: 0 0 8px var(--neon-red);
+            margin: 10px 0;
+            position: relative;
+        }
+
+        /**
+        .horizontal-divider::before, .horizontal-divider::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            width: 5px;
+            height: 5px;
+            background: var(--neon-red);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--neon-red);
+        }
+        .horizontal-divider::before { left: 0; }
+        .horizontal-divider::after { right: 0; }
+        **/
+
+        /* Menu Buttons */
+        .menu-options {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            gap: 15px;
+        }
+
+        .menu-btn {
+            padding: 12px 40px;
+            border: 1px solid var(--dark-red);
+            color: var(--neon-red);
+            background: rgba(20, 0, 0, 0.6);
+            cursor: pointer;
+            width: 250px;
+            transition: all 0.2s ease;
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .menu-btn.active {
+            background: var(--neon-red);
+            color: #000;
+            box-shadow: 0 0 20px var(--neon-red);
+            border-color: #fff;
+            transform: scale(1.05);
+        }
+
+        #player-name {
+            width: 280px;
+            background: #000;
+            border: 1px solid var(--neon-red);
+            color: #fff;
+            padding: 12px;
+            font-family: 'Rajdhani', sans-serif;
+            box-shadow: inset 0 0 5px var(--dark-red);
+        }
+
+        #player-name::placeholder {
+            color: var(--dark-red);
+        }
+
+        #player-name.shake-error::placeholder {
+            color: var(--neon-red) !important;
+            opacity: 1 !important;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-10px); }
+            40%, 80% { transform: translateX(10px); }
+        }
+
+        .shake-error {
+            animation: shake 0.4s ease-in-out;
+            border-color: var(--neon-red) !important;
+            box-shadow: 0 0 20px var(--neon-red) !important;
+        }
+
+        /* HUD */
+        #hud {
+            position: absolute;
+            top: 30px; left: 0;
+            width: 100vw;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        #score-container {
+            font-size: 3.5rem;
+            color: var(--neon-yellow);
+            text-shadow: 0 0 20px var(--neon-yellow);
+            font-family: 'Orbitron', sans-serif;
+            line-height: 1;
+        }
+
+        /* Bonus UI */
+        #bonus-container {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+
+        #bonus-info {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--neon-pink);
+            text-shadow: 0 0 15px var(--neon-pink);
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        #bonus-bar-container {
+            width: 250px; height: 8px;
+            background: rgba(0, 0, 0, 0.5);
+            margin-top: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        #bonus-bar-fill {
+            width: 100%; height: 100%;
+            background: var(--neon-blue);
+            box-shadow: 0 0 8px var(--neon-blue);
+            transition: width 0.1s linear;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        #pause-btn {
+            position: fixed;
+            top: 20px; right: 20px;
+            width: 45px; height: 45px;
+            border: 2px solid var(--neon-blue);
+            color: var(--neon-blue);
+            background: rgba(0,0,0,0.5);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; pointer-events: auto; z-index: 100;
+        }
+
+        .hidden { display: none !important; }
+
+        .visually-hidden {
+            visibility: hidden;
+            opacity: 0;
+            position: absolute;
+            pointer-events: none;
+        }
+
+        /* Background Layers */
+        #bg-media-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; background: #000; }
+        .bg-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: top center; opacity: 0; transition: opacity 1.5s; }
+        .bg-visible { opacity: 0.5; }
+        #horizon-mask { position: absolute; bottom: 0; left: 0; width: 100%; height: 50%; background: linear-gradient(to top, #000 0%, transparent 100%); z-index: 2; pointer-events: none; }
+
+        #touch-controls { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; display: none; touch-action: none; }
+        #touch-controls.active { display: block; }
+
+        .credits {
+            margin-top: 20px;
+            font-size: 1rem;
+            color: var(--neon-red);
+            opacity: 0.6;
+        }
+        .credits a, .credits a:visited, .credits a:active, .credits a:hover {
+            color: var(--neon-red);
+            text-decoration: none;
+        }
+        .credits:hover {
+            opacity: 1;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="audio-layers">
+        <audio id="game-audio" src="./track.mp3" preload="auto"></audio>
+        <div id="yt-audio-container" style="position:absolute; visibility:hidden; pointer-events:none;">
+            <div id="yt-player-audio"></div>
+        </div>
+    </div>
+
+    <div id="bg-media-container">
+        <div id="bg-layer-1" class="bg-layer bg-visible"></div>
+        <div id="bg-layer-2" class="bg-layer"></div>
+        <div id="yt-layer" class="bg-layer"><div id="yt-player"></div></div>
+        <div id="horizon-mask"></div>
+    </div>
+
+    <div id="dev-tools" style="display:none; position: absolute; top: 20px; left: 20px; z-index: 9999; background: rgba(0,0,0,0.8); padding: 15px; border: 1px solid #00ff00; color: #00ff00; font-family: monospace; font-size: 12px; pointer-events: auto;">
+        <div style="margin-bottom: 10px; font-weight: bold; border-bottom: 1px solid #00ff00; padding-bottom: 5px; letter-spacing: 1px;">DEV MODE</div>
+        <div style="margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+            <input type="checkbox" id="dev-invincible" style="width: auto; margin: 0; cursor: pointer;" checked>
+            <label for="dev-invincible" style="cursor: pointer; user-select: none;">INVINCIBLE (GOD MODE)</label>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-weight: bold;">T:</span>
+            <input type="range" id="dev-slider" min="0" value="0" step="0.1" style="width: 200px; cursor: pointer; margin: 0; padding: 0; border: none; height: 14px; background: transparent; accent-color: #00ff00;">
+            <span id="dev-time-val" style="min-width: 35px; text-align: right; font-weight: bold;">000</span>
+        </div>
+    </div>
+
+    <div id="game-canvas"></div>
+    <div id="touch-controls"></div>
+
+    <div id="hud" class="hidden">
+        <div id="pause-btn">||</div>
+        <div id="score-container">SCORE: <span id="score-val">000000</span></div>
+
+        <div id="velocity-container" style="margin-top: 5px;">
+            <span style="color: var(--neon-blue); font-family: 'Orbitron', sans-serif; font-size: 1.2rem;">VELOCITY: </span>
+            <span id="velocity-val" style="color: #fff; font-family: 'Orbitron', sans-serif; font-size: 1.2rem; text-shadow: 0 0 10px var(--neon-blue);">1.0x</span>
+        </div>
+
+        <div id="bonus-container" class="hidden">
+            <div id="bonus-info">
+                <span id="bonus-name">SPEED</span> : <span id="bonus-timer">10</span>s
+            </div>
+            <div id="bonus-bar-container">
+                <div id="bonus-bar-fill"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="screens-container">
+        <div id="start-screen" class="screen active">
+            <div class="screen-content">
+                <div id="status-display" style="color: var(--neon-red); font-size: 1rem; letter-spacing: 4px; opacity: 0.8;">
+                    SYSTEM_STATUS: ONLINE
+                </div>
+
+                <div id="name-step" style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
+                    <input type="text" id="player-name" placeholder="YOUR NAME..." autofocus>
+                    <p>Press [ENTER] to identify yourself</p>
+                </div>
+
+                <div id="selection-step" class="visually-hidden" style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
+                    <p style="letter-spacing: 3px; font-weight: bold;">SELECT FREQUENCY MODULE</p>
+                    <div class="instrument-grid">
+                        <div class="instrument" data-type="bass" data-color="0x00ffff">Bass</div>
+                        <div class="instrument" data-type="drums" data-color="0xff00ff">Drums</div>
+                        <div class="instrument" data-type="guitar" data-color="0xff0000">Guitar</div>
+                        <div class="instrument" data-type="keys" data-color="0xffff00">Keys</div>
+                    </div>
+                    <p>← → : Select | [ENTER] : Play</p>
+                    <div class="horizontal-divider"></div>
+                    <div id="leaderboard-container" style="width: 100%; margin-top: 10px;">
+                        <div style="font-size: 1rem; color: var(--neon-red); border-bottom: 1px solid var(--dark-red); padding-bottom: 5px; margin-bottom: 10px;">GLOBAL_RANKINGS</div>
+                        <div id="leaderboard-list" style="font-family: monospace; font-size: 1rem; text-align: left; max-height: 150px; overflow-y: auto;">
+                            LOADING DATA...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="pause-screen" class="screen">
+            <div class="screen-content">
+                <h1>PAUSED</h1>
+                <div class="menu-options">
+                    <div class="menu-btn active" data-action="resume">Resume</div>
+                    <div class="menu-btn" data-action="restart">Restart</div>
+                </div>
+                <p>[ESC] to resume</p>
+                <div class="credits">
+                    <a href="https://maanenfaces.com/en/" target="_blank">GAME & MUSIC: MAANEN FACES</a>
+                </div>
+            </div>
+        </div>
+
+        <div id="game-over-screen" class="screen">
+            <div class="screen-content">
+                <h1>GAME OVER</h1>
+                <p id="final-score">SCORE: 000000</p>
+                <div class="menu-options">
+                    <div class="menu-btn active" data-action="restart">Restart</div>
+                </div>
+                <div class="credits">
+                    <a href="https://maanenfaces.com/en/" target="_blank">GAME & MUSIC: MAANEN FACES</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="importmap">
+        { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+    </script>
+    <script type="module" src="./App.js"></script>
+</body>
+</html>
