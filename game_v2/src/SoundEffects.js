@@ -3,7 +3,7 @@ export class SoundEffects {
 
     // --- RÉGLAGE GLOBAL DU VOLUME (0.0 à 1.0) ---
     // Augmentez cette valeur pour rendre tous les bips plus forts
-    static masterVolume = 1;
+    static masterVolume = 1.6;
 
     static playTone(freq, type, duration, volume = 0.1) {
         if (this.ctx.state === 'suspended') this.ctx.resume();
