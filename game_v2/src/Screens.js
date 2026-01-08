@@ -120,7 +120,7 @@ export class Screens {
                     break;
                 case 'PLAYING':
                     if (e.key === 'Escape') this.togglePause();
-                    if (e.key === 'ArrowLeft') this.engine.player.move(-1);
+                    if (e.key === 'ArrowLeft') this.engine.player.move(-1, this.engine.state);
                     if (e.key === 'ArrowRight') this.engine.player.move(1);
                     if (e.key === 'ArrowUp') this.engine.player.jump(this.engine.activeBonus);
                     if (e.key === 'ArrowDown') this.engine.player.fastFall();;
@@ -226,13 +226,13 @@ export class Screens {
         if (activeBonus && activeBonus.item && activeBonus.timeLeft > 0) {
             const bonus = activeBonus.item;
             this.bonusUI.container.classList.remove('hidden');
-            this.bonusUI.name.innerText = bonus.subType.toUpperCase();
+            this.bonusUI.name.innerText = bonus.name.toUpperCase();
             this.bonusUI.timer.innerText = Math.ceil(activeBonus.timeLeft);
 
             const progress = (activeBonus.timeLeft / activeBonus.item.bonusDuration) * 100;
             this.bonusUI.bar.style.width = `${progress}%`;
 
-            const activeColor = bonus.uiColor || '#ffffff';
+            const activeColor = bonus.colorHex || '#ffffff';
 
             this.bonusUI.bar.style.backgroundColor = activeColor;
             this.bonusUI.bar.style.boxShadow = `0 0 10px ${activeColor}`;
@@ -269,18 +269,28 @@ export class Screens {
 
     validateName() {
         const name = this.nameInput.value.trim().toUpperCase();
+        const nameRegex = /^[A-Z0-9_-]{1,10}$/;
 
-        if (name.length == 0) {
+        if (!nameRegex.test(name)) {
             this.step = "NAME";
             const originalPlaceholder = this.nameInput.placeholder;
-            this.nameInput.placeholder = "ENTER YOUR NAME HERE";
 
+            if (name.length > 10) {
+                this.nameInput.placeholder = "MAX 10 CHARACTERS";
+            } else if (name.length === 0) {
+                this.nameInput.placeholder = "ENTER YOUR NAME HERE";
+            } else {
+                this.nameInput.placeholder = "ONLY LETTERS AND NUMBERS";
+            }
+
+            this.nameInput.value = "";
             this.nameInput.classList.add('shake-error');
             SoundEffects.error();
+
             setTimeout(() => {
                 this.nameInput.placeholder = originalPlaceholder;
                 this.nameInput.classList.remove('shake-error');
-            }, 500);
+            }, 700);
 
             return;
         }
@@ -289,7 +299,7 @@ export class Screens {
         Leaderboard.fetchScores();
 
         const statusDisplay = document.getElementById('status-display');
-        if (statusDisplay) statusDisplay.innerText = `USER_ID: ${name} | AUTHENTICATED`;
+        if (statusDisplay) statusDisplay.innerText = `USER ID: ${name} // AUTHENTICATED`;
 
         this.step = 'SELECTION';
         document.getElementById('name-step').classList.add('hidden');
@@ -321,7 +331,7 @@ export class Screens {
     }
 
     updateScore(points) {
-        this.score += points;
+        this.score = Math.round((this.score + points) / 5) * 5;
         const scoreElement = document.getElementById('score-val');
         if (scoreElement) {
             scoreElement.innerText = this.score.toString().padStart(6, '0');
@@ -381,24 +391,34 @@ export class Leaderboard {
         try {
             const response = await fetch(`http://www.dreamlo.com/lb/${DREAMLO_PUBLIC_KEY}/json`);
             const data = await response.json();
-            let scores = data.dreamlo.leaderboard.entry;
 
-            if (!scores) {
-                listContainer.innerHTML = "NO DATA AVAILABLE";
-                return;
+            let scores = [];
+
+            // Extraction sécurisée des scores
+            if (data.dreamlo.leaderboard && data.dreamlo.leaderboard.entry) {
+                scores = data.dreamlo.leaderboard.entry;
+                if (!Array.isArray(scores)) scores = [scores];
             }
 
-            // Dreamlo renvoie un objet unique si il n'y a qu'un score, on le transforme en tableau
-            if (!Array.isArray(scores)) scores = [scores];
+            // On crée un tableau de 10 éléments
+            // Si on a des scores, on les prend, sinon on complète avec du vide
+            const fullList = Array.from({ length: 5 }, (_, index) => {
+                const entry = scores[index];
+                return {
+                    name: entry ? entry.name.substring(0, 5) : "...",
+                    score: entry ? entry.score : 0
+                };
+            });
 
-            listContainer.innerHTML = scores.map((entry, index) => `
-                <div style="display: flex; justify-content: space-between; padding: 2px 0; border-bottom: 1px hide solid rgba(255,0,0,0.1);">
-                    <span>${index + 1}. ${entry.name.substring(0, 10)}</span>
+            listContainer.innerHTML = fullList.map((entry, index) => `
+                <div style="display: flex; justify-content: space-between; padding: 2px 0; border-bottom: 1px solid rgba(255,0,0,0.1);">
+                    <span>${index + 1}. ${entry.name}</span>
                     <span>${entry.score}</span>
                 </div>
             `).join('');
 
         } catch (error) {
+            console.error(error);
             listContainer.innerHTML = "OFFLINE_MODE";
         }
     }

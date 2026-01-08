@@ -7,6 +7,7 @@ export class Player2 {
         this.isJumping = false;
         this.canJump = false;
         this.jumpVel = 0;
+        this.nextMove = 0;
 
         const geo = new THREE.BoxGeometry(1.2, 1.2, 1.2);
         this.mesh = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({color: 0xff0000, transparent: true, opacity: 0.5}));
@@ -53,6 +54,7 @@ export class Player {
         this.yOffset = 0;
         this.isJumping = false;
         this.jumpVel = 0;
+        this.nextMove = 0;
 
         // Configuration visuelle
         const geo = new THREE.BoxGeometry(1.2, 1.2, 1.2);
@@ -77,17 +79,24 @@ export class Player {
     }
 
     update(state, getProjection) {
-        // Si mort, on met à jour uniquement les particules
         if (this.isDead) {
             this.updateParticles(state.delta);
             return;
         }
 
-        // Mouvement latéral fluide
-        const lerpSpeed = 20;
+        // Gestion des mouvements avec prise en compte de l'effet "reverse"
+        if (this.nextMove !== 0) {
+            const isReverse = state.phase?.effects?.includes("reverse");
+            const finalDir = isReverse ? -this.nextMove : this.nextMove;
+            this.currentLane = Math.max(-1, Math.min(1, this.currentLane + finalDir));
+            this.nextMove = 0;
+        }
+
+        // 1. Mouvement latéral fluide (Inchangé)
+        const lerpSpeed = 30;
         this.currentX += (this.currentLane * 6 - this.currentX) * lerpSpeed * state.delta;
 
-        // Logique du saut
+        // 2. Logique du saut (Inchangé)
         if (this.isJumping) {
             this.yOffset += this.jumpVel * state.delta;
             this.jumpVel -= 40 * state.delta;
@@ -97,11 +106,23 @@ export class Player {
             }
         }
 
-        // Positionnement 3D
-        const proj = getProjection(3);
-        this.mesh.position.set(proj.x + this.currentX, proj.y + this.yOffset + 1, 3);
+        // 3. Positionnement 3D CORRIGÉ
+        // On passe this.currentX pour que le joueur suive l'inclinaison de la route !
+        const proj = getProjection(3, this.currentX);
 
-        // Effet visuel d'invincibilité (Clignotement)
+        this.mesh.position.set(
+            proj.x + this.currentX,
+            proj.y + this.yOffset + 1,
+            3
+        );
+
+        // 4. Inclinaison visuelle du joueur
+        // Le mesh du joueur doit aussi pencher si la route penche
+        if (proj.rollAngle !== undefined) {
+            this.mesh.rotation.z = proj.rollAngle;
+        }
+
+        // 5. Effet d'invincibilité
         if (state.activeBonus && state.activeBonus.item && state.activeBonus.item.subType === 'invincible') {
             this.mesh.visible = Math.floor(Date.now() / 100) % 2 === 0;
         } else {
@@ -111,7 +132,8 @@ export class Player {
 
     move(dir) {
         if (this.isDead) return;
-        this.currentLane = Math.max(-1, Math.min(1, this.currentLane + dir));
+        this.nextMove = dir;
+        //this.currentLane = Math.max(-1, Math.min(1, this.currentLane + dir));
     }
 
     jump(activeBonus) {

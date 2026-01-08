@@ -19,7 +19,12 @@
         /* General UI Elements */
         input { background: transparent; border: 1px solid var(--neon-red); padding: 10px; color: white; font-size: 1.2rem; text-align: center; outline: none; }
 
-        #game-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+        #game-container {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 1;
+        }
 
         #screens-container {
             position: relative;
@@ -303,6 +308,26 @@
             opacity: 1;
         }
 
+        #rotation-alert {
+            position: fixed;
+            bottom: 30%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3rem;
+            color: var(--neon-red);
+            text-shadow: 0 0 40px var(--neon-red);
+            z-index: 2000;
+            pointer-events: none;
+            animation: alertBlink 0.4s infinite alternate;
+            text-align: center;
+        }
+
+        @keyframes alertBlink {
+            from { opacity: 1; }
+            to { opacity: 0.2; }
+        }
+
     </style>
 </head>
 <body>
@@ -334,7 +359,13 @@
         </div>
     </div>
 
-    <div id="game-canvas"></div>
+    <div id="rotation-alert" class="hidden">
+        WORLD ROTATING<br/>INVERTING CONTROLS
+    </div>
+
+    <div id="game-container">
+        <div id="game-canvas"></div>
+    </div>
     <div id="touch-controls"></div>
 
     <div id="hud" class="hidden">
@@ -360,7 +391,7 @@
         <div id="start-screen" class="screen active">
             <div class="screen-content">
                 <div id="status-display" style="color: var(--neon-red); font-size: 1rem; letter-spacing: 4px; opacity: 0.8;">
-                    SYSTEM_STATUS: ONLINE
+                    SYSTEM STATUS: ONLINE
                 </div>
 
                 <div id="name-step" style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
@@ -377,9 +408,8 @@
                         <div class="instrument" data-type="keys" data-color="0xffff00">Keys</div>
                     </div>
                     <p>← → : Select | [ENTER] : Play</p>
-                    <div class="horizontal-divider"></div>
                     <div id="leaderboard-container" style="width: 100%; margin-top: 10px;">
-                        <div style="font-size: 1rem; color: var(--neon-red); border-bottom: 1px solid var(--dark-red); padding-bottom: 5px; margin-bottom: 10px;">GLOBAL_RANKINGS</div>
+                        <div style="font-size: 1rem; color: var(--neon-red); border-bottom: 1px solid var(--dark-red); letter-spacing: 4px; padding-bottom: 10px; margin-bottom: 20px;">GLOBAL RANKINGS</div>
                         <div id="leaderboard-list" style="font-family: monospace; font-size: 1rem; text-align: left; max-height: 150px; overflow-y: auto;">
                             LOADING DATA...
                         </div>
