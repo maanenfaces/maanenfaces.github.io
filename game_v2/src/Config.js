@@ -22,13 +22,13 @@ export const SONG_STRUCTURE = [
     // BRIDGE 1
     { start: 95,  end: 109, label: "BRIDGE 1",          speed: 1,  density: 0.05, effects: [], waveHeight: 0.5, curveStrength: 5, color: 0xffff00 },
     { start: 109, end: 116, label: "BRIDGE 1 BUILD-UP", speed: 1, density: 0.02, effects: [], waveHeight: 0, curveStrength: 0, color: 0xffff00, slopeStrength: 15, rollStrength: 0.5 },
-    { start: 116, end: 122, label: "BRIDGE 1 BUILD-UP", speed: 1,    density: 0.02, effects: [], waveHeight: 0.2, waveType: 2, curveStrength: 0, color: 0xffff00, slopeStrength: 25, rollStrength: 0.7 },
+    { start: 116, end: 122, label: "BRIDGE 1 BUILD-UP", speed: 1,    density: 0.02, effects: [], waveHeight: 0.2, waveType: 2, curveStrength: 0, color: 0xffff00, slopeStrength: 0.5, rollStrength: 0.7 },
 
     // CHORUS 1
-    { start: 122, end: 136, label: "CHORUS 1", speed: 1.3, density: 0.03, effects: ["flash"], waveHeight: 0, curveStrength: 2, color: [0xff0000, 0x0000ff] },
-    { start: 136, end: 149, label: "CHORUS 1", speed: 1.3, density: 0.03, effects: ["glitch", "flash"], waveHeight: 0.1, curveStrength: 4, color: [0xff0000, 0x0000ff, 0x000000] },
-    { start: 149, end: 155, label: "CHORUS 1", speed: 1.3, density: 0.03,  effects: ["glitch", "flash", "eclair", "shake", "moving_obstacles"], waveHeight: 0.3, curveStrength: 4, color: 0x000000, bgImage: "https://www.publicdomainpictures.net/pictures/320000/velka/rauch-hintergrund-1575902986IPo.jpg" },
-    { start: 155, end: 163, label: "CHORUS 1", speed: 1.3, density: 0.03,  effects: ["glitch", "flash", "eclair", "shake", "moving_obstacles", "fog"], waveHeight: 0.3, curveStrength: 4, color: 0x000000, bgVideo: "b17ggN8TZUs", gridOpacity: 0 },
+    { start: 122, end: 136, label: "CHORUS 1", speed: 2, density: 0.1, effects: [], eclairIntensity: 0.2, glitchIntensity: 0.1, waveHeight: 0, curveStrength: 4, rollStrength: 100, color: [0xff0000, 0x0000ff] },
+    { start: 136, end: 149, label: "CHORUS 1", speed: 2.2, density: 0.1, effects: ["glitch", "flash"], waveHeight: 0.2, curveStrength: 4, color: [0xff0000, 0x0000ff, 0x000000] },
+    { start: 149, end: 155, label: "CHORUS 1", speed: 2.4, density: 0.15,  effects: ["glitch", "flash", "eclair", "shake", "moving_obstacles"], waveHeight: 0.6, curveStrength: 4, color: [0xaa0000, 0xdd0000], bgImage: "https://www.publicdomainpictures.net/pictures/320000/velka/rauch-hintergrund-1575902986IPo.jpg" },
+    { start: 155, end: 163, label: "CHORUS 1", speed: 2.6, density: 0.2,  effects: ["glitch", "flash", "eclair", "shake", "moving_obstacles", "fog"], waveHeight: 0.8, curveStrength: 4, color: [0x770000, 0xaa0000], bgVideo: "b17ggN8TZUs", gridOpacity: 0 },
 
     // POST-CHORUS 1
     { start: 163, end: 190, label: "POST-CHORUS 1", speed: 2, density: 0.15, effects: [], waveHeight: 0.03, curveStrength: 2, color: 0xffff00 },
