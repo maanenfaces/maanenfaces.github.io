@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import { World } from './World.js';
 import { Road } from './Road.js';
-import { Gate } from './Gate.js';
 import { EntityManager } from './Entities.js';
 import { Player } from './Player.js';
 import { BackgroundManager } from './BackgroundManager.js';
@@ -34,6 +33,7 @@ export class GameEngine {
             speed: 1,
             waveHeight: 0,
             curveStrength: 0,
+            rollStrength: 0,
             color: new THREE.Color(0x00ffff),
             gridOpacity: 0.5
         };
@@ -63,11 +63,49 @@ export class GameEngine {
         });
     }
 
-    getProjection(z) {
+    getProjection(z, xOffset = 0) {
         const wz = z - this.zOffset;
-        const x = Math.sin(wz * 0.02 + this.time * 0.5) * this.currentParams.curveStrength;
-        const y = Math.sin(this.time * 2 + wz * 0.1) * this.currentParams.waveHeight;
-        return { x, y };
+        const cp = this.currentParams;
+        const rollStr = cp.rollStrength || 0;
+
+        // 1. X : Courbure (Virage du monde)
+        let x = Math.sin(wz * 0.02 + this.time * 0.5) * (cp.curveStrength || 0);
+
+        // 2. Y : Vagues Verticales (Base)
+        let yBase = Math.sin(this.time * 2 + wz * 0.1) * (cp.waveHeight || 0);
+
+        // 3. EFFET ROULIS (Bateau) avec modulation de phase
+        let yRolling = 0;
+        if (rollStr !== 0) {
+            // --- MODULATION ALEATOIRE / LONGUE ---
+            // On crée une variation lente (0.2) qui définit si le mouvement est "calme" ou "nerveux"
+            const slowVariation = Math.sin(this.time * 0.2);
+
+            // On crée un "spike" (phase courte) en utilisant une puissance élevée sur un sinus rapide
+            // Cela génère des pics d'activité brefs de temps en temps
+            const fastSpike = Math.pow(Math.max(0, Math.sin(this.time * 0.5)), 10) * 2.0;
+
+            // On mixe le temps : la base est lente, mais on ajoute les spikes
+            const modulatedTime = (this.time * 0.8) + (this.time * fastSpike);
+
+            // L'angle de bascule utilise wz * 0.01 pour la longueur, et notre temps modulé
+            const angle = Math.sin(modulatedTime + wz * 0.01) * (rollStr * 0.003);
+
+            yRolling = xOffset * angle;
+        }
+
+        let finalY = yBase + yRolling;
+
+        // 4. MICRO-GLITCH
+        if (this.currentPhase?.effects?.includes('glitch')) {
+            const glitchNoise = Math.sin(wz * 0.5 + this.time * 10);
+            if (glitchNoise > 0.97) {
+                finalY += (Math.random() - 0.5) * 0.8;
+                x += (Math.random() - 0.5) * 0.5;
+            }
+        }
+
+        return { x, y: finalY };
     }
 
     update(currentTime, delta) {
@@ -75,14 +113,15 @@ export class GameEngine {
 
         this.time = currentTime;
 
-        // this.updatePhase(currentTime);
+        // GESTION PHASE MUSICAL ET IMAGE DE FOND
         const musicStatus = this.music.update();
         this.currentPhase = musicStatus.phase;
-
         this.background.update(this.currentPhase, 0.8);
 
+        // Raccourci pour faciliter la lecture
         const p = this.currentPhase;
 
+        // BONUS ACTIF
         if (this.activeBonus.timeLeft > 0) {
             this.activeBonus.timeLeft -= delta;
             if (this.activeBonus.timeLeft <= 0) {
@@ -91,9 +130,42 @@ export class GameEngine {
             }
         }
 
-        // 1. GESTION DE LA COULEUR CIBLE
-        let targetColorHex;
+        // GESTION DES EFFETS
+        const effects = p.effects || [];
+        const triggers = {
+            glitch: effects.includes('glitch') && Math.random() < (p.glitchIntensity || 0.05),
+            flash:  effects.includes('flash')  && Math.random() < (p.flashIntensity  || 0.02),
+            eclair: effects.includes('eclair') && Math.random() < (p.eclairIntensity || 0.1),
+            shake:  effects.includes('shake'),
+            moving: effects.includes('moving_obstacles')
+        };
 
+        if (triggers.eclair) {
+            this.world.triggerLightning();
+        }
+
+        if (triggers.flash) {
+            let flashColorHex = 0xffffff; // Blanc par défaut
+
+            if (p.color && Array.isArray(p.color)) {
+                flashColorHex = p.color[Math.floor(Math.random() * p.color.length)];
+            } else if (p.color) {
+                flashColorHex = p.color;
+            }
+
+            this.world.triggerScreenFlash(flashColorHex);
+        }
+
+        if (triggers.glitch) {
+            document.body.style.filter = `hue-rotate(${Math.random() * 360}deg) brightness(1.2) contrast(1.5)`;
+
+            setTimeout(() => {
+                document.body.style.filter = 'none';
+            }, 80);
+        }
+
+        // GESTION DE LA COULEUR AMBIANTE
+        let targetColorHex;
         if (Array.isArray(p.color)) {
             // Si c'est un tableau, on alterne toutes les 0.5 secondes (ajustable)
             this.colorTimer += delta;
@@ -105,33 +177,24 @@ export class GameEngine {
         } else {
             targetColorHex = p.color;
         }
-
         const targetColor = new THREE.Color(targetColorHex);
 
-        // 2. INTERPOLATION DOUCE (Lerp)
-        // On transitionne la couleur actuelle vers la cible (vitesse 2 * delta)
+        // INTERPOLATION DOUCE (Lerp)
         this.currentParams.color.lerp(targetColor, 2 * delta);
-
-        // 3. LERP DES AUTRES PARAMÈTRES
         this.currentParams.speed += (p.speed - this.currentParams.speed) * 0.05;
         this.currentParams.waveHeight += (p.waveHeight - this.currentParams.waveHeight) * 0.05;
         this.currentParams.curveStrength += (p.curveStrength - this.currentParams.curveStrength) * 0.05;
-        this.currentParams.gridOpacity += ((p.gridOpacity !== undefined ? p.gridOpacity : 0.5) - this.currentParams.gridOpacity) * 0.05;
-
-        this.currentTotalSpeed = this.currentParams.speed * this.activeBonus.speedMultiplier;
-        this.zOffset += this.currentTotalSpeed * delta * 50;
-
-        const state = {time: this.time, delta, speed: this.currentTotalSpeed * 50, phase: p, params: this.currentParams, activeBonus: this.activeBonus };
-        const proj = (z) => this.getProjection(z);
+        this.currentParams.rollStrength += (p.rollStrength - this.currentParams.rollStrength) * 0.05;
+        this.currentParams.gridOpacity += ((p.gridOpacity !== undefined ? p.gridOpacity : 1) - this.currentParams.gridOpacity) * 0.05;
 
         /*
+        // GESTION DES PORTES DE PHASE
         const spawnZ = -500;
         const phaseToSpawn = this.music.getNextPhaseSoon(
             this.currentParams.speed,
             spawnZ,
             delta
         );
-
         if (phaseToSpawn && !this.isGateInTransit && phaseToSpawn.label !== this.lastPhaseName) {
             const gate = new Gate(this.scene, phaseToSpawn.label, targetColor);
             gate.z = spawnZ;
@@ -141,6 +204,23 @@ export class GameEngine {
         this.isGateInTransit = this.gates.length > 0;
         */
 
+        // MISE A JOUR DE LA VITESSE TOTALE (avec bonus)
+        this.currentTotalSpeed = this.currentParams.speed * this.activeBonus.speedMultiplier;
+        this.zOffset += this.currentTotalSpeed * delta * 50;
+
+        // ETAT GLOBAL
+        const proj = (z) => this.getProjection(z);
+        const state = {
+            time: this.time,
+            delta,
+            speed: this.currentTotalSpeed * 50,
+            phase: p,
+            params: this.currentParams,
+            activeBonus: this.activeBonus,
+            triggers: triggers,
+        };
+
+        // MISE A JOUR DES ELEMENTS DE LA SCENE
         this.world.update(state, proj);
         this.road.update(state, proj);
         this.entities.update(state, proj);
@@ -157,6 +237,7 @@ export class GameEngine {
             return gate.active;
         });
 
+        // GESTION DES OBSTACLES
         this.handleSpawning(delta);
         this.handleCollisions();
     }
@@ -352,5 +433,7 @@ export class GameEngine {
 
         console.log("Engine Reset Complete");
     }
+
+
 
 }

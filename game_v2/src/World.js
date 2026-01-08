@@ -29,7 +29,9 @@ export class World {
 
         this.mesh = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({
             color: 0x000000,
-            side: THREE.DoubleSide
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 1.0
         }));
 
         // On utilise la texture sur le gridMaterial
@@ -47,6 +49,21 @@ export class World {
 
         this.scene.add(this.mesh, this.grid);
         this.scene.fog = new THREE.Fog(0x000000, 200, 500);
+
+        // Le canva pour les éclairs
+        this.lCanvas = document.createElement('canvas');
+        this.lCanvas.id = "lightning-layer";
+        this.lCanvas.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:50;";
+        document.body.appendChild(this.lCanvas);
+        this.lCtx = this.lCanvas.getContext('2d');
+
+        // Ajustement de la taille au redimensionnement
+        window.addEventListener('resize', () => {
+            this.lCanvas.width = window.innerWidth;
+            this.lCanvas.height = window.innerHeight;
+        });
+        this.lCanvas.width = window.innerWidth;
+        this.lCanvas.height = window.innerHeight;
     }
 
     reset() {
@@ -77,36 +94,95 @@ export class World {
 
     update(state, getProjection) {
         const pos = this.mesh.geometry.attributes.position;
-        const isGlitchPhase = state.phase.effects.includes('glitch');
+        const isGlitch = state.triggers && state.triggers.glitch;
 
-        // 1. DÉFILEMENT VISUEL
-        // On décale l'offset de la texture en fonction de la vitesse
         const speed = state.params.speed || 0.5;
         this.gridMaterial.map.offset.y += speed * 0.05;
 
-        // 2. DÉFORMATION DU SOL (Vagues)
-        // Ici on garde le iz d'origine pour que les vagues soient calées sur les objets
         for (let i = 0; i < pos.count; i++) {
+            const ix = this.baseVertices[i * 3];
             const iz = this.baseVertices[i * 3 + 2];
-            const proj = getProjection(iz);
 
-            let y = proj.y;
-            if (isGlitchPhase && Math.random() > 0.99) y += 5;
+            // On passe bien ix pour le calcul de l'inclinaison (slope)
+            const proj = getProjection(iz, ix);
 
-            pos.setY(i, y);
+            // IMPORTANT : On garde ix et on AJOUTE la courbure proj.x
+            let finalX = ix + proj.x;
+            let finalY = proj.y;
+
+            if (isGlitch) {
+                finalX += Math.sin(i * 0.5) * 2.0;
+                finalY += (Math.random() - 0.5) * 4.0;
+            }
+
+            pos.setXYZ(i, finalX, finalY, iz);
         }
 
         pos.needsUpdate = true;
         this.grid.geometry.attributes.position.copy(pos);
         this.grid.geometry.attributes.position.needsUpdate = true;
 
+        const targetOpacity = state.params.gridOpacity !== undefined ? state.params.gridOpacity : 1;
+        const currentOpacity = isGlitch ? Math.random() : targetOpacity;
+
+        this.grid.material.opacity = currentOpacity;
         this.grid.material.color.copy(state.params.color);
-        this.grid.material.opacity = state.params.gridOpacity;
+        this.mesh.material.opacity = currentOpacity;
+    }
+
+    triggerScreenFlash(colorHex) {
+        const flashDiv = document.createElement('div');
+
+        // Conversion du hex (0xffffff) en string CSS (#ffffff)
+        const cssColor = `#${colorHex.toString(16).padStart(6, '0')}`;
+
+        flashDiv.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: ${cssColor};
+            z-index: 9999;
+            pointer-events: none;
+            opacity: 0.7;
+        `;
+
+        document.body.appendChild(flashDiv);
+
+        // Suppression rapide pour l'effet de flash
+        setTimeout(() => {
+            flashDiv.remove();
+        }, 60); // Durée du flash en ms
     }
 
     triggerLightning() {
-        const old = this.scene.fog.color.clone();
-        this.scene.fog.color.set(0xffffff);
-        setTimeout(() => this.scene.fog.color.copy(old), 100);
+        // 1. Nettoyage de sécurité avant de dessiner
+        this.lCtx.clearRect(0, 0, this.lCanvas.width, this.lCanvas.height);
+
+        // 2. Configuration du style
+        this.lCtx.strokeStyle = '#ffffff';
+        this.lCtx.lineWidth = 3;
+        this.lCtx.shadowBlur = 15;
+        this.lCtx.shadowColor = '#ffffff';
+
+        // 3. Dessin de la trajectoire
+        this.lCtx.beginPath();
+        let x = Math.random() * this.lCanvas.width;
+        let y = 0;
+        this.lCtx.moveTo(x, y);
+
+        while (y < this.lCanvas.height) {
+            x += (Math.random() - 0.5) * 150;
+            y += Math.random() * 80 + 30;
+            this.lCtx.lineTo(x, y);
+        }
+        this.lCtx.stroke();
+
+        // 4. EFFACEMENT AUTOMATIQUE (Le secret de la brièveté)
+        // 50ms à 80ms est la durée idéale pour un éclair réaliste
+        setTimeout(() => {
+            this.lCtx.clearRect(0, 0, this.lCanvas.width, this.lCanvas.height);
+        }, 60);
     }
 }
