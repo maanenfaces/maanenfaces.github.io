@@ -101,30 +101,44 @@ export class Road {
     }
 
     update(state, getProjection) {
-        // Mise à jour de la couleur néon
+        // 1. Mise à jour de la couleur et de la texture
         if (state.params && state.params.color) {
             this.material.color.copy(state.params.color);
         }
 
-        // Effet de défilement basé sur la vitesse
         const speed = state.params.speed || 0.5;
         const unitLength = this.length / this.repetitions;
-
         this.material.map.offset.y += speed / unitLength;
 
-        // Déformation de la géométrie selon la trajectoire
+        // 2. Récupération du trigger Glitch
+        const isGlitch = state.triggers && state.triggers.glitch;
+
+        // 3. Déformation de la géométrie
         const pos = this.mesh.geometry.attributes.position;
         for (let i = 0; i < pos.count; i++) {
-            const ix = this.baseVertices[i * 3];
-            const iz = this.baseVertices[i * 3 + 2];
+            const ix = this.baseVertices[i * 3];     // Position X d'origine (largeur de la route)
+            const iz = this.baseVertices[i * 3 + 2]; // Position Z d'origine
 
-            // On récupère la projection (x=courbure, y=vague)
-            const proj = getProjection(iz);
+            // On passe bien ix à getProjection pour l'effet de bascule (slope)
+            const proj = getProjection(iz, ix);
 
-            // Application de la transformation
-            // ix + proj.x permet à la route de suivre les virages
-            // proj.y + 0.1 permet à la route de suivre les bosses/vagues
-            pos.setXYZ(i, ix + proj.x, proj.y + 0.1, iz);
+            // CORRECTION : ix (largeur) + proj.x (courbure/virage)
+            let finalX = ix + proj.x;
+
+            // finalY récupère la vague + l'inclinaison calculée dans getProjection
+            let finalY = proj.y + 0.1;
+
+            // --- EFFET DE DÉCALAGE TEMPORAIRE (GLITCH) ---
+            if (isGlitch) {
+                // Décalage par tranches horizontales (style Matrix)
+                const sliceEffect = Math.sin(iz * 0.1) * 3.0;
+                finalX += sliceEffect;
+
+                // Micro-sauts verticaux pour salir le signal
+                finalY += (Math.random() - 0.5) * 0.5;
+            }
+
+            pos.setXYZ(i, finalX, finalY, iz);
         }
 
         pos.needsUpdate = true;
