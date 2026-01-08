@@ -22,10 +22,20 @@ class Entity {
 
     updatePosition(speed, delta, getProjection) {
         this.z += speed * delta;
-        const proj = getProjection(this.z);
-        this.mesh.position.set(proj.x + (this.lane * this.laneWidth), proj.y, this.z);
+        const laneX = this.lane * this.laneWidth;
 
-        // Une fois positionné, on le rend visible
+        // On récupère les données de projection
+        const proj = getProjection(this.z, laneX);
+
+        // 1. Positionnement (déjà fait)
+        this.mesh.position.set(proj.x + laneX, proj.y, this.z);
+
+        // 2. INCLINAISON (Le nouveau code)
+        // On applique l'angle de roulis à la rotation Z de l'objet
+        // Note: On met souvent un signe "-" car si le sol penche à droite,
+        // l'objet doit pivoter dans le sens des aiguilles d'une montre.
+        this.mesh.rotation.z = proj.rollAngle;
+
         if (!this.initialized) {
             this.mesh.visible = true;
             this.initialized = true;
@@ -127,13 +137,16 @@ export class JumpBonus extends Bonus {
     constructor(lane, z, getProjection) {
         super(lane, z, getProjection);
         this.subType = 'jump';
+        this.name = "jump";
+        this.color = 0xffff00;
+        this.colorHex = '#ffff00';
 
         const geo = new THREE.OctahedronGeometry(1);
-        const mat = new THREE.MeshBasicMaterial({ color: 0xffff00, wireframe: false });
+        const mat = new THREE.MeshBasicMaterial({ color: this.color, wireframe: false });
 
         this.initMesh(geo, mat, 1.5);
 
-        const label = this.createTextLabel('JUMP', '#ffff00');
+        const label = this.createTextLabel(this.name, this.colorHex);
         this.mesh.add(label);
     }
 
@@ -146,13 +159,16 @@ export class SpeedBonus extends Bonus {
     constructor(lane, z, getProjection) {
         super(lane, z, getProjection);
         this.subType = 'speed';
+        this.name = "speed";
+        this.color = 0x00ffff;
+        this.colorHex = '#00ffff';
 
         const geo = new THREE.ConeGeometry(0.8, 1.8, 4);
-        const mat = new THREE.MeshBasicMaterial({ color: 0x00ffff, wireframe: true });
+        const mat = new THREE.MeshBasicMaterial({ color: this.color, wireframe: true });
 
         this.initMesh(geo, mat, 1.5);
 
-        const label = this.createTextLabel('SPEED', '#00ffff');
+        const label = this.createTextLabel(this.name, this.colorHex);
         this.mesh.add(label);
     }
 
@@ -166,13 +182,16 @@ export class InvincibleBonus extends Bonus {
     constructor(lane, z, getProjection) {
         super(lane, z, getProjection);
         this.subType = 'invincible';
+        this.name = "GHOST";
+        this.color = 0xff00ff;
+        this.colorHex = '#ff00ff';
 
         const geo = new THREE.IcosahedronGeometry(1.2, 0);
-        const mat = new THREE.MeshBasicMaterial({ color: 0xff00ff, wireframe: true });
+        const mat = new THREE.MeshBasicMaterial({ color: this.color, wireframe: true });
 
         this.initMesh(geo, mat, 1.8);
 
-        const label = this.createTextLabel('GHOST', '#ff00ff');
+        const label = this.createTextLabel(this.name, this.colorHex);
         this.mesh.add(label);
     }
 

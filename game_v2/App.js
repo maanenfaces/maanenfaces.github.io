@@ -24,6 +24,15 @@ export class App {
         this.engine = new GameEngine(this.scene, this.camera, SONG_STRUCTURE);
         this.ui = new Screens(this.engine);
 
+        const rotationAlert = document.getElementById('rotation-alert');
+        window.addEventListener('uiRotationStart', () => {
+            rotationAlert.classList.remove('hidden');
+        });
+        window.addEventListener('uiRotationEnd', () => {
+            console.log("Hiding rotation alert");
+            rotationAlert.classList.add('hidden');
+        });
+
         window.addEventListener('resize', this.onWindowResize.bind(this), false);
 
         this.animate(0);
@@ -60,7 +69,7 @@ export class App {
 
         this.camera.aspect = aspect;
         this.camera.updateProjectionMatrix();
-        this.renderer.setSize(width, height);
+        this.renderer.setSize(width, height, false);
     }
 }
 

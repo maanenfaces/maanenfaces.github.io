@@ -15,10 +15,12 @@ export class GameEngine {
         this.songPhases = songPhases;
         this.time = 0;
         this.zOffset = 0;
-        this.spawnTimer = 0;
         this.isPaused = true;
         this.currentPhase = songPhases[0];
         this.currentParams = { speed: 1, waveHeight: 0, curveStrength: 0, color: new THREE.Color(0x00ffff), gridOpacity: 0.5 };
+
+        this.scoreTimer = 0;
+        this.spawnTimer = 0;
 
         this.world = new World(scene);
         this.road = new Road(scene);
@@ -39,6 +41,12 @@ export class GameEngine {
         };
 
         this.currentTotalSpeed = this.currentParams.speed;
+        this.bonusVelocity = 0;
+        this.decelerationTime = 100;
+
+        this.isReversed = false;
+        this.cameraRotation = 0;
+        this.isRotating = false;
 
         this.activeBonus = {
             item: null,
@@ -52,8 +60,6 @@ export class GameEngine {
             isInvincible: false
         };
 
-        this.gates = [];
-        this.lastPhaseName = "";
         this.isGateInTransit = false;
         this.needSpeedReset = false;
 
@@ -68,50 +74,53 @@ export class GameEngine {
         const cp = this.currentParams;
         const rollStr = cp.rollStrength || 0;
 
-        // 1. X : Courbure (Virage du monde)
+        // 1. X : Courbure (Virages)
         let x = Math.sin(wz * 0.02 + this.time * 0.5) * (cp.curveStrength || 0);
 
-        // 2. Y : Vagues Verticales (Base)
+        // 2. Y : Vagues Verticales
         let yBase = Math.sin(this.time * 2 + wz * 0.1) * (cp.waveHeight || 0);
 
-        // 3. EFFET ROULIS (Bateau) avec modulation de phase
+        // 3. EFFET ROULIS (L'Hélice Lisse)
+        let angle = 0;
         let yRolling = 0;
         if (rollStr !== 0) {
-            // --- MODULATION ALEATOIRE / LONGUE ---
-            // On crée une variation lente (0.2) qui définit si le mouvement est "calme" ou "nerveux"
-            const slowVariation = Math.sin(this.time * 0.2);
+            // --- LA CORRECTION EST ICI ---
+            // On réduit drastiquement l'influence de wz (0.001 au lieu de 0.01)
+            // Cela permet à l'angle d'être quasiment identique du début à la fin de la route.
+            const slowBase = Math.sin(this.time * 0.8 + wz * 0.001);
 
-            // On crée un "spike" (phase courte) en utilisant une puissance élevée sur un sinus rapide
-            // Cela génère des pics d'activité brefs de temps en temps
-            const fastSpike = Math.pow(Math.max(0, Math.sin(this.time * 0.5)), 10) * 2.0;
+            // Spike aléatoire
+            const fastSpike = Math.pow(Math.max(0, Math.sin(this.time * 0.4)), 10) * Math.sin(this.time * 5);
 
-            // On mixe le temps : la base est lente, mais on ajoute les spikes
-            const modulatedTime = (this.time * 0.8) + (this.time * fastSpike);
-
-            // L'angle de bascule utilise wz * 0.01 pour la longueur, et notre temps modulé
-            const angle = Math.sin(modulatedTime + wz * 0.01) * (rollStr * 0.003);
+            // On réduit un peu le facteur (0.001) pour un contrôle plus fin avec ton rollStr de 30
+            angle = (slowBase + fastSpike) * (rollStr * 0.001);
 
             yRolling = xOffset * angle;
         }
 
-        let finalY = yBase + yRolling;
-
         // 4. MICRO-GLITCH
+        let yGlitch = 0;
         if (this.currentPhase?.effects?.includes('glitch')) {
-            const glitchNoise = Math.sin(wz * 0.5 + this.time * 10);
-            if (glitchNoise > 0.97) {
-                finalY += (Math.random() - 0.5) * 0.8;
-                x += (Math.random() - 0.5) * 0.5;
+            if (Math.sin(wz * 0.5 + this.time * 10) > 0.97) {
+                yGlitch = (Math.random() - 0.5) * 0.8;
             }
         }
 
-        return { x, y: finalY };
+        return { x, y: yBase + yRolling + yGlitch, rollAngle: angle };
     }
 
     update(currentTime, delta) {
         if (this.isPaused) return;
 
         this.time = currentTime;
+
+        // 10 POINTS PAR SECONDE, MODIFIÉ PAR LA VITESSE ACTUELLE
+        this.scoreTimer += delta;
+        if (this.scoreTimer >= 1.0) {
+            const points = Math.floor(10 * this.currentParams.speed);
+            window.dispatchEvent(new CustomEvent('addScore', { detail: points }));
+            this.scoreTimer -= 1.0;
+        }
 
         // GESTION PHASE MUSICAL ET IMAGE DE FOND
         const musicStatus = this.music.update();
@@ -133,11 +142,11 @@ export class GameEngine {
         // GESTION DES EFFETS
         const effects = p.effects || [];
         const triggers = {
-            glitch: effects.includes('glitch') && Math.random() < (p.glitchIntensity || 0.05),
-            flash:  effects.includes('flash')  && Math.random() < (p.flashIntensity  || 0.02),
             eclair: effects.includes('eclair') && Math.random() < (p.eclairIntensity || 0.1),
-            shake:  effects.includes('shake'),
-            moving: effects.includes('moving_obstacles')
+            flash:  effects.includes('flash')  && Math.random() < (p.flashIntensity  || 0.02),
+            glitch: effects.includes('glitch') && Math.random() < (p.glitchIntensity || 0.05),
+            reverse: effects.includes("reverse"),
+            shake:   effects.includes('shake'),
         };
 
         if (triggers.eclair) {
@@ -164,6 +173,26 @@ export class GameEngine {
             }, 80);
         }
 
+        const targetRotation = triggers.reverse ? Math.PI : 0;
+        const rotationSpeed = 0.25;
+        this.cameraRotation += (targetRotation - this.cameraRotation) * rotationSpeed * delta;
+        this.camera.rotation.z = this.cameraRotation;
+
+        const rotationDiff = Math.abs(targetRotation - this.cameraRotation);
+        const currentlyRotating = Math.abs(targetRotation - this.cameraRotation) > 0.3;
+
+        if (currentlyRotating !== this.isRotating) {
+            this.isRotating = currentlyRotating;
+            const eventName = this.isRotating ? 'uiRotationStart' : 'uiRotationEnd';
+            window.dispatchEvent(new CustomEvent(eventName));
+        }
+
+        if (triggers.reverse !== this.isReversed) {
+            const eventName = triggers.reverse ? 'effectReverseOn' : 'effectReverseOff';
+            window.dispatchEvent(new CustomEvent(eventName, {detail: { phase: p.label }}));
+            this.isReversed = triggers.reverse;
+        }
+
         // GESTION DE LA COULEUR AMBIANTE
         let targetColorHex;
         if (Array.isArray(p.color)) {
@@ -187,29 +216,26 @@ export class GameEngine {
         this.currentParams.rollStrength += (p.rollStrength - this.currentParams.rollStrength) * 0.05;
         this.currentParams.gridOpacity += ((p.gridOpacity !== undefined ? p.gridOpacity : 1) - this.currentParams.gridOpacity) * 0.05;
 
-        /*
-        // GESTION DES PORTES DE PHASE
-        const spawnZ = -500;
-        const phaseToSpawn = this.music.getNextPhaseSoon(
-            this.currentParams.speed,
-            spawnZ,
-            delta
-        );
-        if (phaseToSpawn && !this.isGateInTransit && phaseToSpawn.label !== this.lastPhaseName) {
-            const gate = new Gate(this.scene, phaseToSpawn.label, targetColor);
-            gate.z = spawnZ;
-            this.gates.push(gate);
-            this.lastPhaseName = phaseToSpawn.label;
-        }
-        this.isGateInTransit = this.gates.length > 0;
-        */
-
         // MISE A JOUR DE LA VITESSE TOTALE (avec bonus)
-        this.currentTotalSpeed = this.currentParams.speed * this.activeBonus.speedMultiplier;
+        const baseSpeed = this.currentParams.speed;
+        const multiplier = this.activeBonus.speedMultiplier;
+
+        if (multiplier > 1) {
+            this.currentTotalSpeed = baseSpeed * multiplier;
+            this.bonusVelocity = this.currentTotalSpeed - baseSpeed;
+        } else {
+            if (this.bonusVelocity > 0) {
+                const friction = 0.2 * delta;
+                this.bonusVelocity += (0 - this.bonusVelocity) * friction;
+                if (this.bonusVelocity < 0.1) this.bonusVelocity = 0;
+            }
+            this.currentTotalSpeed = baseSpeed + this.bonusVelocity;
+        }
+
         this.zOffset += this.currentTotalSpeed * delta * 50;
 
         // ETAT GLOBAL
-        const proj = (z) => this.getProjection(z);
+        const proj = (z, x) => this.getProjection(z, x);
         const state = {
             time: this.time,
             delta,
@@ -217,7 +243,7 @@ export class GameEngine {
             phase: p,
             params: this.currentParams,
             activeBonus: this.activeBonus,
-            triggers: triggers,
+            triggers: triggers
         };
 
         // MISE A JOUR DES ELEMENTS DE LA SCENE
@@ -225,17 +251,6 @@ export class GameEngine {
         this.road.update(state, proj);
         this.entities.update(state, proj);
         this.player.update(state, proj);
-
-        this.gates = this.gates.filter(gate => {
-            gate.update(this.currentParams.speed, delta, (z) => this.getProjection(z), (passedGate) => {
-                console.log("Passage de la porte :", passedGate.label);
-                if (this.needSpeedReset) {
-                    this.activeBonus.speedMultiplier = 1;
-                    this.needSpeedReset = false;
-                }
-            });
-            return gate.active;
-        });
 
         // GESTION DES OBSTACLES
         this.handleSpawning(delta);
@@ -288,8 +303,14 @@ export class GameEngine {
 
                 // CAS B : C'est un MUR
                 else if (ent.type === "wall") {
-                    const isInvincible = (this.activeBonus.item && this.activeBonus.item.subType === "invincible" && this.activeBonus.timeLeft > 0) ||
-                             (DEV_MODE && this.devSettings.isInvincible);
+                    const hasInvincibilityBonus = this.activeBonus.item?.subType === "invincible" && this.activeBonus.timeLeft > 0;
+                    const isDevGodMode = DEV_MODE && this.devSettings.isInvincible;
+                    const isPhaseTransition = this.isRotating;
+
+                    const isInvincible =
+                        hasInvincibilityBonus ||
+                        isDevGodMode ||
+                        isPhaseTransition;
 
                     const isJumping = this.player.isJumping;
 
