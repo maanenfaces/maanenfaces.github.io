@@ -34,15 +34,12 @@ export class BackgroundManager {
         let targetType = 'none';
         let targetValue = null;
 
-        if (phase.bgVideo) {
+        if (phase.theme.background.videoId) {
             targetType = 'video';
-            targetValue = phase.bgVideo;
-        } else if (phase.bgImage) {
+            targetValue = phase.theme.background.videoId;
+        } else if (phase.theme.background.imageUrl) {
             targetType = 'image';
-            targetValue = phase.bgImage;
-        } else {
-            targetType = 'image';
-            targetValue = 'https://f4.bcbits.com/img/a2164237503_10.jpg';
+            targetValue = phase.theme.background.imageUrl;
         }
 
         if (this.currentBgKey === targetValue) return;

@@ -28,7 +28,9 @@ export class Screens {
                 panel: document.getElementById('dev-tools'),
                 invincible: document.getElementById('dev-invincible'),
                 slider: document.getElementById('dev-slider'),
-                timeVal: document.getElementById('dev-time-val')
+                timeVal: document.getElementById('dev-time-val'),
+                wallDensity: document.getElementById('dev-wall-density'),
+                bonusDensity: document.getElementById('dev-bonus-density')
             };
             this.initDevTools();
         }
@@ -74,7 +76,7 @@ export class Screens {
             this.engine.music.audio.currentTime = targetTime;
 
             // 2. Mettre à jour l'affichage 000
-            this.updateDevTimeDisplay(targetTime);
+            this.updateDevUI(targetTime);
 
             // 3. Nettoyer les entités pour éviter les collisions fantômes lors du saut
             if (this.engine.entities) {
@@ -83,10 +85,12 @@ export class Screens {
         });
     }
 
-    updateDevTimeDisplay(seconds) {
-        if (this.devUI && this.devUI.timeVal) {
+    updateDevUI(seconds) {
+        if (this.devUI) {
             const formattedTime = Math.floor(seconds).toString().padStart(3, '0');
             this.devUI.timeVal.innerText = formattedTime;
+            this.devUI.bonusDensity.innerText = this.engine.currentPhase.bonuses.density;
+            this.devUI.wallDensity.innerText = this.engine.currentPhase.obstacles.density;
         }
     }
 
@@ -98,7 +102,7 @@ export class Screens {
         if (DEV_MODE && this.devUI && !this.engine.isPaused) {
             const currentTime = this.engine.music.audio.currentTime;
             this.devUI.slider.value = currentTime;
-            this.updateDevTimeDisplay(currentTime);
+            this.updateDevUI(currentTime);
         }
     }
 
