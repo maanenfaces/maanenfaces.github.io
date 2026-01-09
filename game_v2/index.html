@@ -348,10 +348,17 @@
 
     <div id="dev-tools" style="display:none; position: absolute; top: 20px; left: 20px; z-index: 9999; background: rgba(0,0,0,0.8); padding: 15px; border: 1px solid #00ff00; color: #00ff00; font-family: monospace; font-size: 12px; pointer-events: auto;">
         <div style="margin-bottom: 10px; font-weight: bold; border-bottom: 1px solid #00ff00; padding-bottom: 5px; letter-spacing: 1px;">DEV MODE</div>
+
         <div style="margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
             <input type="checkbox" id="dev-invincible" style="width: auto; margin: 0; cursor: pointer;" checked>
             <label for="dev-invincible" style="cursor: pointer; user-select: none;">INVINCIBLE (GOD MODE)</label>
         </div>
+
+        <div style="margin-bottom: 10px; display: flex; flex-direction: column; gap: 4px; border-left: 2px solid #00ff00; padding-left: 8px;">
+            <div>WALL DENSITY: <span id="dev-wall-density" style="font-weight: bold;">0.0</span></div>
+            <div>BONUS DENSITY: <span id="dev-bonus-density" style="font-weight: bold;">0.0</span></div>
+        </div>
+
         <div style="display: flex; align-items: center; gap: 10px;">
             <span style="font-weight: bold;">T:</span>
             <input type="range" id="dev-slider" min="0" value="0" step="0.1" style="width: 200px; cursor: pointer; margin: 0; padding: 0; border: none; height: 14px; background: transparent; accent-color: #00ff00;">
