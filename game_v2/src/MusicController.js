@@ -12,6 +12,9 @@ export class MusicController {
         this.ready = { audio: false, visual: false };
         this.useYouTube = videoIdAudio !== null;
 
+        this.currentPhaseLabel = null;
+        this.hasPhaseChanged = false;
+
         if (this.useYouTube || videoIdVisual) {
             this.initYouTube();
         } else {
@@ -111,6 +114,18 @@ export class MusicController {
 
         const phase = SONG_STRUCTURE.find(p => time >= p.start && time < p.end)
                     || SONG_STRUCTURE[SONG_STRUCTURE.length - 1];
+
+        // CRÉATION DU HASH
+        // On transforme l'objet de la phase en chaîne de caractères unique
+        const phaseHash = JSON.stringify(phase);
+
+        // DÉTECTION DU CHANGEMENT PAR HASH
+        if (phaseHash !== this.currentPhaseHash) {
+            this.currentPhaseHash = phaseHash;
+            this.hasPhaseChanged = true;
+        } else {
+            this.hasPhaseChanged = false;
+        }
 
         return {
             time: time,

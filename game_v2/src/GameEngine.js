@@ -8,6 +8,41 @@ import { MusicController } from './MusicController.js';
 import { SoundEffects } from './SoundEffects.js';
 import { DEV_MODE } from './Config.js';
 
+const DEFAULT_PHASE = {
+    label: "UNKNOWN",
+    speed: 1,
+    theme: {
+        background: {
+            // Cover de l'album A Brilliant Future de Maanen Faces
+            imageUrl: "https://f4.bcbits.com/img/a2164237503_10.jpg",
+            videoId: null
+        },
+        colors: [0x00ff00],
+        gridOpacity: 1
+    },
+    bonuses: {
+        density: 0.05,
+        distribution: [
+            { entity: "GhostBonus", percent: 10 },
+            { entity: "JumpBonus",  percent: 45 },
+            { entity: "SpeedBonus", percent: 45 }
+        ]
+    },
+    obstacles: {
+        density: 0.2,
+        distribution: [{ entity: "Wall", percent: 100 }]
+    },
+    effects: {
+        curve:     { intensity: 0 },
+        flash:     { intensity: 0 },
+        glitch:    { intensity: 0 },
+        lightning: { intensity: 0 },
+        reverse:   { enabled: false },
+        roll:      { intensity: 0 },
+        wave:      { intensity: 0 }
+    }
+};
+
 export class GameEngine {
     constructor(scene, camera, songPhases) {
         this.scene = scene;
@@ -16,11 +51,12 @@ export class GameEngine {
         this.time = 0;
         this.zOffset = 0;
         this.isPaused = true;
-        this.currentPhase = songPhases[0];
+        this.currentPhase = DEFAULT_PHASE;
         this.currentParams = { speed: 1, waveHeight: 0, curveStrength: 0, color: new THREE.Color(0x00ffff), gridOpacity: 0.5 };
 
         this.scoreTimer = 0;
-        this.spawnTimer = 0;
+        this.spawnBonusTimer = 10; // pas de bonus les 10 premières secondes
+        this.spawnWallTimer = 1;
 
         this.world = new World(scene);
         this.road = new Road(scene);
@@ -42,7 +78,7 @@ export class GameEngine {
 
         this.currentTotalSpeed = this.currentParams.speed;
         this.bonusVelocity = 0;
-        this.decelerationTime = 100;
+        this.speedTransitionDuration = 10;
 
         this.isReversed = false;
         this.cameraRotation = 0;
@@ -67,6 +103,26 @@ export class GameEngine {
             console.log("gameStarted event received");
             this.onStart();
         });
+    }
+
+    consolidatePhase(previousPhase, newPhase) {
+        const merge = (mould, patch) => {
+            // Si c'est un objet (et pas un tableau), on fusionne récursivement
+            if (mould !== null && typeof mould === 'object' && !Array.isArray(mould)) {
+                const result = {};
+                for (const key in mould) {
+                    // IMPORTANT: On ré-exécute la fusion sur chaque clé
+                    result[key] = merge(mould[key], patch ? patch[key] : undefined);
+                }
+                return result;
+            }
+
+            // Si la phase actuelle propose une valeur (patch), on la prend.
+            // Sinon, on prend SYSTEMATIQUEMENT la valeur du moule (DEFAULT_PHASE).
+            return (patch !== undefined && patch !== null) ? patch : mould;
+        };
+
+        return merge(previousPhase, newPhase);
     }
 
     getProjection(z, xOffset = 0) {
@@ -100,7 +156,7 @@ export class GameEngine {
 
         // 4. MICRO-GLITCH
         let yGlitch = 0;
-        if (this.currentPhase?.effects?.includes('glitch')) {
+        if (this.currentPhase?.effects?.glitch?.intensity) {
             if (Math.sin(wz * 0.5 + this.time * 10) > 0.97) {
                 yGlitch = (Math.random() - 0.5) * 0.8;
             }
@@ -114,7 +170,14 @@ export class GameEngine {
 
         this.time = currentTime;
 
-        // 10 POINTS PAR SECONDE, MODIFIÉ PAR LA VITESSE ACTUELLE
+        // 1. GESTION PHASE MUSICALE ET CONSOLIDATION
+        const musicStatus = this.music.update();
+        if (this.music.hasPhaseChanged) {
+            this.currentPhase = this.consolidatePhase(this.currentPhase, musicStatus.phase);
+        }
+        const p = this.currentPhase;
+
+        // 2. SCORE (10 points par seconde * vitesse)
         this.scoreTimer += delta;
         if (this.scoreTimer >= 1.0) {
             const points = Math.floor(10 * this.currentParams.speed);
@@ -122,15 +185,68 @@ export class GameEngine {
             this.scoreTimer -= 1.0;
         }
 
-        // GESTION PHASE MUSICAL ET IMAGE DE FOND
-        const musicStatus = this.music.update();
-        this.currentPhase = musicStatus.phase;
-        this.background.update(this.currentPhase, 0.8);
+        // 3. LOGIQUE DES TRIGGERS (Basée sur l'intensité)
+        const triggers = {
+            lightning: Math.random() < (p.effects.lightning.intensity * delta * 10),
+            flash:     Math.random() < (p.effects.flash.intensity * delta * 5),
+            glitch:    Math.random() < (p.effects.glitch.intensity * delta * 5),
+            reverse:   p.effects.reverse.enabled === true
+        };
 
-        // Raccourci pour faciliter la lecture
-        const p = this.currentPhase;
+        if (triggers.lightning) this.world.triggerLightning();
 
-        // BONUS ACTIF
+        if (triggers.flash) {
+            const colors = p.theme.colors;
+            const flashColor = Array.isArray(colors) ? colors[Math.floor(Math.random() * colors.length)] : colors;
+            this.world.triggerScreenFlash(flashColor);
+        }
+
+        if (triggers.glitch) {
+            document.body.style.filter = `hue-rotate(${Math.random() * 360}deg) brightness(1.2) contrast(1.5)`;
+            setTimeout(() => { document.body.style.filter = 'none'; }, 80);
+        }
+
+        // 4. GESTION DE LA COULEUR AMBIANTE (Alternance si tableau)
+        let targetColorHex;
+        if (Array.isArray(p.theme.colors)) {
+            this.colorTimer += delta;
+            if (this.colorTimer > 0.5) {
+                this.colorTimer = 0;
+                this.colorIndex = (this.colorIndex + 1) % p.theme.colors.length;
+            }
+            targetColorHex = p.theme.colors[this.colorIndex];
+        } else {
+            targetColorHex = p.theme.colors;
+        }
+
+        // 5. INTERPOLATION (Lerp)
+        const lerpS = 0.05;
+        this.currentParams.color.lerp(new THREE.Color(targetColorHex), 2 * delta);
+        this.currentParams.gridOpacity += (p.theme.gridOpacity - this.currentParams.gridOpacity) * lerpS;
+        this.currentParams.curveStrength += (p.effects.curve.intensity - this.currentParams.curveStrength) * lerpS;
+        this.currentParams.waveHeight += (p.effects.wave.intensity - this.currentParams.waveHeight) * lerpS;
+        this.currentParams.rollStrength += (p.effects.roll.intensity - this.currentParams.rollStrength) * lerpS;
+
+        // 6. CAMERA ROTATION & REVERSE
+        const targetRotation = triggers.reverse ? Math.PI : 0;
+        this.cameraRotation += (targetRotation - this.cameraRotation) * (lerpS * 5);
+        this.camera.rotation.z = this.cameraRotation;
+
+        // Événements de rotation (UI)
+        const currentlyRotating = Math.abs(targetRotation - this.cameraRotation) > 0.1;
+        if (currentlyRotating !== this.isRotating) {
+            this.isRotating = currentlyRotating;
+            window.dispatchEvent(new CustomEvent(this.isRotating ? 'uiRotationStart' : 'uiRotationEnd'));
+        }
+
+        // Événements de changement d'état Reverse
+        if (triggers.reverse !== this.isReversed) {
+            this.isReversed = triggers.reverse;
+            const eventName = this.isReversed ? 'effectReverseOn' : 'effectReverseOff';
+            window.dispatchEvent(new CustomEvent(eventName, { detail: { phase: p.label } }));
+        }
+
+        // 7. GESTION DU BONUS & VITESSE TOTALE
         if (this.activeBonus.timeLeft > 0) {
             this.activeBonus.timeLeft -= delta;
             if (this.activeBonus.timeLeft <= 0) {
@@ -139,102 +255,46 @@ export class GameEngine {
             }
         }
 
-        // GESTION DES EFFETS
-        const effects = p.effects || [];
-        const triggers = {
-            eclair: effects.includes('eclair') && Math.random() < (p.eclairIntensity || 0.1),
-            flash:  effects.includes('flash')  && Math.random() < (p.flashIntensity  || 0.02),
-            glitch: effects.includes('glitch') && Math.random() < (p.glitchIntensity || 0.05),
-            reverse: effects.includes("reverse"),
-            shake:   effects.includes('shake'),
-        };
-
-        if (triggers.eclair) {
-            this.world.triggerLightning();
-        }
-
-        if (triggers.flash) {
-            let flashColorHex = 0xffffff; // Blanc par défaut
-
-            if (p.color && Array.isArray(p.color)) {
-                flashColorHex = p.color[Math.floor(Math.random() * p.color.length)];
-            } else if (p.color) {
-                flashColorHex = p.color;
-            }
-
-            this.world.triggerScreenFlash(flashColorHex);
-        }
-
-        if (triggers.glitch) {
-            document.body.style.filter = `hue-rotate(${Math.random() * 360}deg) brightness(1.2) contrast(1.5)`;
-
-            setTimeout(() => {
-                document.body.style.filter = 'none';
-            }, 80);
-        }
-
-        const targetRotation = triggers.reverse ? Math.PI : 0;
-        const rotationSpeed = 0.25;
-        this.cameraRotation += (targetRotation - this.cameraRotation) * rotationSpeed * delta;
-        this.camera.rotation.z = this.cameraRotation;
-
-        const rotationDiff = Math.abs(targetRotation - this.cameraRotation);
-        const currentlyRotating = Math.abs(targetRotation - this.cameraRotation) > 0.3;
-
-        if (currentlyRotating !== this.isRotating) {
-            this.isRotating = currentlyRotating;
-            const eventName = this.isRotating ? 'uiRotationStart' : 'uiRotationEnd';
-            window.dispatchEvent(new CustomEvent(eventName));
-        }
-
-        if (triggers.reverse !== this.isReversed) {
-            const eventName = triggers.reverse ? 'effectReverseOn' : 'effectReverseOff';
-            window.dispatchEvent(new CustomEvent(eventName, {detail: { phase: p.label }}));
-            this.isReversed = triggers.reverse;
-        }
-
-        // GESTION DE LA COULEUR AMBIANTE
-        let targetColorHex;
-        if (Array.isArray(p.color)) {
-            // Si c'est un tableau, on alterne toutes les 0.5 secondes (ajustable)
-            this.colorTimer += delta;
-            if (this.colorTimer > 0.5) {
-                this.colorTimer = 0;
-                this.colorIndex = (this.colorIndex + 1) % p.color.length;
-            }
-            targetColorHex = p.color[this.colorIndex];
-        } else {
-            targetColorHex = p.color;
-        }
-        const targetColor = new THREE.Color(targetColorHex);
-
-        // INTERPOLATION DOUCE (Lerp)
-        this.currentParams.color.lerp(targetColor, 2 * delta);
-        this.currentParams.speed += (p.speed - this.currentParams.speed) * 0.05;
-        this.currentParams.waveHeight += (p.waveHeight - this.currentParams.waveHeight) * 0.05;
-        this.currentParams.curveStrength += (p.curveStrength - this.currentParams.curveStrength) * 0.05;
-        this.currentParams.rollStrength += (p.rollStrength - this.currentParams.rollStrength) * 0.05;
-        this.currentParams.gridOpacity += ((p.gridOpacity !== undefined ? p.gridOpacity : 1) - this.currentParams.gridOpacity) * 0.05;
-
-        // MISE A JOUR DE LA VITESSE TOTALE (avec bonus)
-        const baseSpeed = this.currentParams.speed;
+        const targetSpeed = p.speed;
         const multiplier = this.activeBonus.speedMultiplier;
+        
+        // 1. MISE À JOUR DE LA VITESSE DE BASE (Musique)
+        if (this.currentParams.speed < targetSpeed) {
+            // Accélération instantanée
+            this.currentParams.speed = targetSpeed;
+        }
+        else if (this.currentParams.speed > targetSpeed && multiplier <= 1) {
+            // Décélération lente (uniquement hors bonus)
+            const step = delta / this.speedTransitionDuration;
+            this.currentParams.speed = Math.max(targetSpeed, this.currentParams.speed - step);
+        }
 
+        const baseSpeed = this.currentParams.speed;
+
+        // 2. GESTION DE LA VÉLOCITÉ BONUS
         if (multiplier > 1) {
-            this.currentTotalSpeed = baseSpeed * multiplier;
-            this.bonusVelocity = this.currentTotalSpeed - baseSpeed;
+            // Si on vient d'activer le bonus, on fixe la valeur du boost
+            // au lieu de la recalculer à chaque frame par rapport à la base
+            if (this.bonusVelocity <= 0) {
+                this.bonusVelocity = baseSpeed * (multiplier - 1);
+            }
+            // La vitesse totale est l'addition de la base (qui peut varier) et du boost (fixe)
+            this.currentTotalSpeed = baseSpeed + this.bonusVelocity;
         } else {
+            // Si plus de bonus, on applique la friction sur le boost restant
             if (this.bonusVelocity > 0) {
                 const friction = 0.2 * delta;
                 this.bonusVelocity += (0 - this.bonusVelocity) * friction;
-                if (this.bonusVelocity < 0.1) this.bonusVelocity = 0;
+                if (this.bonusVelocity < 0.01) this.bonusVelocity = 0;
             }
             this.currentTotalSpeed = baseSpeed + this.bonusVelocity;
         }
 
         this.zOffset += this.currentTotalSpeed * delta * 50;
 
-        // ETAT GLOBAL
+        this.zOffset += this.currentTotalSpeed * delta * 50;
+
+        // 8. ÉTAT ET MISES À JOUR
         const proj = (z, x) => this.getProjection(z, x);
         const state = {
             time: this.time,
@@ -246,15 +306,14 @@ export class GameEngine {
             triggers: triggers
         };
 
-        // MISE A JOUR DES ELEMENTS DE LA SCENE
+        this.background.update(p, delta);
         this.world.update(state, proj);
         this.road.update(state, proj);
         this.entities.update(state, proj);
         this.player.update(state, proj);
 
-        // GESTION DES OBSTACLES
-        this.handleSpawning(delta);
-        this.handleCollisions();
+        this.handleSpawning(state, proj);
+        this.handleCollisions(state, proj);
     }
 
     updatePhase(t) {
@@ -262,20 +321,45 @@ export class GameEngine {
         if (ph && ph !== this.currentPhase) this.currentPhase = ph;
     }
 
-    handleSpawning(dt) {
-        this.spawnTimer -= dt;
-        if (this.spawnTimer <= 0) {
-            const safeLane = Math.floor(Math.random() * 3) - 1;
+    handleSpawning(state, proj) {
+        const dt = state.delta;
+        const p = state.phase;
 
-            // ON PASSE LA PROJECTION ICI
-            const projFunc = (z) => this.getProjection(z);
-            this.entities.spawnWallPattern(safeLane, projFunc, this.isGateInTransit);
+        const wallDensity = p.obstacles?.density || 0;
+        const bonusDensity = p.bonuses?.density || 0;
 
-            this.spawnTimer = 1 / (this.currentPhase.density * 10);
+        // --- 1. Gestion des Murs ---
+        if (wallDensity > 0) {
+            this.spawnWallTimer -= dt;
+            if (this.spawnWallTimer <= 0) {
+                this.currentSafeLane = Math.floor(Math.random() * 3) - 1;
+                this.entities.spawnWallPattern(state, this.currentSafeLane, proj);
+                this.spawnWallTimer = 1 / (wallDensity * 5);
+
+                // Verrou
+                if (this.spawnBonusTimer < 0.2) this.spawnBonusTimer = 0.2;
+            }
+        } else {
+            // Si densité 0, on garde le timer à une valeur positive pour le prochain changement
+            this.spawnWallTimer = 0.5;
+        }
+
+        // --- 2. Gestion des Bonus ---
+        if (bonusDensity > 0) {
+            this.spawnBonusTimer -= dt;
+            if (this.spawnBonusTimer <= 0) {
+                this.entities.spawnBonusPattern(state, this.currentSafeLane, proj);
+                this.spawnBonusTimer = 1 / (bonusDensity * 2);
+
+                // Verrou
+                if (this.spawnWallTimer < 0.2) this.spawnWallTimer = 0.2;
+            }
+        } else {
+            this.spawnBonusTimer = 0.5;
         }
     }
 
-    handleCollisions() {
+    handleCollisions(state, proj) {
         this.entities.entities.forEach(ent => {
             if (!ent.isActive) return;
 

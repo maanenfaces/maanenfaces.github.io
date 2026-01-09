@@ -2,94 +2,284 @@ export const DREAMLO_PUBLIC_KEY = "69458ce88f40bbcf805ef9d4";
 export const DREAMLO_PRIVATE_KEY = "hs-2UxzkEE63Qe2M03wFnw54oKmXEjbE24PZxu_IlWYA";
 
 export const DEV_MODE = true;
-
-export const SONG_START_AT = 120;
+export const SONG_START_AT = 1;
 
 export const SONG_STRUCTURE = [
+    // ---------------------------------------------------------
     // INTRO
-    { start: 0,  end: 28, label: "INTRO", speed: 1, density: 0.1, effects: [], waveHeight: 0.5, curveStrength: 4, color: 0x00ff00 },
+    // ---------------------------------------------------------
+    { start: 0, end: 5, label: "INTRO 1",
+      bonuses: { density: 0 },
+      obstacles: { density: 0.05 }
+    },
 
-    // VERSE 1 WARMUP: DISCOVERING THE GAME
-    { start: 28, end: 31, label: "VERSE 1 WARMUP", speed: 1, density: 0.1,  effects: [], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
-    { start: 31, end: 41, label: "VERSE 1 WARMUP", speed: 1, density: 0.15, effects: [], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
-    { start: 41, end: 55, label: "VERSE 1 WARMUP", speed: 1, density: 0.17, effects: [], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
+    { start: 5, end: 14, label: "INTRO 1",
+      speed: 1.2,
+      bonuses: { density: 0 },
+      obstacles: { density: 0.16 }
+    },
 
-    // VERSE 1: GETTING INTO THE FLOW + A FEW EFFECTS
-    { start: 55, end: 74, label: "VERSE 1",          speed: 0.8, density: 0.17, effects: ["fog"], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
-    { start: 74, end: 81, label: "VERSE 1",          speed: 0.8, density: 0.2,  effects: [], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
-    { start: 81, end: 95, label: "VERSE 1 BUILD-UP", speed: 1, density: 0.08, effects: [], waveHeight: 0.3, curveStrength: 3, color: 0xffff00 },
+    { start: 14, end: 28, label: "INTRO 1",
+      speed: 1.3,
+      obstacles: { density: 0.21 }
+    },
 
+    // ---------------------------------------------------------
+    // VERSE 1 WARMUP
+    // ---------------------------------------------------------
+
+    { start: 28, end: 35, label: "VERSE 1 WARMUP",
+      effects: { curve: { intensity: 1 } },
+      obstacles: { density: 0.25 },
+      theme: { colors: [0xffff00] }
+    },
+    { start: 35, end: 41, label: "VERSE 1 WARMUP",
+      obstacles: { density: 0.27 },
+    },
+    { start: 41, end: 55, label: "VERSE 1 WARMUP",
+      bonuses: { density: 0.05 },
+      effects: { curve: { intensity: 2 } }
+    },
+
+    // ---------------------------------------------------------
+    // VERSE 1
+    // ---------------------------------------------------------
+    { start: 55, end: 74, label: "VERSE 1",
+      colors: [0xffff00, 0xffa500, 0x00ff00],
+      effects: { wave: { intensity: 0.1 } }
+    },
+    { start: 74, end: 81, label: "VERSE 1",
+      bonuses: { density: 0.1, distributions: [{"speed": 100}] }
+    },
+    { start: 81, end: 95, label: "VERSE 1 BUILD-UP",
+      effects: { curve: { intensity: 3 }, wave: { intensity: 0.3 } }
+    },
+
+    // ---------------------------------------------------------
     // BRIDGE 1
-    { start: 95,  end: 109, label: "BRIDGE 1",          speed: 1,  density: 0.05, effects: [], waveHeight: 0.5, curveStrength: 5, color: 0xffff00 },
-    { start: 109, end: 116, label: "BRIDGE 1 BUILD-UP", speed: 1, density: 0.02, effects: [], waveHeight: 0, curveStrength: 0, color: 0xffff00, rollStrength: 0.5 },
-    { start: 116, end: 122, label: "BRIDGE 1 BUILD-UP", speed: 1,    density: 0.02, effects: [], waveHeight: 0.2, waveType: 2, curveStrength: 0, color: 0xffff00, slopeStrength: 0.5, rollStrength: 0.7 },
+    // ---------------------------------------------------------
+    {
+        label: "BRIDGE 1",
+        start: 95, end: 109,
+        theme: { colors: [0xffff00] },
+        obstacles: { density: 0.05 },
+        effects: { curve: { intensity: 5 }, wave: { intensity: 0.5 } }
+    },
+    {
+        label: "BRIDGE 1 BUILD-UP",
+        start: 109, end: 116,
+        theme: { colors: [0xffff00] },
+        obstacles: { density: 0.02 },
+        effects: { curve: { intensity: 0 }, wave: { intensity: 0 }, roll: { intensity: 0.5 } }
+    },
+    {
+        label: "BRIDGE 1 BUILD-UP",
+        start: 116, end: 122,
+        theme: { colors: [0xffff00] },
+        obstacles: { density: 0.02 },
+        effects: { curve: { intensity: 0 }, wave: { intensity: 0.2 }, roll: { intensity: 0.7 } }
+    },
 
+    // ---------------------------------------------------------
     // CHORUS 1
-    { start: 122, end: 136, label: "CHORUS 1", speed: 2, density: 0.1, effects: ["reverse"], eclairIntensity: 0.2, glitchIntensity: 0.1, waveHeight: 0, curveStrength: 4, rollStrength: 50, color: [0xff0000, 0x0000ff] },
-    { start: 136, end: 149, label: "CHORUS 1", speed: 2.2, density: 0.1, effects: ["glitch", "flash"], waveHeight: 0.2, curveStrength: 4, rollStrength: 50, color: [0xff0000, 0x0000ff, 0x000000] },
-    { start: 149, end: 155, label: "CHORUS 1", speed: 2.4, density: 0.15,  effects: ["glitch", "flash", "eclair", "shake", "moving_obstacles"], waveHeight: 0.6, curveStrength: 4, color: [0xaa0000, 0xdd0000], rollStrength: 80, bgImage: "https://www.publicdomainpictures.net/pictures/320000/velka/rauch-hintergrund-1575902986IPo.jpg" },
-    { start: 155, end: 163, label: "CHORUS 1", speed: 2.6, density: 0.2,  effects: ["glitch", "flash", "eclair", "shake", "moving_obstacles", "fog"], waveHeight: 0.8, curveStrength: 4, color: [0x770000, 0xaa0000], bgVideo: "b17ggN8TZUs", gridOpacity: 0 },
+    // ---------------------------------------------------------
+    {
+        label: "CHORUS 1",
+        start: 122, end: 136,
+        speed: 2,
+        theme: { colors: [0xff0000, 0x0000ff] },
+        obstacles: { density: 0.1 },
+        effects: {
+            lightning: { intensity: 0.2 },
+            glitch: { intensity: 0.1 },
+            curve: { intensity: 4 },
+            wave: { intensity: 0 }
+        }
+    },
+    {
+        label: "CHORUS 1",
+        start: 136, end: 149,
+        speed: 2.2,
+        theme: { colors: [0xff0000, 0x0000ff, 0x000000] },
+        obstacles: { density: 0.1 },
+        effects: {
+            glitch: { intensity: 0.1 },
+            flash: { intensity: 0.1 },
+            curve: { intensity: 4 },
+            wave: { intensity: 0.2 }
+        }
+    },
+    {
+        label: "CHORUS 1",
+        start: 149, end: 155,
+        speed: 2.4,
+        theme: {
+            colors: [0xaa0000, 0xdd0000],
+            background: { imageUrl: "https://www.publicdomainpictures.net/pictures/320000/velka/rauch-hintergrund-1575902986IPo.jpg" }
+        },
+        obstacles: { density: 0.15 },
+        effects: {
+            glitch: { intensity: 0.1 },
+            flash: { intensity: 0.1 },
+            lightning: { intensity: 0.1 },
+            curve: { intensity: 4 },
+            wave: { intensity: 0.6 },
+            roll: { intensity: 0.8 }
+        }
+    },
+    {
+        label: "CHORUS 1",
+        start: 155, end: 163,
+        speed: 2.6,
+        theme: {
+            colors: [0x770000, 0xaa0000],
+            background: { videoId: "b17ggN8TZUs" },
+            gridOpacity: 0
+        },
+        obstacles: { density: 0.2 },
+        effects: {
+            glitch: { intensity: 0.1 },
+            flash: { intensity: 0.1 },
+            lightning: { intensity: 0.1 },
+            curve: { intensity: 4 },
+            wave: { intensity: 0.8 }
+        }
+    },
 
+    // ---------------------------------------------------------
     // POST-CHORUS 1
-    { start: 163, end: 190, label: "POST-CHORUS 1", speed: 2, density: 0.15, effects: [], waveHeight: 0.03, curveStrength: 2, color: 0xffff00 },
-    { start: 190, end: 217, label: "POST-CHORUS 1 VOICE", speed: 2, density: 0.15, effects: [], waveHeight: 0.6, curveStrength: 2, color: 0xffff00 },
+    // ---------------------------------------------------------
+    {
+        label: "POST-CHORUS 1",
+        start: 163, end: 190,
+        speed: 2,
+        theme: { colors: [0xffff00] },
+        obstacles: { density: 0.15 },
+        effects: { curve: { intensity: 2 }, wave: { intensity: 0.03 } }
+    },
+    {
+        label: "POST-CHORUS 1 VOICE",
+        start: 190, end: 217,
+        speed: 2,
+        theme: { colors: [0xffff00] },
+        obstacles: { density: 0.15 },
+        effects: { curve: { intensity: 2 }, wave: { intensity: 0.6 } }
+    },
 
-    // MID-SONG BREAK
-    { start: 217, end: 237, label: "MID-SONG BREAK", speed: 0.8, density: 0.03, effects: [], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
+    // ---------------------------------------------------------
+    // MID-SONG BREAK & VERSE 2
+    // ---------------------------------------------------------
+    {
+        label: "MID-SONG BREAK",
+        start: 217, end: 237,
+        speed: 0.8,
+        theme: { colors: [0xffff00] },
+        obstacles: { density: 0.03 },
+        effects: { curve: { intensity: 2 }, wave: { intensity: 0 } }
+    },
+    {
+        label: "VERSE 2 WARMUP",
+        start: 237, end: 283,
+        speed: 0.7,
+        theme: { colors: [0xffff00] },
+        obstacles: { density: 0.02 },
+        effects: { curve: { intensity: 2 }, wave: { intensity: 0 } }
+    },
+    {
+        label: "VERSE 2",
+        start: 283, end: 285,
+        speed: 0.7,
+        theme: { colors: [0xffff00] },
+        obstacles: { density: 0.02 },
+        effects: { curve: { intensity: 2 }, wave: { intensity: 0 } }
+    },
+    {
+        label: "VERSE 2",
+        start: 285, end: 304,
+        speed: 0.7,
+        theme: { colors: [0xffff00] },
+        obstacles: { density: 0.02 },
+        effects: { curve: { intensity: 2 }, wave: { intensity: 0 } }
+    },
 
-    // VERSE 2 WARMUP
-    { start: 237, end: 283, label: "VERSE 2 WARMUP", speed: 0.7, density: 0.02, effects: [], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
-
-    // VERSE 2
-    { start: 283, end: 285, label: "VERSE 2", speed: 0.7, density: 0.02, effects: [], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
-    { start: 285, end: 304, label: "VERSE 2", speed: 0.7, density: 0.02, effects: [], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
-
+    // ---------------------------------------------------------
     // BRIDGE 2
-    { start: 304, end: 318, label: "BRIDGE 2",          speed: 0.8, density: 0.03, effects: [], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
-    { start: 318, end: 332, label: "BRIDGE 2 BUILD-UP", speed: 0.8, density: 0.03, effects: [], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
+    // ---------------------------------------------------------
+    {
+        label: "BRIDGE 2",
+        start: 304, end: 318,
+        speed: 0.8,
+        theme: { colors: [0xffff00] },
+        obstacles: { density: 0.03 },
+        effects: { curve: { intensity: 2 }, wave: { intensity: 0 } }
+    },
+    {
+        label: "BRIDGE 2 BUILD-UP",
+        start: 318, end: 332,
+        speed: 0.8,
+        theme: { colors: [0xffff00] },
+        obstacles: { density: 0.03 },
+        effects: { curve: { intensity: 2 }, wave: { intensity: 0 } }
+    },
 
+    // ---------------------------------------------------------
     // CHORUS 2
-    { start: 332, end: 345, label: "CHORUS 2", speed: 0.8, density: 0.03, effects: [], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
-    { start: 345, end: 359, label: "CHORUS 2", speed: 0.8, density: 0.03, effects: [], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
-    { start: 359, end: 366, label: "CHORUS 2", speed: 0.8, density: 0.03, effects: [], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
-    { start: 366, end: 372, label: "CHORUS 2", speed: 0.8, density: 0.03, effects: [], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
+    // ---------------------------------------------------------
+    { start: 332, end: 345, label: "CHORUS 2", speed: 0.8, theme: { colors: [0xffff00] }, obstacles: { density: 0.03 }, effects: { curve: { intensity: 2 }, wave: { intensity: 0 } } },
+    { start: 345, end: 359, label: "CHORUS 2", speed: 0.8, theme: { colors: [0xffff00] }, obstacles: { density: 0.03 }, effects: { curve: { intensity: 2 }, wave: { intensity: 0 } } },
+    { start: 359, end: 366, label: "CHORUS 2", speed: 0.8, theme: { colors: [0xffff00] }, obstacles: { density: 0.03 }, effects: { curve: { intensity: 2 }, wave: { intensity: 0 } } },
+    { start: 366, end: 372, label: "CHORUS 2", speed: 0.8, theme: { colors: [0xffff00] }, obstacles: { density: 0.03 }, effects: { curve: { intensity: 2 }, wave: { intensity: 0 } } },
 
+    // ---------------------------------------------------------
     // POST-CHORUS 2
-    { start: 372, end: 399, label: "POST-CHORUS 2", speed: 0.8, density: 0.03, effects: [], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
-    { start: 399, end: 413, label: "POST-CHORUS 2", speed: 0.8, density: 0.03, effects: [], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
-    { start: 413, end: 426, label: "POST-CHORUS 2", speed: 0.8, density: 0.03, effects: [], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
-    { start: 426, end: 440, label: "POST-CHORUS 2", speed: 0.8, density: 0.03, effects: [], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
-    { start: 440, end: 453, label: "POST-CHORUS 2", speed: 0.8, density: 0.03, effects: [], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
+    // ---------------------------------------------------------
+    { start: 372, end: 399, label: "POST-CHORUS 2", speed: 0.8, theme: { colors: [0xffff00] }, obstacles: { density: 0.03 }, effects: { curve: { intensity: 2 }, wave: { intensity: 0 } } },
+    { start: 399, end: 413, label: "POST-CHORUS 2", speed: 0.8, theme: { colors: [0xffff00] }, obstacles: { density: 0.03 }, effects: { curve: { intensity: 2 }, wave: { intensity: 0 } } },
+    { start: 413, end: 426, label: "POST-CHORUS 2", speed: 0.8, theme: { colors: [0xffff00] }, obstacles: { density: 0.03 }, effects: { curve: { intensity: 2 }, wave: { intensity: 0 } } },
+    { start: 426, end: 440, label: "POST-CHORUS 2", speed: 0.8, theme: { colors: [0xffff00] }, obstacles: { density: 0.03 }, effects: { curve: { intensity: 2 }, wave: { intensity: 0 } } },
+    { start: 440, end: 453, label: "POST-CHORUS 2", speed: 0.8, theme: { colors: [0xffff00] }, obstacles: { density: 0.03 }, effects: { curve: { intensity: 2 }, wave: { intensity: 0 } } },
 
+    // ---------------------------------------------------------
     // ENDING PART 1
-    { start: 453, end: 467, label: "ENDING PART 1", speed: 0.8, density: 0.03, effects: [], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
-    { start: 467, end: 480, label: "ENDING PART 1", speed: 0.8, density: 0.03, effects: [], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
-    { start: 480, end: 494, label: "ENDING PART 1", speed: 0.8, density: 0.03, effects: [], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
-    { start: 494, end: 501, label: "ENDING PART 1", speed: 0.8, density: 0.03, effects: [], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
+    // ---------------------------------------------------------
+    { start: 453, end: 467, label: "ENDING PART 1", speed: 0.8, theme: { colors: [0xffff00] }, obstacles: { density: 0.03 }, effects: { curve: { intensity: 2 }, wave: { intensity: 0 } } },
+    { start: 467, end: 480, label: "ENDING PART 1", speed: 0.8, theme: { colors: [0xffff00] }, obstacles: { density: 0.03 }, effects: { curve: { intensity: 2 }, wave: { intensity: 0 } } },
+    { start: 480, end: 494, label: "ENDING PART 1", speed: 0.8, theme: { colors: [0xffff00] }, obstacles: { density: 0.03 }, effects: { curve: { intensity: 2 }, wave: { intensity: 0 } } },
+    { start: 494, end: 501, label: "ENDING PART 1", speed: 0.8, theme: { colors: [0xffff00] }, obstacles: { density: 0.03 }, effects: { curve: { intensity: 2 }, wave: { intensity: 0 } } },
 
+    // ---------------------------------------------------------
     // ENDING BREAK 1
-    { start: 501, end: 504, label: "ENDING BREAK 1", speed: 0.8, density: 0.03, effects: [], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
-    { start: 504, end: 508, label: "ENDING BREAK 1", speed: 0.8, density: 0.03, effects: [], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
-    { start: 508, end: 511, label: "ENDING BREAK 1", speed: 0.8, density: 0.03, effects: [], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
-    { start: 511, end: 514, label: "ENDING BREAK 1", speed: 0.8, density: 0.03, effects: [], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
+    // ---------------------------------------------------------
+    { start: 501, end: 504, label: "ENDING BREAK 1", speed: 0.8, theme: { colors: [0xffff00] }, obstacles: { density: 0.03 }, effects: { curve: { intensity: 2 }, wave: { intensity: 0 } } },
+    { start: 504, end: 508, label: "ENDING BREAK 1", speed: 0.8, theme: { colors: [0xffff00] }, obstacles: { density: 0.03 }, effects: { curve: { intensity: 2 }, wave: { intensity: 0 } } },
+    { start: 508, end: 511, label: "ENDING BREAK 1", speed: 0.8, theme: { colors: [0xffff00] }, obstacles: { density: 0.03 }, effects: { curve: { intensity: 2 }, wave: { intensity: 0 } } },
+    { start: 511, end: 514, label: "ENDING BREAK 1", speed: 0.8, theme: { colors: [0xffff00] }, obstacles: { density: 0.03 }, effects: { curve: { intensity: 2 }, wave: { intensity: 0 } } },
 
+    // ---------------------------------------------------------
     // ENDING PART 2
-    { start: 514, end: 521, label: "ENDING PART 2", speed: 0.8, density: 0.03, effects: [], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
-    { start: 521, end: 528, label: "ENDING PART 2", speed: 0.8, density: 0.03, effects: [], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
+    // ---------------------------------------------------------
+    { start: 514, end: 521, label: "ENDING PART 2", speed: 0.8, theme: { colors: [0xffff00] }, obstacles: { density: 0.03 }, effects: { curve: { intensity: 2 }, wave: { intensity: 0 } } },
+    { start: 521, end: 528, label: "ENDING PART 2", speed: 0.8, theme: { colors: [0xffff00] }, obstacles: { density: 0.03 }, effects: { curve: { intensity: 2 }, wave: { intensity: 0 } } },
 
+    // ---------------------------------------------------------
     // ENDING BREAK 2
-    { start: 528, end: 529, label: "ENDING BREAK 2", speed: 0.8, density: 0.03, effects: [], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
-    { start: 529, end: 531, label: "ENDING BREAK 2", speed: 0.8, density: 0.03, effects: [], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
-    { start: 531, end: 534, label: "ENDING BREAK 2", speed: 0.8, density: 0.03, effects: [], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
-    { start: 534, end: 538, label: "ENDING BREAK 2", speed: 0.8, density: 0.03, effects: [], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
-    { start: 538, end: 541, label: "ENDING BREAK 22", speed: 0.8, density: 0.03, effects: [], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
+    // ---------------------------------------------------------
+    { start: 528, end: 529, label: "ENDING BREAK 2", speed: 0.8, theme: { colors: [0xffff00] }, obstacles: { density: 0.03 }, effects: { curve: { intensity: 2 }, wave: { intensity: 0 } } },
+    { start: 529, end: 531, label: "ENDING BREAK 2", speed: 0.8, theme: { colors: [0xffff00] }, obstacles: { density: 0.03 }, effects: { curve: { intensity: 2 }, wave: { intensity: 0 } } },
+    { start: 531, end: 534, label: "ENDING BREAK 2", speed: 0.8, theme: { colors: [0xffff00] }, obstacles: { density: 0.03 }, effects: { curve: { intensity: 2 }, wave: { intensity: 0 } } },
+    { start: 534, end: 538, label: "ENDING BREAK 2", speed: 0.8, theme: { colors: [0xffff00] }, obstacles: { density: 0.03 }, effects: { curve: { intensity: 2 }, wave: { intensity: 0 } } },
+    { start: 538, end: 541, label: "ENDING BREAK 22", speed: 0.8, theme: { colors: [0xffff00] }, obstacles: { density: 0.03 }, effects: { curve: { intensity: 2 }, wave: { intensity: 0 } } },
 
+    // ---------------------------------------------------------
     // ENDING PART 3
-    { start: 541, end: 548, label: "ENDING PART 3", speed: 0.8, density: 0.03, effects: [], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
-    { start: 548, end: 555, label: "ENDING PART 3", speed: 0.8, density: 0.03, effects: [], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
+    // ---------------------------------------------------------
+    { start: 541, end: 548, label: "ENDING PART 3", speed: 0.8, theme: { colors: [0xffff00] }, obstacles: { density: 0.03 }, effects: { curve: { intensity: 2 }, wave: { intensity: 0 } } },
+    { start: 548, end: 555, label: "ENDING PART 3", speed: 0.8, theme: { colors: [0xffff00] }, obstacles: { density: 0.03 }, effects: { curve: { intensity: 2 }, wave: { intensity: 0 } } },
 
+    // ---------------------------------------------------------
     // OUTRO
-    { start: 555, end: 566, label: "OUTRO", speed: 0.8, density: 0.03, effects: [], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
-    { start: 566, end: 574, label: "OUTRO", speed: 0.8, density: 0.03, effects: [], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
-    { start: 574, end: 999, label: "OUTRO", speed: 0.8, density: 0.03, effects: [], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
+    // ---------------------------------------------------------
+    { start: 555, end: 566, label: "OUTRO", speed: 0.8, theme: { colors: [0xffff00] }, obstacles: { density: 0.03 }, effects: { curve: { intensity: 2 }, wave: { intensity: 0 } } },
+    { start: 566, end: 574, label: "OUTRO", speed: 0.8, theme: { colors: [0xffff00] }, obstacles: { density: 0.03 }, effects: { curve: { intensity: 2 }, wave: { intensity: 0 } } },
+    { start: 574, end: 999, label: "OUTRO", speed: 0.8, theme: { colors: [0xffff00] }, obstacles: { density: 0.03 }, effects: { curve: { intensity: 2 }, wave: { intensity: 0 } } }
 ];

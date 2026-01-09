@@ -51,8 +51,53 @@ export class Wall extends Entity {
             new THREE.BoxGeometry(4, 3, 1),
             new THREE.MeshBasicMaterial({color: 0xff0000, transparent: true, opacity: 0.7})
         );
-        m.position.y = 1.5;
+        m.position.y = 1.6;
         this.mesh.add(m);
+    }
+}
+
+export class MovingWall extends Entity {
+    constructor(lane, z, getProjection) {
+        super(lane, z, getProjection);
+
+        this.type = 'wall';
+        this.moveSpeed = 1.0;
+        this.internalTimer = Math.random() * Math.PI * 2;
+        this.amplitude = 1.0;
+
+        if (Math.random() > 0.5) {
+            this.moveSpeed *= -1;
+        }
+
+        // Visuel Violet
+        const geometry = new THREE.BoxGeometry(4, 3, 1);
+        const material = new THREE.MeshBasicMaterial({
+            color: 0x8A2BE2,
+            transparent: true,
+            opacity: 0.8
+        });
+
+        const m = new THREE.Mesh(geometry, material);
+        m.position.y = 1.8;
+
+        const edges = new THREE.EdgesGeometry(geometry);
+        const line = new THREE.LineSegments(
+            edges,
+            new THREE.LineBasicMaterial({ color: 0xff00ff })
+        );
+        m.add(line);
+        this.mesh.add(m);
+    }
+
+    // On utilise exactement le même nom et les mêmes arguments que dans Entity
+    updatePosition(speed, delta, getProjection) {
+        // 1. On calcule le mouvement latéral AVANT tout le reste
+        this.internalTimer += delta * this.moveSpeed;
+        this.lane = Math.sin(this.internalTimer) * this.amplitude;
+
+        // 2. On appelle la logique de la classe parente (super)
+        // pour qu'elle fasse le rendu 3D avec notre nouvelle "this.lane"
+        super.updatePosition(speed, delta, getProjection);
     }
 }
 
@@ -211,30 +256,64 @@ export class EntityManager {
     createBonus(lane, z, getProjection, type) {
         switch(type) {
             case 'jump':
+            case 'JumpBonus':
                 return new JumpBonus(lane, z, getProjection);
             case 'speed':
+            case 'SpeedBonus':
                 return new SpeedBonus(lane, z, getProjection);
             case 'invincible':
+            case 'GhostBonus':
+            case 'InvincibleBonus':
                 return new InvincibleBonus(lane, z, getProjection);
             default:
                 return new Bonus(lane, z, getProjection);
         }
     }
 
-    spawnWallPattern(safeLane, getProjection, isNewPhaseComing = false) {
-        // Spawn des murs
-        [-1, 0, 1].forEach(l => {
-            if(l !== safeLane) {
-                this.add(new Wall(l, -250, getProjection));
-            }
-        });
+    getRandomEntity(distribution, fallbackType) {
+        if (!distribution || distribution.length === 0) return fallbackType;
 
-        // Spawn d'un bonus aléatoire sur la voie libre
-        if(Math.random() > 0.7) {
-            let types = ['jump', 'invincible'];
-            if (!isNewPhaseComing) types.push('speed');
-            const randomType = types[Math.floor(Math.random() * types.length)];
-            this.add(this.createBonus(safeLane, -250, getProjection, randomType));
+        const roll = Math.random() * 100;
+        let cumulative = 0;
+
+        for (const item of distribution) {
+            cumulative += item.percent;
+            if (roll <= cumulative) {
+                return item.entity;
+            }
+        }
+        return fallbackType;
+    }
+
+    spawnBonusPattern(state, safeLane, getProjection) {
+        const p = state.phase;
+        const selectedBonus = this.getRandomEntity(p.bonuses.distribution, 'JumpBonus');
+
+        if (selectedBonus) {
+            // On place le bonus dans la safeLane pour garantir qu'il n'est pas DANS un mur
+            this.add(this.createBonus(safeLane, -250, getProjection, selectedBonus));
+        }
+    }
+
+    spawnWallPattern(state, safeLane, getProjection) {
+        const p = state.phase;
+        const selected = this.getRandomEntity(p.obstacles.distribution, 'Wall');
+
+        if (selected === 'MovingWall') {
+            // Occupe toute la largeur dynamiquement
+            this.add(new MovingWall(0, -250, getProjection));
+        } else {
+            // Murs statiques : on laisse la safeLane vide
+            const availableLanes = [-1, 0, 1].filter(l => l !== safeLane);
+            const numberOfWalls = Math.random() < 0.5 ? 1 : 2;
+
+            const selectedLanes = availableLanes
+                .sort(() => Math.random() - 0.5)
+                .slice(0, numberOfWalls);
+
+            selectedLanes.forEach(lane => {
+                this.add(new Wall(lane, -250, getProjection));
+            });
         }
     }
 

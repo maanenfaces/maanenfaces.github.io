@@ -86,7 +86,7 @@ export class Player {
 
         // Gestion des mouvements avec prise en compte de l'effet "reverse"
         if (this.nextMove !== 0) {
-            const isReverse = state.phase?.effects?.includes("reverse");
+            const isReverse = state.phase.effects.reverse.enabled;
             const finalDir = isReverse ? -this.nextMove : this.nextMove;
             this.currentLane = Math.max(-1, Math.min(1, this.currentLane + finalDir));
             this.nextMove = 0;
