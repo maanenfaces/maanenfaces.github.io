@@ -31,7 +31,12 @@ const DEFAULT_PHASE = {
     },
     obstacles: {
         density: 0.2,
-        distribution: [{ entity: "Wall", percent: 100 }]
+        distribution: [
+            { entity: "Wall", percent: 25 },
+            { entity: "MovingWall", percent: 25 },
+            { entity: "FallingWall", percent: 25 },
+            { entity: "ChasingWall", percent: 25 }
+        ]
     },
     effects: {
         curve:     { intensity: 0.5 },
