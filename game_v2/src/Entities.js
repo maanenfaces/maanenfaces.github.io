@@ -20,7 +20,7 @@ class Entity {
         }
     }
 
-    updatePosition(speed, delta, getProjection) {
+    updatePosition(speed, delta, getProjection, allEntities = []) {
         this.z += speed * delta;
         const laneX = this.lane * this.laneWidth;
 
@@ -47,6 +47,7 @@ export class Wall extends Entity {
     constructor(lane, z, getProjection) {
         super(lane, z, getProjection);
         this.type = 'wall';
+        this.color = 0xff0000;
 
         this.glitchPalette = [
             0xaa0044, // Bordeaux/Rose sombre
@@ -63,7 +64,7 @@ export class Wall extends Entity {
         this.innerMesh = new THREE.Mesh(
             geometry,
             new THREE.MeshBasicMaterial({
-                color: 0xff0000,
+                color: this.color,
                 transparent: true,
                 opacity: 0.7
             })
@@ -72,7 +73,7 @@ export class Wall extends Entity {
         const edgesGeometry = new THREE.EdgesGeometry(geometry);
         this.line = new THREE.LineSegments(
             edgesGeometry,
-            new THREE.LineBasicMaterial({ color: 0xff0000, opacity: 0.8 })
+            new THREE.LineBasicMaterial({ color: this.color, opacity: 0.8 })
         );
 
         this.innerMesh.add(this.line);
@@ -109,7 +110,7 @@ export class Wall extends Entity {
             }
 
             // Retour à la couleur rouge d'origine
-            this.innerMesh.material.color.setHex(0xff0000);
+            this.innerMesh.material.color.setHex(this.color);
         }
     }
 }
@@ -118,73 +119,124 @@ export class FallingWall extends Wall {
     constructor(lane, z, getProjection) {
         super(lane, z, getProjection);
         this.type = 'falling_wall';
+        this.color = 0x00ff88;
 
-        // 1. VITESSE ALÉATOIRE PAR OBJET
-        // Cycle entre 0.8s (très rapide) et 1.4s (rapide)
-        // Cela permet de voir le mur tomber plusieurs fois pendant son approche
         this.fallCycleDuration = 0.8 + Math.random() * 0.6;
-
-        // 2. TIMING ALÉATOIRE AU DÉPART
-        // On commence à un point aléatoire du cycle pour éviter que tous les murs ne tombent en même temps
         this.internalTimer = Math.random() * this.fallCycleDuration;
+        this.glitchPalette = [
+            0x00ff88, // Couleur de base (rappel)
+            0x55ff00, // Vert fluo
+            0x00ffff, // Cyan électrique (très proche du bleu mais harmonieux)
+            0x004400,
+            0xff6600, // Orange vif (couleur complémentaire pour un effet de "crash" visuel)
+            0x004422  // Vert très sombre (micro-coupure)
+        ];
 
-        this.glitchPalette = [0x00ccff, 0x0044ff, 0xff6600, 0xffaa00, 0xffffff];
+        // --- Setup Traînée ---
+        this.trails = [];
+        this.trailSpawnTimer = 0;
+        this.trailFrequency = 0.03;
+        this.trailGeometry = new THREE.BoxGeometry(4, 3, 1);
+        this.trailBaseMaterial = new THREE.MeshBasicMaterial({
+            color: 0xaaff88,
+            transparent: true,
+            opacity: 0.4
+        });
 
         if (this.innerMesh) {
             this.innerMesh.material = this.innerMesh.material.clone();
-            this.innerMesh.material.color.setHex(0x00ff88);
-
+            this.innerMesh.material.color.setHex(this.color);
             if (this.innerMesh.children[0]) {
                 this.innerMesh.children[0].material = this.innerMesh.children[0].material.clone();
-                this.innerMesh.children[0].material.color.setHex(0x55ff00);
+                this.innerMesh.children[0].material.color.setHex(this.color);
             }
         }
     }
 
-    updatePosition(speed, delta, getProjection) {
-        // Le mouvement tourne en boucle dès le début
+    spawnTrail(currentY) {
+        const trailMesh = new THREE.Mesh(this.trailGeometry, this.trailBaseMaterial.clone());
+
+        // Point d'ancrage : face supérieure du mur (Y + 1.5 car le mur fait 3 de haut)
+        const anchorY = currentY + 1.5;
+        const spawnZ = this.mesh.position.z + 0.5; // Calé sur l'arrière
+
+        trailMesh.position.set(this.mesh.position.x, anchorY, spawnZ);
+        this.mesh.parent.add(trailMesh);
+
+        this.trails.push({
+            mesh: trailMesh,
+            life: 1.0,
+            startY: anchorY,
+            z: spawnZ
+        });
+    }
+
+    updatePosition(speed, delta, getProjection, allEntities = []) {
         this.internalTimer += delta;
-
         const progress = (this.internalTimer % this.fallCycleDuration) / this.fallCycleDuration;
-
-        // Paramètres de chute
-        const fallThreshold = 0.25; // 25% du temps pour tomber, 75% pour remonter
+        const fallThreshold = 0.25;
         const maxFallDistance = 6.0;
         let yOffset = 0;
 
         if (progress < fallThreshold) {
-            // CHUTE ÉLECTRIQUE
-            // Utilisation d'une puissance plus élevée (cube) pour un effet de "poids" encore plus marqué
-            const fallProgress = progress / fallThreshold;
-            yOffset = Math.pow(fallProgress, 3) * maxFallDistance;
+            yOffset = Math.pow(progress / fallThreshold, 3) * maxFallDistance;
         } else {
-            // REMONTÉE NERVEUSE
-            const riseProgress = (progress - fallThreshold) / (1 - fallThreshold);
-            yOffset = maxFallDistance * (1 - riseProgress);
+            yOffset = maxFallDistance * (1 - (progress - fallThreshold) / (1 - fallThreshold));
         }
 
-        // Positionnement (Abaissé selon ta demande précédente)
         const initialHeight = 7.6;
-        this.innerMesh.position.y = initialHeight - yOffset;
+        const newY = initialHeight - yOffset;
 
-        // Mise à jour de la position Z (mouvement vers le joueur)
-        super.updatePosition(speed, delta, getProjection);
+        // Avant de mettre à jour le mesh, on mémorise l'ancienne face haute pour l'étirement
+        const topFlankY = newY + 1.5;
+
+        this.innerMesh.position.y = newY;
+        super.updatePosition(speed, delta, getProjection, allEntities);
+
+        // Gestion Traînée
+        this.trailSpawnTimer += delta;
+        if (this.trailSpawnTimer >= this.trailFrequency) {
+            this.spawnTrail(newY);
+            this.trailSpawnTimer = 0;
+        }
+
+        for (let i = this.trails.length - 1; i >= 0; i--) {
+            const t = this.trails[i];
+            t.life -= delta * 4.0; // Disparition rapide pour l'effet de vitesse
+
+            if (t.life <= 0) {
+                this.mesh.parent.remove(t.mesh);
+                t.mesh.material.dispose();
+                this.trails.splice(i, 1);
+            } else {
+                t.z += speed * delta;
+
+                // ÉTIREMENT VERTICAL
+                // On étire entre le point où le segment est né et la position actuelle du haut du mur
+                const deltaY = topFlankY - t.startY;
+
+                t.mesh.position.y = t.startY + (deltaY / 2);
+                t.mesh.position.z = t.z;
+                t.mesh.position.x = this.mesh.position.x;
+
+                // Scale Y : distance divisée par la hauteur initiale (3)
+                t.mesh.scale.y = Math.max(0.01, Math.abs(deltaY) / 3);
+                t.mesh.scale.x = 1.0;
+                t.mesh.scale.z = 1.0;
+
+                t.mesh.material.opacity = t.life * 0.3;
+            }
+        }
     }
 
-    // On s'assure que l'animation de glitch utilise bien les couleurs uniques
-    animate(time, intensity = 1.0) {
-        const glitchBurst = Math.sin(time * 2.5 + this.pulseOffset) * Math.sin(time * 0.8);
-
-        if (glitchBurst > 0.5) {
-            const randomColor = this.glitchPalette[Math.floor(Math.random() * this.glitchPalette.length)];
-            this.innerMesh.material.color.setHex(randomColor);
-
-            this.innerMesh.position.x = (Math.sin(time * 70) * 0.15 + (Math.random() - 0.5) * 0.1) * intensity;
-        } else {
-            this.innerMesh.position.x *= 0.7;
-            // Retour au vert émeraude propre à cette instance
-            this.innerMesh.material.color.setHex(0x00ff88);
-        }
+    dispose() {
+        this.trails.forEach(t => {
+            if (t.mesh.parent) t.mesh.parent.remove(t.mesh);
+            t.mesh.material.dispose();
+        });
+        this.trails = [];
+        this.trailGeometry.dispose();
+        this.trailBaseMaterial.dispose();
     }
 }
 
@@ -193,43 +245,307 @@ export class MovingWall extends Wall {
         super(lane, z, getProjection);
 
         this.type = 'wall';
-        this.moveSpeed = 1.0;
+        this.color = 0xFFA000; // Orange Ambre
+
+        // --- Paramètres de mouvement avec variation aléatoire ---
+        // Vitesse entre 1.2 et 1.8 (moyenne 1.5)
+        this.moveSpeed = 1.2 + Math.random() * 0.6;
+        // Amplitude entre 1.0 et 1.4 (moyenne 1.2)
+        this.amplitude = 1.0 + Math.random() * 0.4;
+
         this.internalTimer = Math.random() * Math.PI * 2;
-        this.amplitude = 1.0;
 
-        if (Math.random() > 0.5) {
-            this.moveSpeed *= -1;
-        }
+        this.glitchPalette = [
+            0xffcc00, // Orange-Jaune clair
+            0xffaa00, // Ambre
+            0xffff00, // Jaune pur
+            0x663300, // Marron chaud
+            0x004400
+        ];
 
-        // Visuel Violet
-        const geometry = new THREE.BoxGeometry(4, 3, 1);
-        const material = new THREE.MeshBasicMaterial({
-            color: 0x8A2BE2,
+        // Direction de départ aléatoire
+        if (Math.random() > 0.5) this.moveSpeed *= -1;
+
+        // --- Configuration de la Traînée ---
+        this.trails = [];
+        this.trailSpawnTimer = 0;
+        this.trailFrequency = 0.04;
+
+        this.trailGeometry = new THREE.BoxGeometry(4, 3, 1);
+
+        this.trailBaseMaterial = new THREE.MeshBasicMaterial({
+            color: 0xffd300,
             transparent: true,
-            opacity: 0.8
+            opacity: 0.3
         });
 
-        const m = new THREE.Mesh(geometry, material);
-        m.position.y = 1.8;
+        // Setup du mur principal
+        if (this.innerMesh) {
+            this.innerMesh.material = new THREE.MeshBasicMaterial({
+                color: this.color,
+                transparent: true,
+                opacity: 0.75
+            });
+            this.innerMesh.position.y = 1.8;
 
-        const edges = new THREE.EdgesGeometry(geometry);
-        const line = new THREE.LineSegments(
-            edges,
-            new THREE.LineBasicMaterial({ color: 0xff00ff })
-        );
-        m.add(line);
-        this.mesh.add(m);
+            if (this.innerMesh.children[0]) {
+                this.innerMesh.children[0].material = this.innerMesh.children[0].material.clone();
+                this.innerMesh.children[0].material.color.setHex(this.color);
+            }
+        }
     }
 
-    // On utilise exactement le même nom et les mêmes arguments que dans Entity
-    updatePosition(speed, delta, getProjection) {
-        // 1. On calcule le mouvement latéral AVANT tout le reste
+    spawnTrail() {
+        const trailMesh = new THREE.Mesh(this.trailGeometry, this.trailBaseMaterial.clone());
+
+        // Calcul du flanc opposé au mouvement
+        const direction = Math.sign(this.moveSpeed * Math.cos(this.internalTimer));
+        const anchorOffset = -direction * 2;
+        const spawnX = this.mesh.position.x + anchorOffset;
+
+        // Position Z : Calée sur la face arrière du mur (Z du mur + 0.5)
+        const spawnZ = this.mesh.position.z - 1;
+
+        trailMesh.position.set(spawnX, 1.8, spawnZ);
+        this.mesh.parent.add(trailMesh);
+
+        this.trails.push({
+            mesh: trailMesh,
+            life: 1.0,
+            startX: spawnX,
+            z: spawnZ
+        });
+    }
+
+    updatePosition(speed, delta, getProjection, allEntities = []) {
+        // Logique de mouvement latéral
         this.internalTimer += delta * this.moveSpeed;
         this.lane = Math.sin(this.internalTimer) * this.amplitude;
 
-        // 2. On appelle la logique de la classe parente (super)
-        // pour qu'elle fasse le rendu 3D avec notre nouvelle "this.lane"
-        super.updatePosition(speed, delta, getProjection);
+        // Mise à jour parente (Z et projection route)
+        super.updatePosition(speed, delta, getProjection, allEntities);
+
+        const direction = Math.sign(this.moveSpeed * Math.cos(this.internalTimer));
+        const anchorOffset = -direction * 2;
+        const currentFlankX = this.mesh.position.x + anchorOffset;
+
+        // Gestion du spawn des traînées
+        this.trailSpawnTimer += delta;
+        if (this.trailSpawnTimer >= this.trailFrequency) {
+            this.spawnTrail();
+            this.trailSpawnTimer = 0;
+        }
+
+        // Mise à jour et nettoyage des traînées
+        for (let i = this.trails.length - 1; i >= 0; i--) {
+            const t = this.trails[i];
+            t.life -= delta * 3.0; // Vitesse de dissipation
+
+            if (t.life <= 0) {
+                this.mesh.parent.remove(t.mesh);
+                t.mesh.material.dispose();
+                this.trails.splice(i, 1);
+            } else {
+                // Progression Z synchronisée avec le défilement du jeu
+                t.z += speed * delta;
+
+                // Étirement latéral dynamique
+                const deltaX = currentFlankX - t.startX;
+                t.mesh.position.x = t.startX + (deltaX / 2);
+                t.mesh.position.z = t.z;
+
+                t.mesh.scale.x = Math.max(0.01, Math.abs(deltaX) / 4);
+                t.mesh.scale.z = 1.0;
+                t.mesh.scale.y = 1.0;
+
+                // Application de la courbure de la route
+                const p = getProjection(t.z);
+                t.mesh.position.y = p.y + 1.8;
+                t.mesh.material.opacity = t.life * 0.4;
+            }
+        }
+    }
+
+    animate(time, intensity = 1.0) {
+        const glitchBurst = Math.sin(time * 2.5 + (this.pulseOffset || 0)) * Math.sin(time * 0.8);
+
+        if (glitchBurst > 0.5) {
+            const randomColor = this.glitchPalette[Math.floor(Math.random() * this.glitchPalette.length)];
+            this.innerMesh.material.color.setHex(randomColor);
+            this.innerMesh.position.x = (Math.sin(time * 70) * 0.15) * intensity;
+        } else {
+            this.innerMesh.position.x *= 0.7;
+            // Retour à la couleur Orange définie dans le constructor
+            this.innerMesh.material.color.setHex(this.color);
+        }
+    }
+
+    dispose() {
+        this.trails.forEach(t => {
+            if (t.mesh.parent) t.mesh.parent.remove(t.mesh);
+            t.mesh.material.dispose();
+        });
+        this.trails = [];
+        this.trailGeometry.dispose();
+        this.trailBaseMaterial.dispose();
+    }
+}
+
+export class ChasingWall extends Wall {
+    constructor(lane, z, getProjection) {
+        super(lane, z, getProjection);
+        this.type = 'chasing_wall';
+        this.color = 0x00BFFF; // Bleu électrique
+
+        this.LANE_WIDTH = 6; // Largeur confirmée
+
+        // Vitesse additionnelle pour remonter le trafic
+        this.flySpeed = 65.0 + Math.random() * 20.0;
+
+        this.targetLane = lane;
+        this.lane = lane;
+
+        this.glitchPalette = [0x00BFFF, 0x00ffff, 0x0044ff, 0xffffff];
+
+        // Configuration Traînée
+        this.trails = [];
+        this.trailSpawnTimer = 0;
+        this.trailFrequency = 0.025;
+
+        this.trailGeometry = new THREE.BoxGeometry(3.5, 0.2, 1); // Très plat au sol
+        this.trailBaseMaterial = new THREE.MeshBasicMaterial({
+            color: this.color,
+            transparent: true,
+            opacity: 0.5
+        });
+
+        if (this.innerMesh) {
+            this.innerMesh.material = new THREE.MeshBasicMaterial({
+                color: this.color,
+                transparent: true,
+                opacity: 0.8
+            });
+            this.innerMesh.position.y = 1.8;
+
+            if (this.innerMesh.children[0]) {
+                this.innerMesh.children[0].material = this.innerMesh.children[0].material.clone();
+                this.innerMesh.children[0].material.color.setHex(this.color);
+            }
+        }
+    }
+
+    updatePosition(speed, delta, getProjection, allEntities = []) {
+        // 1. IA D'ÉVITEMENT
+        if (allEntities && !this.isChangingLane) {
+            const obstacleAhead = allEntities.find(e =>
+                e !== this &&
+                Math.round(e.lane) === Math.round(this.targetLane) &&
+                e.mesh.position.z > this.mesh.position.z &&
+                e.mesh.position.z < this.mesh.position.z + 25
+            );
+
+            if (obstacleAhead) {
+                const possibleLanes = [-1, 0, 1].filter(l => l !== this.targetLane);
+                this.targetLane = possibleLanes[Math.floor(Math.random() * possibleLanes.length)];
+            }
+        }
+
+        // 2. TRANSITION DE LANE
+        const transitionSpeed = 6.0;
+        this.lane += (this.targetLane - this.lane) * delta * transitionSpeed;
+
+        // 3. AVANCE RAPIDE Z
+        this.mesh.position.z += (speed + this.flySpeed) * delta;
+
+        // 4. RÉCUPÉRATION DE LA PROJECTION
+        const projection = getProjection(this.mesh.position.z);
+        const roll = projection.rollAngle || 0;
+
+        // 5. POSITIONNEMENT AVEC ROLL (Trigonométrie pour rester sur le bitume)
+        const laneOffset = this.lane * this.LANE_WIDTH;
+
+        // On calcule X et Y en fonction de l'angle de la route
+        // X = centre_route + cos(angle) * décalage_voie
+        // Y = centre_route + sin(angle) * décalage_voie
+        this.mesh.position.x = projection.x + Math.cos(roll) * laneOffset;
+        this.mesh.position.y = projection.y + Math.sin(roll) * laneOffset;
+
+        // On incline le mur pour qu'il soit perpendiculaire à la route
+        this.mesh.rotation.z = roll;
+
+        // 6. GESTION DES TRAÎNÉES
+        this.trailSpawnTimer += delta;
+        if (this.trailSpawnTimer >= this.trailFrequency) {
+            this.spawnTrail(roll);
+            this.trailSpawnTimer = 0;
+        }
+
+        this.updateTrails(speed, delta, getProjection);
+    }
+
+    spawnTrail(roll) {
+        const trailMesh = new THREE.Mesh(this.trailGeometry, this.trailBaseMaterial.clone());
+
+        // Position et rotation initiales
+        trailMesh.position.copy(this.mesh.position);
+        trailMesh.rotation.z = roll;
+
+        this.mesh.parent.add(trailMesh);
+
+        this.trails.push({
+            mesh: trailMesh,
+            life: 1.0,
+            z: this.mesh.position.z,
+            laneAtSpawn: this.lane
+        });
+    }
+
+    updateTrails(speed, delta, getProjection) {
+        for (let i = this.trails.length - 1; i >= 0; i--) {
+            const t = this.trails[i];
+            t.life -= delta * 2.5;
+
+            if (t.life <= 0) {
+                this.mesh.parent.remove(t.mesh);
+                t.mesh.material.dispose();
+                this.trails.splice(i, 1);
+            } else {
+                // Recul avec le décor
+                t.z += speed * delta;
+
+                // Recalcul de la projection pour chaque segment de traînée
+                const p = getProjection(t.z);
+                const r = p.rollAngle || 0;
+                const offset = t.laneAtSpawn * this.LANE_WIDTH;
+
+                t.mesh.position.z = t.z;
+                t.mesh.position.x = p.x + Math.cos(r) * offset;
+                t.mesh.position.y = p.y + Math.sin(r) * offset;
+                t.mesh.rotation.z = r;
+
+                t.mesh.material.opacity = t.life * 0.4;
+                t.mesh.scale.x = t.life;
+            }
+        }
+    }
+
+    animate(time, intensity = 1.0) {
+        const glitchBurst = Math.sin(time * 2.5) * Math.sin(time * 0.8);
+        if (glitchBurst > 0.5) {
+            this.innerMesh.material.color.setHex(this.glitchPalette[Math.floor(Math.random() * this.glitchPalette.length)]);
+        } else {
+            this.innerMesh.material.color.setHex(this.color);
+        }
+    }
+
+    dispose() {
+        this.trails.forEach(t => {
+            if (t.mesh.parent) t.mesh.parent.remove(t.mesh);
+            t.mesh.material.dispose();
+        });
+        this.trails = [];
+        this.trailGeometry.dispose();
+        this.trailBaseMaterial.dispose();
     }
 }
 
@@ -468,31 +784,44 @@ export class EntityManager {
     spawnWallPattern(state, safeLane, getProjection) {
         const p = state.phase;
         // On pioche le type d'entité selon la distribution de la phase
+        // Note : Assure-toi que 'ChasingWall' est bien présent dans ton state.phase.obstacles.distribution
         const selected = this.getRandomEntity(p.obstacles.distribution, 'Wall');
 
+        const spawnAtZ = -300;
+
         if (selected === 'MovingWall') {
-            // Le MovingWall oscille sur toute la largeur
+            // Orange : Oscille latéralement
             this.add(new MovingWall(0, -250, getProjection));
         }
         else if (selected === 'FallingWall') {
-            // Le FallingWall occupe une voie précise, mais on respecte la safeLane
+            // Vert : Tombe du ciel sur une voie précise
             const availableLanes = [-1, 0, 1].filter(l => l !== safeLane);
-            // On en place un seul car il est plus dangereux (mouvement vertical)
             const lane = availableLanes[Math.floor(Math.random() * availableLanes.length)];
-            this.add(new FallingWall(lane, -250, getProjection));
+            this.add(new FallingWall(lane, spawnAtZ, getProjection));
+        }
+        else if (selected === 'ChasingWall') {
+            // Bleu : Fonce vers le joueur et évite les obstacles
+            // On le spawn plus loin (-450) pour lui laisser de la distance de poursuite
+            const lane = Math.floor(Math.random() * 3) - 1;
+            this.add(new ChasingWall(lane, spawnAtZ, getProjection));
+
+            // Comme il vient de loin, on peut aussi ajouter un mur statique standard
+            // à la distance normale pour créer un obstacle qu'il devra éviter
+            if (Math.random() > 0.5) {
+                const staticLane = [-1, 0, 1][Math.floor(Math.random() * 3)];
+                this.add(new Wall(staticLane, spawnAtZ, getProjection));
+            }
         }
         else {
-            // Cas par défaut : Murs statiques (Wall)
+            // Cas par défaut : Murs statiques (Blancs/Gris)
             const availableLanes = [-1, 0, 1].filter(l => l !== safeLane);
-
-            // On décide d'en mettre 1 ou 2 pour laisser au moins une voie libre
             const numberOfWalls = Math.random() < 0.5 ? 1 : 2;
             const selectedLanes = availableLanes
                 .sort(() => Math.random() - 0.5)
                 .slice(0, numberOfWalls);
 
             selectedLanes.forEach(lane => {
-                this.add(new Wall(lane, -250, getProjection));
+                this.add(new Wall(lane, spawnAtZ, getProjection));
             });
         }
     }
@@ -506,6 +835,8 @@ export class EntityManager {
         ent.isActive = false;
         ent.mesh.visible = false; // Désactivation visuelle IMMÉDIATE
 
+        if (ent.dispose) ent.dispose();
+
         // On utilise setTimeout pour laisser une frame de battement avant le retrait physique
         // Cela évite que le moteur essaie de rendre un objet qui n'existe plus
         setTimeout(() => {
@@ -513,7 +844,13 @@ export class EntityManager {
             // Nettoyage de la géométrie pour libérer la mémoire (optionnel mais propre)
             ent.mesh.traverse(child => {
                 if (child.geometry) child.geometry.dispose();
-                if (child.material) child.material.dispose();
+                if (child.material) {
+                    if (Array.isArray(child.material)) {
+                        child.material.forEach(m => m.dispose());
+                    } else {
+                        child.material.dispose();
+                    }
+                }
             });
         }, 0);
 
@@ -522,7 +859,7 @@ export class EntityManager {
 
     update(state, getProjection) {
         this.entities.forEach(ent => {
-            ent.updatePosition(state.speed, state.delta, getProjection);
+            ent.updatePosition(state.speed, state.delta, getProjection, this.entities);
             if(ent.animate) ent.animate(state.time);
             if(ent.z > 20) this.removeEntity(ent);
         });

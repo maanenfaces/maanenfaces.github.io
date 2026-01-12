@@ -93,7 +93,7 @@ export const SONG_STRUCTURE = [
         start: 116, end: 122,
         theme: { colors: [0xffff00] },
         obstacles: { density: 0.02 },
-        effects: { curve: { intensity: 0 }, wave: { intensity: 0.2 }, roll: { intensity: 0.7 } }
+        effects: { curve: { intensity: 0 }, wave: { intensity: 0.2 }, roll: { intensity: 50 } }
     },
 
     // ---------------------------------------------------------
