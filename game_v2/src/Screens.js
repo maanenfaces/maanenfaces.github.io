@@ -38,74 +38,6 @@ export class Screens {
         this.init();
     }
 
-    initDevTools() {
-        this.devUI.panel.style.display = 'block';
-
-        // Initialiser l'état d'invincibilité dans le moteur
-        if (this.engine.devSettings) {
-            this.engine.devSettings.isInvincible = this.devUI.invincible.checked;
-        }
-
-        const updateSliderMax = () => {
-            const duration = this.engine.music.audio.duration;
-            if (duration && !isNaN(duration)) {
-                this.devUI.slider.max = duration;
-                console.log("Slider Dev configuré sur :", duration, "secondes");
-            }
-        };
-
-        // Gestion du chargement de l'audio pour le slider
-        if (this.engine.music.audio.readyState >= 1) {
-            updateSliderMax();
-        } else {
-            this.engine.music.audio.addEventListener('loadedmetadata', updateSliderMax);
-        }
-
-        // Checkbox Invincibilité
-        this.devUI.invincible.addEventListener('change', (e) => {
-            if (this.engine.devSettings) {
-                this.engine.devSettings.isInvincible = e.target.checked;
-            }
-        });
-
-        // Slider : Navigation temporelle
-        this.devUI.slider.addEventListener('input', (e) => {
-            const targetTime = parseFloat(e.target.value);
-
-            // 1. Appliquer le temps à l'audio
-            this.engine.music.audio.currentTime = targetTime;
-
-            // 2. Mettre à jour l'affichage 000
-            this.updateDevUI(targetTime);
-
-            // 3. Nettoyer les entités pour éviter les collisions fantômes lors du saut
-            if (this.engine.entities) {
-                this.engine.entities.entities.forEach(ent => this.engine.entities.removeEntity(ent));
-            }
-        });
-    }
-
-    updateDevUI(seconds) {
-        if (this.devUI) {
-            const formattedTime = Math.floor(seconds).toString().padStart(3, '0');
-            this.devUI.timeVal.innerText = formattedTime;
-            this.devUI.bonusDensity.innerText = this.engine.currentPhase.bonuses.density;
-            this.devUI.wallDensity.innerText = this.engine.currentPhase.obstacles.density;
-        }
-    }
-
-    update() {
-        this.updateBonusUI();
-        this.updateHUD();
-
-        // Mise à jour de l'UI Dev Mode
-        if (DEV_MODE && this.devUI && !this.engine.isPaused) {
-            const currentTime = this.engine.music.audio.currentTime;
-            this.devUI.slider.value = currentTime;
-            this.updateDevUI(currentTime);
-        }
-    }
-
     init() {
         window.addEventListener('keydown', (e) => {
             if(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Space"].includes(e.code)) {
@@ -172,6 +104,73 @@ export class Screens {
         // Init in the background when starting, to avoid table glitching
         // This would be refresh when the user will validate its name
         Leaderboard.fetchScores();
+    }
+
+    initDevTools() {
+        this.devUI.panel.style.display = 'block';
+
+        // Initialiser l'état d'invincibilité dans le moteur
+        if (this.engine.devSettings) {
+            this.engine.devSettings.isInvincible = this.devUI.invincible.checked;
+        }
+
+        const updateSliderMax = () => {
+            const duration = this.engine.music.audio.duration;
+            if (duration && !isNaN(duration)) {
+                this.devUI.slider.max = duration;
+                console.log("Slider Dev configuré sur :", duration, "secondes");
+            }
+        };
+
+        // Gestion du chargement de l'audio pour le slider
+        if (this.engine.music.audio.readyState >= 1) {
+            updateSliderMax();
+        } else {
+            this.engine.music.audio.addEventListener('loadedmetadata', updateSliderMax);
+        }
+
+        // Checkbox Invincibilité
+        this.devUI.invincible.addEventListener('change', (e) => {
+            if (this.engine.devSettings) {
+                this.engine.devSettings.isInvincible = e.target.checked;
+            }
+        });
+
+        // Slider : Navigation temporelle
+        this.devUI.slider.addEventListener('input', (e) => {
+            const targetTime = parseFloat(e.target.value);
+
+            // 1. Appliquer le temps à l'audio
+            this.engine.music.audio.currentTime = targetTime;
+
+            // 2. Mettre à jour l'affichage 000
+            this.updateDevUI(targetTime);
+
+            // 3. Nettoyer les entités pour éviter les collisions fantômes lors du saut
+            if (this.engine.entities) {
+                this.engine.entities.entities.forEach(ent => this.engine.entities.removeEntity(ent));
+            }
+        });
+    }
+
+    update() {
+        this.updateBonusUI();
+        this.updateHUD();
+
+        if (DEV_MODE && this.devUI && !this.engine.isPaused) {
+            this.updateDevUI();
+        }
+    }
+
+    updateDevUI() {
+        if (this.devUI) {
+            const currentTime = this.engine.music.audio.currentTime;
+            const formattedTime = Math.floor(currentTime).toString().padStart(3, '0');
+            this.devUI.slider.value = currentTime;
+            this.devUI.timeVal.innerText = formattedTime;
+            this.devUI.bonusDensity.innerText = this.engine.currentPhase.bonuses.density;
+            this.devUI.wallDensity.innerText = this.engine.currentPhase.obstacles.density;
+        }
     }
 
     togglePause() {
