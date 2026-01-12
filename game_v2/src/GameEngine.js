@@ -62,6 +62,7 @@ export class GameEngine {
 
         this.scoreTimer = 0;
         this.spawnBonusTimer = 10; // pas de bonus les 10 premières secondes
+        this.spawnCityTimer = 5;
         this.spawnWallTimer = 1;
 
         this.world = new World(scene);
@@ -383,6 +384,12 @@ export class GameEngine {
             }
         } else {
             this.spawnBonusTimer = 0.5;
+        }
+
+        this.spawnCityTimer -= dt;
+        if (this.spawnCityTimer <= 0) {
+            this.entities.spawnCityScapeElement(state, proj);
+            this.spawnCityTimer = 0.3;
         }
     }
 
