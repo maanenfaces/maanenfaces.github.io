@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { GameEngine } from './src/GameEngine.js';
 import { Screens } from './src/Screens.js';
-import { SONG_STRUCTURE } from './src/Config.js';
+import { DEV_MODE, SONG_STRUCTURE } from './src/Config.js';
 
 export class App {
     constructor() {
@@ -39,15 +39,41 @@ export class App {
     }
 
     animate(now) {
+        const start = performance.now();
         requestAnimationFrame((t) => this.animate(t));
+
+        if (!this.lastTime) {
+            this.lastTime = now;
+            return;
+        }
+
         const delta = Math.min((now - this.lastTime) / 1000, 0.1);
         this.lastTime = now;
 
         if (this.engine) {
             this.engine.update(now / 1000, delta);
             this.ui.update();
+            this.renderer.render(this.scene, this.camera);
+
+            if (DEV_MODE) {
+                this.updateDevTools(now / 1000, start, delta);
+            }
         }
-        this.renderer.render(this.scene, this.camera);
+    }
+
+    updateDevTools(currentTime, startTime, delta) {
+        const p = this.engine.currentPhase;
+        if (!p) return;
+
+        const elements = {
+            'dev-perf': (performance.now() - startTime).toFixed(2),
+            'dev-fps': delta > 0 ? Math.round(1 / delta) : 0,
+        };
+
+        for (const [id, value] of Object.entries(elements)) {
+            const el = document.getElementById(id);
+            if (el) el.innerText = value;
+        }
     }
 
     onWindowResize() {

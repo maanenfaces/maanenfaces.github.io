@@ -23,9 +23,10 @@ const DEFAULT_PHASE = {
     bonuses: {
         density: 0.05,
         distribution: [
-            { entity: "GhostBonus", percent: 10 },
-            { entity: "JumpBonus",  percent: 45 },
-            { entity: "SpeedBonus", percent: 45 }
+            { entity: "PointBonus", percent: 40 },
+            { entity: "SpeedBonus", percent: 30 },
+            { entity: "JumpBonus",  percent: 20 },
+            { entity: "GhostBonus", percent: 10 }
         ]
     },
     obstacles: {
@@ -33,9 +34,9 @@ const DEFAULT_PHASE = {
         distribution: [{ entity: "Wall", percent: 100 }]
     },
     effects: {
-        curve:     { intensity: 0 },
+        curve:     { intensity: 0.5 },
         flash:     { intensity: 0 },
-        glitch:    { intensity: 0 },
+        glitch:    { intensity: 0.1 },
         lightning: { intensity: 0 },
         reverse:   { enabled: false },
         roll:      { intensity: 0 },
@@ -96,9 +97,6 @@ export class GameEngine {
             isInvincible: false
         };
 
-        this.isGateInTransit = false;
-        this.needSpeedReset = false;
-
         window.addEventListener('gameStarted', () => {
             console.log("gameStarted event received");
             this.onStart();
@@ -156,9 +154,22 @@ export class GameEngine {
 
         // 4. MICRO-GLITCH
         let yGlitch = 0;
-        if (this.currentPhase?.effects?.glitch?.intensity) {
-            if (Math.sin(wz * 0.5 + this.time * 10) > 0.97) {
-                yGlitch = (Math.random() - 0.5) * 0.8;
+        const glitchConfig = this.currentPhase?.effects?.glitch;
+
+        if (glitchConfig && glitchConfig.intensity > 0) {
+            const intensity = glitchConfig.intensity; // Valeur supposée entre 0 et 1
+
+            // On ajuste le seuil de probabilité selon l'intensité
+            // Plus l'intensité est forte, plus le seuil descend (donc plus de chances de glitcher)
+            const glitchThreshold = 1.0 - (0.05 * intensity);
+
+            if (Math.sin(wz * 0.5 + this.time * (10 + intensity * 20)) > glitchThreshold) {
+                // L'amplitude du saut vertical est multipliée par l'intensité
+                // On passe de 0.8 à une valeur plus ou moins forte
+                yGlitch = (Math.random() - 0.5) * (1.5 * intensity);
+
+                // Optionnel : Ajouter un glitch horizontal léger pour plus de chaos
+                // xGlitch = (Math.random() - 0.5) * intensity;
             }
         }
 
@@ -173,7 +184,11 @@ export class GameEngine {
         // 1. GESTION PHASE MUSICALE ET CONSOLIDATION
         const musicStatus = this.music.update();
         if (this.music.hasPhaseChanged) {
-            this.currentPhase = this.consolidatePhase(this.currentPhase, musicStatus.phase);
+            if (this.time < 5) {
+                this.consolidatePhase(DEFAULT_PHASE, musicStatus.phase);
+            } else {
+                this.currentPhase = this.consolidatePhase(this.currentPhase, musicStatus.phase);
+            }
         }
         const p = this.currentPhase;
 
@@ -201,9 +216,21 @@ export class GameEngine {
             this.world.triggerScreenFlash(flashColor);
         }
 
-        if (triggers.glitch) {
-            document.body.style.filter = `hue-rotate(${Math.random() * 360}deg) brightness(1.2) contrast(1.5)`;
-            setTimeout(() => { document.body.style.filter = 'none'; }, 80);
+        const glitchConfig = this.currentPhase?.effects?.glitch;
+
+        if (triggers.glitch && glitchConfig) {
+            const intensity = glitchConfig.intensity || 0.5;
+
+            const hue = Math.random() * (360 * intensity);
+            const bright = 1 + (0.5 * intensity);
+            const contrast = 1 + (1 * intensity);
+
+            document.body.style.filter = `hue-rotate(${hue}deg) brightness(${bright}) contrast(${contrast})`;
+            const duration = 40 + (80 * intensity);
+
+            setTimeout(() => {
+                document.body.style.filter = 'none';
+            }, duration);
         }
 
         // 4. GESTION DE LA COULEUR AMBIANTE (Alternance si tableau)
@@ -250,14 +277,16 @@ export class GameEngine {
         if (this.activeBonus.timeLeft > 0) {
             this.activeBonus.timeLeft -= delta;
             if (this.activeBonus.timeLeft <= 0) {
-                this.onBonusStop(this.activeBonus.item);
+                const expiredItem = this.activeBonus.item;
                 this.activeBonus.timeLeft = 0;
+                this.onBonusStop(expiredItem);
+                this.activeBonus.item = null;
             }
         }
 
         const targetSpeed = p.speed;
         const multiplier = this.activeBonus.speedMultiplier;
-        
+
         // 1. MISE À JOUR DE LA VITESSE DE BASE (Musique)
         if (this.currentParams.speed < targetSpeed) {
             // Accélération instantanée
@@ -292,8 +321,6 @@ export class GameEngine {
 
         this.zOffset += this.currentTotalSpeed * delta * 50;
 
-        this.zOffset += this.currentTotalSpeed * delta * 50;
-
         // 8. ÉTAT ET MISES À JOUR
         const proj = (z, x) => this.getProjection(z, x);
         const state = {
@@ -314,11 +341,6 @@ export class GameEngine {
 
         this.handleSpawning(state, proj);
         this.handleCollisions(state, proj);
-    }
-
-    updatePhase(t) {
-        const ph = this.songPhases.find(p => t >= p.start && t <= p.end);
-        if (ph && ph !== this.currentPhase) this.currentPhase = ph;
     }
 
     handleSpawning(state, proj) {
@@ -442,6 +464,9 @@ export class GameEngine {
             case 'jump':
                 this.player.canJump = true;
                 break;
+            case 'points':
+                window.dispatchEvent(new CustomEvent('addScore', {detail: 50}));
+                break;
         }
 
         window.dispatchEvent(new CustomEvent('addScore', {
@@ -457,12 +482,7 @@ export class GameEngine {
 
         if (this.activeBonus.timeLeft <= 0) {
             this.activeBonus.scoreMultiplier = 1;
-            if (this.isGateInTransit) {
-                this.needSpeedReset = true;
-            } else {
-                this.activeBonus.speedMultiplier = 1;
-                this.needSpeedReset = false;
-            }
+            this.activeBonus.speedMultiplier = 1;
         }
 
         this.player.canJump = false;

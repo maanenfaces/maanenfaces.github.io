@@ -47,16 +47,148 @@ export class Wall extends Entity {
     constructor(lane, z, getProjection) {
         super(lane, z, getProjection);
         this.type = 'wall';
-        const m = new THREE.Mesh(
-            new THREE.BoxGeometry(4, 3, 1),
-            new THREE.MeshBasicMaterial({color: 0xff0000, transparent: true, opacity: 0.7})
+
+        this.glitchPalette = [
+            0xaa0044, // Bordeaux/Rose sombre
+            0xff2211, // Rouge vif
+            0xff5500, // Orange
+            0x880000, // Rouge sang sombre
+            0x004400  // Flash blanc (rare mais percutant)
+        ];
+
+        this.pulseOffset = Math.random() * Math.PI * 2;
+
+        const geometry = new THREE.BoxGeometry(4, 3, 1);
+
+        this.innerMesh = new THREE.Mesh(
+            geometry,
+            new THREE.MeshBasicMaterial({
+                color: 0xff0000,
+                transparent: true,
+                opacity: 0.7
+            })
         );
-        m.position.y = 1.6;
-        this.mesh.add(m);
+
+        const edgesGeometry = new THREE.EdgesGeometry(geometry);
+        this.line = new THREE.LineSegments(
+            edgesGeometry,
+            new THREE.LineBasicMaterial({ color: 0xff0000, opacity: 0.8 })
+        );
+
+        this.innerMesh.add(this.line);
+
+        this.innerMesh.position.y = 1.7;
+        this.mesh.add(this.innerMesh);
+    }
+
+    animate(time, intensity = 1.0) {
+        // 1. OPACITÉ ALÉATOIRE (Désynchronisée)
+        // On mélange deux ondes lentes pour casser la régularité du pulse
+        const slowPulse = Math.sin(time * 3 + this.pulseOffset);
+        const microPulse = Math.sin(time * 11);
+        this.innerMesh.material.opacity = 0.7 + (slowPulse * 0.1) + (microPulse * 0.05);
+
+        // 2. GLITCH LATÉRAL INTERMITTENT
+        const glitchBurst = Math.sin(time * 2.5 + this.pulseOffset) * Math.sin(time * 0.8);
+
+        if (glitchBurst > 0.5) {
+            // --- PHYSIQUE DU GLITCH ---
+            const shakeX = Math.sin(time * 70) * (0.15 * intensity);
+            const jumpX = (Math.random() - 0.5) * (0.1 * intensity);
+            this.innerMesh.position.x = shakeX + jumpX;
+
+            // On pioche une couleur au hasard dans la liste
+            const randomColor = this.glitchPalette[Math.floor(Math.random() * this.glitchPalette.length)];
+            this.innerMesh.material.color.setHex(randomColor);
+
+        } else {
+            // --- RETOUR À LA NORMALE ---
+            this.innerMesh.position.x *= 0.7;
+            if (Math.abs(this.innerMesh.position.x) < 0.001) {
+                this.innerMesh.position.x = 0;
+            }
+
+            // Retour à la couleur rouge d'origine
+            this.innerMesh.material.color.setHex(0xff0000);
+        }
     }
 }
 
-export class MovingWall extends Entity {
+export class FallingWall extends Wall {
+    constructor(lane, z, getProjection) {
+        super(lane, z, getProjection);
+        this.type = 'falling_wall';
+
+        // 1. VITESSE ALÉATOIRE PAR OBJET
+        // Cycle entre 0.8s (très rapide) et 1.4s (rapide)
+        // Cela permet de voir le mur tomber plusieurs fois pendant son approche
+        this.fallCycleDuration = 0.8 + Math.random() * 0.6;
+
+        // 2. TIMING ALÉATOIRE AU DÉPART
+        // On commence à un point aléatoire du cycle pour éviter que tous les murs ne tombent en même temps
+        this.internalTimer = Math.random() * this.fallCycleDuration;
+
+        this.glitchPalette = [0x00ccff, 0x0044ff, 0xff6600, 0xffaa00, 0xffffff];
+
+        if (this.innerMesh) {
+            this.innerMesh.material = this.innerMesh.material.clone();
+            this.innerMesh.material.color.setHex(0x00ff88);
+
+            if (this.innerMesh.children[0]) {
+                this.innerMesh.children[0].material = this.innerMesh.children[0].material.clone();
+                this.innerMesh.children[0].material.color.setHex(0x55ff00);
+            }
+        }
+    }
+
+    updatePosition(speed, delta, getProjection) {
+        // Le mouvement tourne en boucle dès le début
+        this.internalTimer += delta;
+
+        const progress = (this.internalTimer % this.fallCycleDuration) / this.fallCycleDuration;
+
+        // Paramètres de chute
+        const fallThreshold = 0.25; // 25% du temps pour tomber, 75% pour remonter
+        const maxFallDistance = 6.0;
+        let yOffset = 0;
+
+        if (progress < fallThreshold) {
+            // CHUTE ÉLECTRIQUE
+            // Utilisation d'une puissance plus élevée (cube) pour un effet de "poids" encore plus marqué
+            const fallProgress = progress / fallThreshold;
+            yOffset = Math.pow(fallProgress, 3) * maxFallDistance;
+        } else {
+            // REMONTÉE NERVEUSE
+            const riseProgress = (progress - fallThreshold) / (1 - fallThreshold);
+            yOffset = maxFallDistance * (1 - riseProgress);
+        }
+
+        // Positionnement (Abaissé selon ta demande précédente)
+        const initialHeight = 7.6;
+        this.innerMesh.position.y = initialHeight - yOffset;
+
+        // Mise à jour de la position Z (mouvement vers le joueur)
+        super.updatePosition(speed, delta, getProjection);
+    }
+
+    // On s'assure que l'animation de glitch utilise bien les couleurs uniques
+    animate(time, intensity = 1.0) {
+        const glitchBurst = Math.sin(time * 2.5 + this.pulseOffset) * Math.sin(time * 0.8);
+
+        if (glitchBurst > 0.5) {
+            const randomColor = this.glitchPalette[Math.floor(Math.random() * this.glitchPalette.length)];
+            this.innerMesh.material.color.setHex(randomColor);
+
+            this.innerMesh.position.x = (Math.sin(time * 70) * 0.15 + (Math.random() - 0.5) * 0.1) * intensity;
+        } else {
+            this.innerMesh.position.x *= 0.7;
+            // Retour au vert émeraude propre à cette instance
+            this.innerMesh.material.color.setHex(0x00ff88);
+        }
+    }
+}
+
+export class MovingWall extends Wall {
     constructor(lane, z, getProjection) {
         super(lane, z, getProjection);
 
@@ -247,6 +379,34 @@ export class InvincibleBonus extends Bonus {
     }
 }
 
+export class PointBonus extends Bonus {
+    constructor(lane, z, getProjection) {
+        super(lane, z, getProjection);
+        this.subType = 'points';
+        this.name = "50 PTS";
+        this.color = 0xffffff;
+        this.colorHex = '#ffffff';
+        this.bonusDuration = 0;
+
+        const geo = new THREE.IcosahedronGeometry(1, 0);
+        const mat = new THREE.MeshBasicMaterial({ color: this.color, wireframe: false });
+
+        // On garde l'échelle à 2 comme tu l'as mis
+        this.initMesh(geo, mat, 2);
+        this.bonusMesh.position.y = 1.5;
+
+        const label = this.createTextLabel(this.name, this.colorHex);
+        this.mesh.add(label);
+    }
+
+    applyCustomAnimation(t) {
+        this.bonusMesh.rotation.y += 0.03;
+        // On modifie l'animation pour qu'elle oscille AUTOUR de sa nouvelle hauteur (1.5)
+        // Au lieu de osciller autour de 0
+        this.bonusMesh.position.y = 1.5 + Math.sin(t * 5) * 0.2;
+    }
+}
+
 export class EntityManager {
     constructor(scene) {
         this.scene = scene;
@@ -265,29 +425,39 @@ export class EntityManager {
             case 'GhostBonus':
             case 'InvincibleBonus':
                 return new InvincibleBonus(lane, z, getProjection);
+            case 'point':
+            case 'PointBonus':
+                return new PointBonus(lane, z, getProjection);
             default:
                 return new Bonus(lane, z, getProjection);
         }
     }
 
     getRandomEntity(distribution, fallbackType) {
-        if (!distribution || distribution.length === 0) return fallbackType;
+        if (!Array.isArray(distribution) || distribution.length === 0) return fallbackType;
 
-        const roll = Math.random() * 100;
+        // 1. Calculer la somme totale des pourcentages/poids
+        const totalWeight = distribution.reduce((sum, item) => sum + Number(item.percent), 0);
+
+        // 2. Tirer un nombre entre 0 et le total réel (ex: 105)
+        const roll = Math.random() * totalWeight;
+
         let cumulative = 0;
-
         for (const item of distribution) {
-            cumulative += item.percent;
+            cumulative += Number(item.percent);
+
+            // 3. Vérifier si le tirage tombe dans cette tranche
             if (roll <= cumulative) {
                 return item.entity;
             }
         }
+
         return fallbackType;
     }
 
     spawnBonusPattern(state, safeLane, getProjection) {
         const p = state.phase;
-        const selectedBonus = this.getRandomEntity(p.bonuses.distribution, 'JumpBonus');
+        const selectedBonus = this.getRandomEntity(p.bonuses.distribution, 'PointBonus');
 
         if (selectedBonus) {
             // On place le bonus dans la safeLane pour garantir qu'il n'est pas DANS un mur
@@ -297,16 +467,26 @@ export class EntityManager {
 
     spawnWallPattern(state, safeLane, getProjection) {
         const p = state.phase;
+        // On pioche le type d'entité selon la distribution de la phase
         const selected = this.getRandomEntity(p.obstacles.distribution, 'Wall');
 
         if (selected === 'MovingWall') {
-            // Occupe toute la largeur dynamiquement
+            // Le MovingWall oscille sur toute la largeur
             this.add(new MovingWall(0, -250, getProjection));
-        } else {
-            // Murs statiques : on laisse la safeLane vide
+        }
+        else if (selected === 'FallingWall') {
+            // Le FallingWall occupe une voie précise, mais on respecte la safeLane
             const availableLanes = [-1, 0, 1].filter(l => l !== safeLane);
-            const numberOfWalls = Math.random() < 0.5 ? 1 : 2;
+            // On en place un seul car il est plus dangereux (mouvement vertical)
+            const lane = availableLanes[Math.floor(Math.random() * availableLanes.length)];
+            this.add(new FallingWall(lane, -250, getProjection));
+        }
+        else {
+            // Cas par défaut : Murs statiques (Wall)
+            const availableLanes = [-1, 0, 1].filter(l => l !== safeLane);
 
+            // On décide d'en mettre 1 ou 2 pour laisser au moins une voie libre
+            const numberOfWalls = Math.random() < 0.5 ? 1 : 2;
             const selectedLanes = availableLanes
                 .sort(() => Math.random() - 0.5)
                 .slice(0, numberOfWalls);
@@ -343,7 +523,7 @@ export class EntityManager {
     update(state, getProjection) {
         this.entities.forEach(ent => {
             ent.updatePosition(state.speed, state.delta, getProjection);
-            if(ent.animate) ent.animate();
+            if(ent.animate) ent.animate(state.time);
             if(ent.z > 20) this.removeEntity(ent);
         });
     }

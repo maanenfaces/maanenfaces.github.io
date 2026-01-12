@@ -5,21 +5,24 @@ export const DEV_MODE = true;
 export const SONG_START_AT = 1;
 
 export const SONG_STRUCTURE = [
+
     // ---------------------------------------------------------
     // INTRO
     // ---------------------------------------------------------
-    { start: 0, end: 5, label: "INTRO 1",
+
+    { label: "INTRO 1",
+      start: 0, end: 5,
       bonuses: { density: 0 },
       obstacles: { density: 0.05 }
     },
-
-    { start: 5, end: 14, label: "INTRO 1",
+    { label: "INTRO 1",
+      start: 5, end: 14,
       speed: 1.2,
-      bonuses: { density: 0 },
+      bonuses: { density: 0.1 },
       obstacles: { density: 0.16 }
     },
-
-    { start: 14, end: 28, label: "INTRO 1",
+    { label: "INTRO 1",
+      start: 14, end: 28,
       speed: 1.3,
       obstacles: { density: 0.21 }
     },
@@ -28,49 +31,62 @@ export const SONG_STRUCTURE = [
     // VERSE 1 WARMUP
     // ---------------------------------------------------------
 
-    { start: 28, end: 35, label: "VERSE 1 WARMUP",
+    { label: "VERSE 1 WARMUP",
+      start: 28, end: 35,
       effects: { curve: { intensity: 1 } },
       obstacles: { density: 0.25 },
       theme: { colors: [0xffff00] }
     },
-    { start: 35, end: 41, label: "VERSE 1 WARMUP",
+    { label: "VERSE 1 WARMUP",
+      start: 35, end: 41,
       obstacles: { density: 0.27 },
     },
-    { start: 41, end: 55, label: "VERSE 1 WARMUP",
-      bonuses: { density: 0.05 },
+    { label: "VERSE 1 WARMUP",
+      start: 41, end: 55,
       effects: { curve: { intensity: 2 } }
     },
 
     // ---------------------------------------------------------
     // VERSE 1
     // ---------------------------------------------------------
-    { start: 55, end: 74, label: "VERSE 1",
+
+    { label: "VERSE 1",
+      start: 55, end: 74,
       colors: [0xffff00, 0xffa500, 0x00ff00],
       effects: { wave: { intensity: 0.1 } }
     },
-    { start: 74, end: 81, label: "VERSE 1",
-      bonuses: { density: 0.1, distributions: [{"speed": 100}] }
+    { label: "VERSE 1",
+      start: 74, end: 81,
     },
-    { start: 81, end: 95, label: "VERSE 1 BUILD-UP",
+    { label: "VERSE 1 BUILD-UP",
+      start: 81, end: 95,
       effects: { curve: { intensity: 3 }, wave: { intensity: 0.3 } }
     },
 
     // ---------------------------------------------------------
     // BRIDGE 1
     // ---------------------------------------------------------
-    {
-        label: "BRIDGE 1",
-        start: 95, end: 109,
-        theme: { colors: [0xffff00] },
-        obstacles: { density: 0.05 },
-        effects: { curve: { intensity: 5 }, wave: { intensity: 0.5 } }
+    { label: "BRIDGE 1",
+      start: 95, end: 109,
+      theme: { colors: [0xffff00] },
+      bonuses: { density: 0.4, distributions: [{"speed": 100}] },
+      obstacles: { density: 0.3 },
+      effects: { curve: { intensity: 5 }, wave: { intensity: 0.5 } }
     },
-    {
-        label: "BRIDGE 1 BUILD-UP",
-        start: 109, end: 116,
-        theme: { colors: [0xffff00] },
-        obstacles: { density: 0.02 },
-        effects: { curve: { intensity: 0 }, wave: { intensity: 0 }, roll: { intensity: 0.5 } }
+    { label: "BRIDGE 1 BUILD-UP",
+      start: 109, end: 116,
+      theme: { colors: [0xffff00] },
+      bonuses: {
+        density: 0.05,
+        distribution: [
+            { entity: "PointBonus", percent: 60 },
+            { entity: "SpeedBonus", percent: 25 },
+            { entity: "JumpBonus",  percent: 10 },
+            { entity: "GhostBonus", percent:  5 }
+        ]
+      },
+      obstacles: { density: 0.1 },
+      effects: { curve: { intensity: 0 }, wave: { intensity: 0 }, roll: { intensity: 50 } }
     },
     {
         label: "BRIDGE 1 BUILD-UP",
