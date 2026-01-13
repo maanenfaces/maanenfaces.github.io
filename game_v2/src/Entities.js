@@ -435,23 +435,53 @@ export class ChasingWall extends Wall {
     }
 
     updatePosition(speed, delta, getProjection, allEntities = []) {
-        // 1. IA D'ÉVITEMENT
-        if (allEntities && !this.isChangingLane) {
-            const obstacleAhead = allEntities.find(e =>
-                e !== this &&
-                Math.round(e.lane) === Math.round(this.targetLane) &&
-                e.mesh.position.z > this.mesh.position.z &&
-                e.mesh.position.z < this.mesh.position.z + 25
-            );
+        // 1. IA D'ÉVITEMENT ET DE NAVIGATION
+        // On ne recalcule une décision que si on est stabilisé sur une voie
+        const isStationaryOnLane = Math.abs(this.lane - this.targetLane) < 0.1;
+
+        if (allEntities && isStationaryOnLane && !this.isDead) {
+            const obstacleAhead = allEntities.find(e => {
+                if (e === this || !e.isActive) return false;
+
+                // On ignore les Bonus (on peut passer à travers/dessus)
+                // et les FallingWall (ils tombent, on ne les évite pas latéralement ici)
+                const isObstacle = e.type !== 'bonus' && e.type !== 'falling_wall' && e.type !== 'moving_wall';
+                if (!isObstacle) return false;
+
+                // Déterminer la voie de l'autre entité (priorité à son intention de mouvement)
+                const otherLane = (e.targetLane !== undefined) ? e.targetLane : Math.round(e.lane);
+
+                return otherLane === this.targetLane &&
+                       e.mesh.position.z > this.mesh.position.z &&
+                       e.mesh.position.z < this.mesh.position.z + 45;
+            });
 
             if (obstacleAhead) {
                 const possibleLanes = [-1, 0, 1].filter(l => l !== this.targetLane);
-                this.targetLane = possibleLanes[Math.floor(Math.random() * possibleLanes.length)];
+
+                const safeLanes = possibleLanes.filter(laneCandidate => {
+                    return !allEntities.some(e => {
+                        if (e === this || !e.isActive || e.type === 'bonus') return false;
+
+                        const otherLane = (e.targetLane !== undefined) ? e.targetLane : Math.round(e.lane);
+                        return otherLane === laneCandidate &&
+                               Math.abs(e.mesh.position.z - this.mesh.position.z) < 35;
+                    });
+                });
+
+                if (safeLanes.length > 0) {
+                    // On choisit la voie la plus proche pour éviter les grands sauts brusques
+                    this.targetLane = safeLanes.sort((a, b) => Math.abs(a - this.lane) - Math.abs(b - this.lane))[0];
+                } else {
+                    // Si tout est bouché, on tente une voie au hasard pour ne pas rester bloqué derrière
+                    this.targetLane = possibleLanes[Math.floor(Math.random() * possibleLanes.length)];
+                }
             }
         }
 
-        // 2. TRANSITION DE LANE
-        const transitionSpeed = 6.0;
+        // 2. TRANSITION DE LANE (Interpolation fluide)
+        // On augmente un peu la vitesse de transition pour que l'évitement soit efficace
+        const transitionSpeed = 8.0;
         this.lane += (this.targetLane - this.lane) * delta * transitionSpeed;
 
         // 3. AVANCE RAPIDE Z
@@ -459,18 +489,13 @@ export class ChasingWall extends Wall {
 
         // 4. RÉCUPÉRATION DE LA PROJECTION
         const projection = getProjection(this.mesh.position.z);
+        if (!projection) return;
         const roll = projection.rollAngle || 0;
 
-        // 5. POSITIONNEMENT AVEC ROLL (Trigonométrie pour rester sur le bitume)
+        // 5. POSITIONNEMENT AVEC ROLL
         const laneOffset = this.lane * this.LANE_WIDTH;
-
-        // On calcule X et Y en fonction de l'angle de la route
-        // X = centre_route + cos(angle) * décalage_voie
-        // Y = centre_route + sin(angle) * décalage_voie
         this.mesh.position.x = projection.x + Math.cos(roll) * laneOffset;
         this.mesh.position.y = projection.y + Math.sin(roll) * laneOffset;
-
-        // On incline le mur pour qu'il soit perpendiculaire à la route
         this.mesh.rotation.z = roll;
 
         // 6. GESTION DES TRAÎNÉES
@@ -723,196 +748,6 @@ export class PointBonus extends Bonus {
     }
 }
 
-export class CityScapeElement extends Wall {
-    constructor(lane, z, getProjection, roadColor) {
-        super(lane, z, getProjection);
-        this.type = 'city_scape_element';
-
-        this.baseColor = 0x050505;
-        this.wireColor = (roadColor instanceof THREE.Color) ? roadColor.clone() : new THREE.Color(roadColor || 0x00ff00);
-        this.sideOffset = 18 + Math.random() * 30;
-
-        if (this.innerMesh && this.mesh) this.mesh.remove(this.innerMesh);
-
-        this.buildingGroup = new THREE.Group();
-        this.buildingGroup.visible = false;
-        this.mesh.add(this.buildingGroup);
-
-        this.gridMaterials = [];
-        this.edgeMaterials = [];
-        this.triangleGrids = [];
-        this.subSectionStatus = [];
-
-        this.glitchTimer = 0;
-        this.glitchDuration = 0;
-        this.isCurrentlyGlitching = false;
-        this.glitchIntensity = 0;
-
-        const numFloors = 2 + Math.floor(Math.random() * 3);
-        const width = 6 + Math.random() * 6;
-        const depth = 6 + Math.random() * 6;
-
-        // --- SOCLE ---
-        const baseThickness = 0.2;
-        const baseGeo = new THREE.BoxGeometry(width + 2, baseThickness, depth + 2);
-        const baseMat = new THREE.MeshBasicMaterial({ color: this.wireColor, transparent: true, opacity: 0 });
-        const baseMesh = new THREE.Mesh(baseGeo, baseMat);
-        baseMesh.position.y = baseThickness / 2;
-        this.buildingGroup.add(baseMesh);
-        this.edgeMaterials.push(baseMat);
-
-        let currentHeight = baseThickness;
-
-        // --- GÉNÉRATION DES ÉTAGES ---
-        for (let i = 0; i < numFloors; i++) {
-            const floorHeight = 8 + Math.random() * 12;
-            const floorGroup = new THREE.Group();
-            floorGroup.position.y = currentHeight + floorHeight / 2;
-            this.buildingGroup.add(floorGroup);
-
-            // Division de l'étage en 2 ou 4 blocs
-            const splitX = Math.random() > 0.5 ? 2 : 1;
-            const splitZ = Math.random() > 0.5 ? 2 : 1;
-            const subW = width / splitX;
-            const subD = depth / splitZ;
-
-            for (let sx = 0; sx < splitX; sx++) {
-                for (let sz = 0; sz < splitZ; sz++) {
-                    // 1. GÉOMÉTRIE DU BLOC (avec segments pour le grillage)
-                    // On choisit une densité de grillage aléatoire (2 à 4 segments)
-                    const seg = 2 + Math.floor(Math.random() * 3);
-                    const geo = new THREE.BoxGeometry(subW, floorHeight, subD, seg, seg, seg);
-
-                    const block = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: this.baseColor }));
-                    block.position.x = (sx - (splitX - 1) / 2) * subW;
-                    block.position.z = (sz - (splitZ - 1) / 2) * subD;
-                    floorGroup.add(block);
-
-                    // 2. ARÊTES DE STRUCTURE (Toujours visibles, contours du bloc)
-                    const eMat = new THREE.LineBasicMaterial({ color: this.wireColor, transparent: true, opacity: 0 });
-                    const edges = new THREE.LineSegments(new THREE.EdgesGeometry(geo), eMat);
-                    block.add(edges);
-                    this.edgeMaterials.push(eMat);
-
-                    // 3. GRILLAGE INTERNE (Quads - Pas de diagonales grâce au seuil de 1 degré)
-                    const gMat = new THREE.LineBasicMaterial({ color: this.wireColor, transparent: true, opacity: 0 });
-                    const grid = new THREE.LineSegments(new THREE.EdgesGeometry(geo, 1), gMat);
-                    grid.scale.set(1.002, 1.002, 1.002);
-                    block.add(grid);
-                    this.gridMaterials.push(gMat);
-
-                    // 4. TRIANGLES DE GLITCH (Diagonales visibles)
-                    const tMat = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0 });
-                    const tri = new THREE.LineSegments(new THREE.WireframeGeometry(geo), tMat);
-                    tri.visible = false;
-                    block.add(tri);
-                    this.triangleGrids.push({ mesh: tri, mat: tMat });
-
-                    // ÉTAT ALÉATOIRE : Ce bloc est-il grillagé par défaut ?
-                    this.subSectionStatus.push(Math.random() > 0.5);
-                }
-            }
-            currentHeight += floorHeight;
-        }
-
-        this.glitchPalette = [new THREE.Color(0x004400), this.wireColor, new THREE.Color(0xFFFFFF)];
-        this.innerMesh = this.buildingGroup;
-    }
-
-    animate(time, intensity = 1.0) {
-        const dist = Math.abs(this.mesh.position.z);
-
-        if (dist > 250) {
-            this.buildingGroup.visible = false;
-            return;
-        } else {
-            this.buildingGroup.visible = true;
-        }
-
-        // --- GESTION DU TIMING DU GLITCH ---
-        // Si on ne glitch pas, on a une petite chance de déclencher un "cycle"
-        if (!this.isCurrentlyGlitching && dist < 200 && Math.random() > 0.995) {
-            this.isCurrentlyGlitching = true;
-            this.glitchDuration = 5 + Math.random() * 15; // Durée en frames (environ 0.1s à 0.3s)
-            this.glitchTimer = 0;
-        }
-
-        // Si on est dans un cycle de glitch
-        if (this.isCurrentlyGlitching) {
-            this.glitchTimer++;
-            if (this.glitchTimer >= this.glitchDuration) {
-                this.isCurrentlyGlitching = false;
-            }
-        }
-
-        // Paramètres de base
-        const edgeOpacityBase = dist < 240 ? 0.6 : 0;
-        const gridOpacityBase = dist < 220 ? 0.3 : 0;
-
-        // --- APPLICATION VISUELLE ---
-        this.edgeMaterials.forEach(mat => {
-            mat.opacity = this.isCurrentlyGlitching ? 0.2 : edgeOpacityBase;
-        });
-
-        for (let i = 0; i < this.subSectionStatus.length; i++) {
-            const matQuad = this.gridMaterials[i];
-            const glitchObj = this.triangleGrids[i];
-            const isVisibleNormally = this.subSectionStatus[i];
-
-            if (this.isCurrentlyGlitching) {
-                // On ne change pas le type de grillage (tri/quad) à chaque frame du glitch
-                // On utilise le temps pour faire un clignotement plus lent (toutes les 3 frames par ex)
-                const slowGlitchTick = Math.floor(this.glitchTimer / 3) % 2 === 0;
-                const showTri = (i % 2 === 0) ? slowGlitchTick : !slowGlitchTick;
-
-                glitchObj.mesh.visible = showTri;
-                glitchObj.mat.opacity = showTri ? 0.9 : 0;
-                matQuad.opacity = showTri ? 0 : 0.9;
-
-                if (showTri) {
-                    // On garde la même couleur pendant une partie du glitch
-                    glitchObj.mat.color.copy(this.glitchPalette[i % this.glitchPalette.length]);
-                } else {
-                    matQuad.color.setHex(0xffffff);
-                }
-            } else {
-                glitchObj.mesh.visible = false;
-                glitchObj.mat.opacity = 0;
-                matQuad.color.copy(this.wireColor);
-                matQuad.opacity = isVisibleNormally ? gridOpacityBase : 0;
-            }
-        }
-
-        // Tremblement ralenti
-        if (this.isCurrentlyGlitching) {
-            this.buildingGroup.position.x = (Math.sin(this.glitchTimer) * 0.3);
-        } else {
-            this.buildingGroup.position.x = 0;
-        }
-    }
-
-    updatePosition(speed, delta, getProjection) {
-        this.mesh.position.z += speed * delta;
-        const p = getProjection(this.mesh.position.z);
-        if (!p) return;
-        const roll = p.rollAngle || 0;
-        const totalOffset = this.lane * this.sideOffset;
-        this.mesh.position.x = p.x + Math.cos(roll) * totalOffset;
-        this.mesh.position.y = p.y + Math.sin(roll) * totalOffset;
-        this.mesh.rotation.z = roll;
-    }
-
-    dispose() {
-        if (this.buildingGroup) {
-            this.buildingGroup.traverse(child => {
-                if (child.geometry) child.geometry.dispose();
-                if (child.material) child.material.dispose();
-            });
-        }
-        super.dispose();
-    }
-}
-
 export class EntityManager {
     constructor(scene) {
         this.scene = scene;
@@ -962,74 +797,76 @@ export class EntityManager {
     }
 
     spawnBonusPattern(state, safeLane, getProjection) {
+        const currentDistance = state.zOffset;
+
+        // Les bonus apparaissent dans les "creux" (quand on a fait au moins 40% du chemin vers le prochain mur)
+        const distanceSinceLast = currentDistance - state.lastSpawnDistance;
+        const threshold = state.nextSpawnThreshold || 60;
+
+        // On place le bonus idéalement au milieu de l'espace vide entre deux vagues de murs
+        if (distanceSinceLast < threshold * 0.4 || distanceSinceLast > threshold * 0.6) {
+            return;
+        }
+
         const p = state.phase;
         const selectedBonus = this.getRandomEntity(p.bonuses.distribution, 'PointBonus');
-
         if (selectedBonus) {
-            // On place le bonus dans la safeLane pour garantir qu'il n'est pas DANS un mur
             this.add(this.createBonus(safeLane, -250, getProjection, selectedBonus));
+            // On ne réinitialise pas le threshold ici, sinon on décalerait les murs.
+            // On marque juste que le bonus est pris pour éviter d'en spawn 50 à la suite.
+            state.lastSpawnDistance = currentDistance;
         }
-    }
-
-    spawnCityScapeElement(state, getProjection) {
-        // On définit une distance de spawn (assez loin pour ne pas les voir "popper")
-        const zSpawn = -300;
-
-        // On spawn généralement par paire (gauche et droite) ou un seul côté aléatoire
-        const sides = Math.random() > 0.5 ? [-1, 1] : [Math.random() > 0.5 ? -1 : 1];
-
-        sides.forEach(side => {
-            if (Math.random() > 0.3) {
-                console.log(state.params.color.getHexString());
-                const building = new CityScapeElement(side, zSpawn, getProjection, state.params.color);
-                this.add(building);
-            }
-        });
     }
 
     spawnWallPattern(state, safeLane, getProjection) {
         const p = state.phase;
-        // On pioche le type d'entité selon la distribution de la phase
-        // Note : Assure-toi que 'ChasingWall' est bien présent dans ton state.phase.obstacles.distribution
+        const spawnAtZ = -350;
+        const currentDistance = state.zOffset || 0;
+
+        // --- SÉCURITÉ 1 : COOLDOWN PERSISTANT ---
+        // On utilise "this" au lieu de "state" pour être sûr que les données restent
+        if (this.lastSpawnDistance === undefined) {
+            this.lastSpawnDistance = currentDistance;
+        }
+
+        if (this.nextSpawnThreshold === undefined) {
+            this.nextSpawnThreshold = 20 + Math.random() * 40;
+        }
+
+        // On vérifie l'écart parcouru
+        const distanceTraveledSinceLastSpawn = currentDistance - this.lastSpawnDistance;
+
+        if (distanceTraveledSinceLastSpawn < this.nextSpawnThreshold) {
+            return; // Pas encore assez de distance parcourue
+        }
+
+        // --- LOGIQUE DE SÉLECTION ---
         const selected = this.getRandomEntity(p.obstacles.distribution, 'Wall');
 
-        const spawnAtZ = -300;
-
         if (selected === 'MovingWall') {
-            // Orange : Oscille latéralement
-            this.add(new MovingWall(0, -250, getProjection));
+            this.add(new MovingWall(0, spawnAtZ, getProjection));
         }
         else if (selected === 'FallingWall') {
-            // Vert : Tombe du ciel sur une voie précise
             const availableLanes = [-1, 0, 1].filter(l => l !== safeLane);
             const lane = availableLanes[Math.floor(Math.random() * availableLanes.length)];
             this.add(new FallingWall(lane, spawnAtZ, getProjection));
         }
         else if (selected === 'ChasingWall') {
-            // Bleu : Fonce vers le joueur et évite les obstacles
-            // On le spawn plus loin (-450) pour lui laisser de la distance de poursuite
-            const lane = Math.floor(Math.random() * 3) - 1;
-            this.add(new ChasingWall(lane, spawnAtZ, getProjection));
-
-            // Comme il vient de loin, on peut aussi ajouter un mur statique standard
-            // à la distance normale pour créer un obstacle qu'il devra éviter
-            if (Math.random() > 0.5) {
-                const staticLane = [-1, 0, 1][Math.floor(Math.random() * 3)];
-                this.add(new Wall(staticLane, spawnAtZ, getProjection));
-            }
+            this.add(new ChasingWall(Math.floor(Math.random() * 3) - 1, spawnAtZ - 50, getProjection));
         }
         else {
-            // Cas par défaut : Murs statiques (Blancs/Gris)
             const availableLanes = [-1, 0, 1].filter(l => l !== safeLane);
-            const numberOfWalls = Math.random() < 0.5 ? 1 : 2;
-            const selectedLanes = availableLanes
-                .sort(() => Math.random() - 0.5)
-                .slice(0, numberOfWalls);
+            const numberOfWalls = Math.random() < 0.6 ? 1 : 2;
+            const selectedLanes = availableLanes.sort(() => Math.random() - 0.5).slice(0, numberOfWalls);
 
             selectedLanes.forEach(lane => {
                 this.add(new Wall(lane, spawnAtZ, getProjection));
             });
         }
+
+        // --- RÉINITIALISATION ---
+        this.lastSpawnDistance = currentDistance;
+        this.nextSpawnThreshold = 20 + Math.random() * 40;
     }
 
     add(ent) {

@@ -1,8 +1,244 @@
 import * as THREE from 'three';
 
+/**
+ * CLASSE DE BASE : Gère la physique de positionnement sur la route courbe
+ */
+class ScapeElement {
+    constructor(lane, z, getProjection) {
+        this.mesh = new THREE.Group();
+        this.lane = lane; // -1 ou 1
+        this.z = z;
+        this.isActive = true;
+        this.initialized = false;
+        this.laneWidth = 6; // Utilisé pour le calcul de base
+    }
+
+    updatePosition(speed, delta, getProjection) {
+        this.z += speed * delta;
+
+        // On récupère la projection au centre de la route pour ce Z
+        const proj = getProjection(this.z, 0);
+
+        if (proj) {
+            const roll = proj.rollAngle || 0;
+            // sideOffset est défini dans la classe enfant (CityScapeElement)
+            const distFromCenter = this.sideOffset || 25;
+
+            // CALCUL CRUCIAL : On positionne l'immeuble perpendiculairement
+            // à l'inclinaison de la route (le "roll")
+            const finalX = proj.x + Math.cos(roll) * (this.lane * distFromCenter);
+            const finalY = proj.y + Math.sin(roll) * (this.lane * distFromCenter);
+
+            this.mesh.position.set(finalX, finalY, this.z);
+            this.mesh.rotation.z = roll;
+
+            if (!this.initialized) {
+                this.mesh.visible = true;
+                this.initialized = true;
+            }
+        }
+    }
+}
+
+class BasicCityScapeElement extends ScapeElement {
+    constructor(lane, z, getProjection) {
+        super(lane, z, getProjection);
+        this.pulseOffset = Math.random() * Math.PI * 2;
+    }
+}
+
+export class CityScapeElement extends BasicCityScapeElement {
+    constructor(lane, z, getProjection, roadColor) {
+        super(lane, z, getProjection);
+        this.type = 'city_scape_element';
+
+        // --- CONFIGURATION ---
+        this.baseColor = 0x050505;
+        this.wireColor = (roadColor instanceof THREE.Color) ? roadColor.clone() : new THREE.Color(roadColor || 0x00ff00);
+
+        // C'est ce paramètre qui empêche l'alignement "tout droit"
+        this.sideOffset = 18 + Math.random() * 30;
+
+        // --- STRUCTURE ---
+        this.buildingGroup = new THREE.Group();
+        this.buildingGroup.visible = false;
+        this.mesh.add(this.buildingGroup);
+
+        this.gridMaterials = [];
+        this.edgeMaterials = [];
+        this.triangleGrids = [];
+        this.subSectionStatus = [];
+
+        this.glitchTimer = 0;
+        this.glitchDuration = 0;
+        this.isCurrentlyGlitching = false;
+
+        const numFloors = 2 + Math.floor(Math.random() * 3);
+        const width = 6 + Math.random() * 6;
+        const depth = 6 + Math.random() * 6;
+
+        // --- SOCLE ---
+        const baseThickness = 0.2;
+        const baseGeo = new THREE.BoxGeometry(width + 2, baseThickness, depth + 2);
+        const baseMat = new THREE.MeshBasicMaterial({ color: this.wireColor, transparent: true, opacity: 0 });
+        const baseMesh = new THREE.Mesh(baseGeo, baseMat);
+        baseMesh.position.y = baseThickness / 2;
+        this.buildingGroup.add(baseMesh);
+        this.edgeMaterials.push(baseMat);
+
+        let currentHeight = baseThickness;
+
+        // --- GÉNÉRATION DES ÉTAGES ---
+        for (let i = 0; i < numFloors; i++) {
+            const floorHeight = 8 + Math.random() * 12;
+            const floorGroup = new THREE.Group();
+            floorGroup.position.y = currentHeight + floorHeight / 2;
+            this.buildingGroup.add(floorGroup);
+
+            const splitX = Math.random() > 0.5 ? 2 : 1;
+            const splitZ = Math.random() > 0.5 ? 2 : 1;
+            const subW = width / splitX;
+            const subD = depth / splitZ;
+
+            for (let sx = 0; sx < splitX; sx++) {
+                for (let sz = 0; sz < splitZ; sz++) {
+                    const seg = 2 + Math.floor(Math.random() * 3);
+                    const geo = new THREE.BoxGeometry(subW, floorHeight, subD, seg, seg, seg);
+
+                    const block = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: this.baseColor }));
+                    block.position.x = (sx - (splitX - 1) / 2) * subW;
+                    block.position.z = (sz - (splitZ - 1) / 2) * subD;
+                    floorGroup.add(block);
+
+                    // 2. Arêtes
+                    const eMat = new THREE.LineBasicMaterial({ color: this.wireColor, transparent: true, opacity: 0 });
+                    const edges = new THREE.LineSegments(new THREE.EdgesGeometry(geo), eMat);
+                    block.add(edges);
+                    this.edgeMaterials.push(eMat);
+
+                    // 3. Grillage Quads
+                    const gMat = new THREE.LineBasicMaterial({ color: this.wireColor, transparent: true, opacity: 0 });
+                    const grid = new THREE.LineSegments(new THREE.EdgesGeometry(geo, 1), gMat);
+                    grid.scale.set(1.002, 1.002, 1.002);
+                    block.add(grid);
+                    this.gridMaterials.push(gMat);
+
+                    // 4. Triangles Glitch
+                    const tMat = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0 });
+                    const tri = new THREE.LineSegments(new THREE.WireframeGeometry(geo), tMat);
+                    tri.visible = false;
+                    block.add(tri);
+                    this.triangleGrids.push({ mesh: tri, mat: tMat });
+
+                    this.subSectionStatus.push(Math.random() > 0.5);
+                }
+            }
+            currentHeight += floorHeight;
+        }
+
+        this.glitchPalette = [new THREE.Color(0x004400), this.wireColor, new THREE.Color(0xFFFFFF)];
+        this.innerMesh = this.buildingGroup;
+    }
+
+    animate(time) {
+        const dist = Math.abs(this.mesh.position.z);
+
+        if (dist > 350) {
+            this.buildingGroup.visible = false;
+            return;
+        } else {
+            this.buildingGroup.visible = true;
+        }
+
+        if (!this.isCurrentlyGlitching && dist < 300 && Math.random() > 0.995) {
+            this.isCurrentlyGlitching = true;
+            this.glitchDuration = 5 + Math.random() * 15;
+            this.glitchTimer = 0;
+        }
+
+        if (this.isCurrentlyGlitching) {
+            this.glitchTimer++;
+            if (this.glitchTimer >= this.glitchDuration) this.isCurrentlyGlitching = false;
+        }
+
+        const edgeOpacityBase = dist < 350 ? 0.6 : 0;
+        const gridOpacityBase = dist < 300 ? 0.3 : 0;
+
+        this.edgeMaterials.forEach(mat => {
+            mat.opacity = this.isCurrentlyGlitching ? 0.2 : edgeOpacityBase;
+        });
+
+        for (let i = 0; i < this.subSectionStatus.length; i++) {
+            const matQuad = this.gridMaterials[i];
+            const glitchObj = this.triangleGrids[i];
+            const isVisibleNormally = this.subSectionStatus[i];
+
+            if (this.isCurrentlyGlitching) {
+                const slowGlitchTick = Math.floor(this.glitchTimer / 3) % 2 === 0;
+                const showTri = (i % 2 === 0) ? slowGlitchTick : !slowGlitchTick;
+
+                glitchObj.mesh.visible = showTri;
+                glitchObj.mat.opacity = showTri ? 0.9 : 0;
+                matQuad.opacity = showTri ? 0 : 0.9;
+
+                if (showTri) {
+                    glitchObj.mat.color.copy(this.glitchPalette[i % this.glitchPalette.length]);
+                } else {
+                    matQuad.color.setHex(0xffffff);
+                }
+            } else {
+                if(glitchObj) glitchObj.mesh.visible = false;
+                if(glitchObj) glitchObj.mat.opacity = 0;
+                matQuad.color.copy(this.wireColor);
+                matQuad.opacity = isVisibleNormally ? gridOpacityBase : 0;
+            }
+        }
+
+        if (this.isCurrentlyGlitching) {
+            this.buildingGroup.position.x = (Math.sin(this.glitchTimer) * 0.3);
+        } else {
+            this.buildingGroup.position.x = 0;
+        }
+    }
+
+    updatePosition(speed, delta, getProjection) {
+        this.z += speed * delta;
+
+        // On récupère la projection au centre de la route pour ce Z
+        const proj = getProjection(this.z, 0);
+
+        if (proj) {
+            const roll = proj.rollAngle || 0;
+            const totalOffset = this.lane * this.sideOffset;
+
+            // Calcul trigonométrique pour coller à l'inclinaison du sol
+            this.mesh.position.x = proj.x + Math.cos(roll) * totalOffset;
+            this.mesh.position.y = proj.y + Math.sin(roll) * totalOffset;
+            this.mesh.position.z = this.z;
+            this.mesh.rotation.z = roll;
+
+            this.buildingGroup.visible = true;
+        }
+    }
+
+    dispose() {
+        if (this.buildingGroup) {
+            this.buildingGroup.traverse(child => {
+                if (child.geometry) child.geometry.dispose();
+                if (child.material) child.material.dispose();
+            });
+        }
+    }
+}
+
 export class World {
     constructor(scene) {
         this.scene = scene;
+
+        // Liste spécifique pour le décor (CityScape)
+        this.scenery = [];
+        this.lastSceneryZ = 0;
+
         // On augmente la profondeur (600) pour éviter de voir le bord
         const geo = new THREE.PlaneGeometry(600, 600, 80, 80);
         geo.rotateX(-Math.PI / 2);
@@ -92,6 +328,27 @@ export class World {
         this.grid.geometry.attributes.position.needsUpdate = true;
     }
 
+    spawnScenery(state, getProjection) {
+        const currentDistance = state.zOffset;
+
+        // On spawn un élément tous les X mètres (ex: tous les 40m)
+        if (currentDistance - this.lastSceneryZ < 40) return;
+
+        const zSpawn = -350; // Assez loin
+        const sides = [ -1, 1 ]; // On tente de spawn de chaque côté
+
+        sides.forEach(side => {
+            if (Math.random() > 0.3) {
+                // Création de l'élément (Building, Néon, etc.)
+                const element = new CityScapeElement(side, zSpawn, getProjection, state.params.color);
+                this.scene.add(element.mesh);
+                this.scenery.push(element);
+            }
+        });
+
+        this.lastSceneryZ = currentDistance;
+    }
+
     update(state, getProjection) {
         const pos = this.mesh.geometry.attributes.position;
         const isGlitch = state.triggers && state.triggers.glitch;
@@ -128,6 +385,21 @@ export class World {
         this.grid.material.opacity = currentOpacity;
         this.grid.material.color.copy(state.params.color);
         this.mesh.material.opacity = currentOpacity;
+
+        this.spawnScenery(state, getProjection);
+
+        for (let i = this.scenery.length - 1; i >= 0; i--) {
+            const el = this.scenery[i];
+            el.updatePosition(state.speed, state.delta, getProjection);
+            el.animate(state.time);
+
+            // Suppression si derrière la caméra (z > 50)
+            if (el.mesh.position.z > 50) {
+                this.scene.remove(el.mesh);
+                if(el.dispose) el.dispose();
+                this.scenery.splice(i, 1);
+            }
+        }
     }
 
     triggerScreenFlash(colorHex) {
