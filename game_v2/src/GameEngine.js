@@ -62,7 +62,6 @@ export class GameEngine {
 
         this.scoreTimer = 0;
         this.spawnBonusTimer = 10; // pas de bonus les 10 premières secondes
-        this.spawnCityTimer = 5;
         this.spawnWallTimer = 1;
 
         this.world = new World(scene);
@@ -325,6 +324,7 @@ export class GameEngine {
             this.currentTotalSpeed = baseSpeed + this.bonusVelocity;
         }
 
+        // Distance totale parcourue
         this.zOffset += this.currentTotalSpeed * delta * 50;
 
         // 8. ÉTAT ET MISES À JOUR
@@ -332,6 +332,7 @@ export class GameEngine {
         const state = {
             time: this.time,
             delta,
+            zOffset: this.zOffset,
             speed: this.currentTotalSpeed * 50,
             phase: p,
             params: this.currentParams,
@@ -384,12 +385,6 @@ export class GameEngine {
             }
         } else {
             this.spawnBonusTimer = 0.5;
-        }
-
-        this.spawnCityTimer -= dt;
-        if (this.spawnCityTimer <= 0) {
-            this.entities.spawnCityScapeElement(state, proj);
-            this.spawnCityTimer = 0.3;
         }
     }
 
