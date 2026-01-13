@@ -19,7 +19,7 @@ export const SONG_STRUCTURE = [
       start: 5, end: 14,
       speed: 1.2,
       bonuses: { density: 0.1 },
-      obstacles: { density: 0.16 }
+      obstacles: { density: 0.9 }
     },
     { label: "INTRO 1",
       start: 14, end: 28,
