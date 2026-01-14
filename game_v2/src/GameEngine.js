@@ -39,6 +39,7 @@ const DEFAULT_PHASE = {
         ]
     },
     effects: {
+        city_lightning: { intensity: 0.5 },
         curve:     { intensity: 0.5 },
         flash:     { intensity: 0 },
         glitch:    { intensity: 0.1 },
@@ -64,7 +65,7 @@ export class GameEngine {
         this.spawnBonusTimer = 10; // pas de bonus les 10 premières secondes
         this.spawnWallTimer = 1;
 
-        this.world = new World(scene);
+        this.world = new World(scene, camera);
         this.road = new Road(scene);
         this.entities = new EntityManager(scene);
         this.player = new Player(scene);
@@ -208,9 +209,10 @@ export class GameEngine {
         // 3. LOGIQUE DES TRIGGERS (Basée sur l'intensité)
         const triggers = {
             lightning: Math.random() < (p.effects.lightning.intensity * delta * 10),
-            flash:     Math.random() < (p.effects.flash.intensity * delta * 5),
-            glitch:    Math.random() < (p.effects.glitch.intensity * delta * 5),
-            reverse:   p.effects.reverse.enabled === true
+            city_lightning: Math.random() < (p.effects.city_lightning.intensity * delta * 5),
+            flash: Math.random() < (p.effects.flash.intensity * delta * 5),
+            glitch: Math.random() < (p.effects.glitch.intensity * delta * 5),
+            reverse: p.effects.reverse.enabled === true
         };
 
         if (triggers.lightning) this.world.triggerLightning();
@@ -339,6 +341,10 @@ export class GameEngine {
             activeBonus: this.activeBonus,
             triggers: triggers
         };
+
+        if (triggers.city_lightning) {
+            this.world.triggerCityLightning(state, this.camera, p.effects.city_lightning.intensity);
+        }
 
         this.background.update(p, delta);
         this.world.update(state, proj);
