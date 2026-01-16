@@ -118,34 +118,37 @@
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         const navbarCollapse = document.getElementById('navbarNav');
-        const navLinks = navbarCollapse.querySelectorAll('.nav-link:not(.dropdown-toggle)');
         const bsCollapse = new bootstrap.Collapse(navbarCollapse, { toggle: false });
 
-        navLinks.forEach(link => {
-            link.addEventListener('click', function(e) {
-                const href = this.getAttribute('href');
-                if (href.includes('#')) {
-                    const targetId = href.split('#')[1];
-                    const targetElement = document.getElementById(targetId);
-
-                    if (targetElement && navbarCollapse.classList.contains('show')) {
-                        e.preventDefault();
-                        bsCollapse.hide();
-
-                        navbarCollapse.addEventListener('hidden.bs.collapse', () => {
-                            const offset = 30;
-                            const elementPosition = targetElement.getBoundingClientRect().top;
-                            const offsetPosition = elementPosition + window.pageYOffset - offset;
-
-                            window.scrollTo({
-                                top: offsetPosition,
-                                behavior: "smooth"
-                            });
-                        }, { once: true });
-                    }
+        document.querySelectorAll('.nav-link:not(.dropdown-toggle)').forEach(link => {
+            link.addEventListener('click', () => {
+                if (navbarCollapse.classList.contains('show')) {
+                    bsCollapse.hide();
                 }
+                setTimeout(adjustScrollPosition, 800);
             });
         });
+
+        // Adjust scrolling position for anchor links
+        function adjustScrollPosition() {
+            const hash = window.location.hash;
+            if (hash) {
+                const target = document.querySelector(hash);
+                if (target) {
+                    const offset = 40;
+                    const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - offset;
+
+                    if (Math.abs(window.pageYOffset - targetPosition) > 10) {
+                        window.scrollTo({
+                            top: targetPosition,
+                            behavior: 'smooth'
+                        });
+                    }
+                }
+            }
+        }
+
+        window.addEventListener('load', adjustScrollPosition);
     });
 
     document.addEventListener("DOMContentLoaded", function() {
