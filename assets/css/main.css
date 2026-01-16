@@ -201,6 +201,17 @@ a.nav-link.btn-mf.dropdown-toggle.py-0 {
   color: unset !important;
 }
 
+.navbar-mf-title {
+    opacity: 0;
+    transition: opacity 0.4s ease-in-out;
+    pointer-events: none;
+}
+
+.navbar-mf-title.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
 /**
  * Boostrap custom CSS adjustements
  */
