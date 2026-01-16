@@ -43,3 +43,53 @@
   overflow: hidden;       /* cache le texte qui dépasse */
   text-overflow: ellipsis;/* ajoute "..." à la fin si ça dépasse */
 }
+
+.youtube-lite.video-locked > .img-fluid {
+    pointer-events: none;
+    pointer: cursor;
+}
+
+.youtube-lite.video-locked::after {
+  display: none;
+}
+
+/**
+.youtube-lite-countdown {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 0, 0, 0.75);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 1.5rem;
+    pointer-events: none;
+    z-index: 10;
+}
+**/
+
+.youtube-lite-countdown {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 0, 0, 0.8);
+    color: #ffffff;
+    padding: 10px 20px;
+    border-radius: 3px;
+
+    /* Style Horloge Numérique */
+    font-family: 'Courier New', Courier, monospace; /* Police à largeur fixe */
+    font-size: 2rem;
+    font-weight: bold;
+    letter-spacing: -1px;
+
+    /* Optionnel : Effet "Néon/LED" */
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(255, 0, 0, 0.2);
+
+    pointer-events: none;
+    z-index: 10;
+}

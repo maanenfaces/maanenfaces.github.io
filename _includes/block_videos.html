@@ -13,15 +13,17 @@
             <div class="border border-custom mb-4">
                 <div class="auto-resize-yt-iframe">
                     <div class="youtube-lite"
-                         {% if item.preview_img_url %}
+                         {% if item.release_date_preview_img_url %}
+                         data-preview-img-url="{{ item.release_date_preview_img_url }}"
+                         {% elsif item.preview_img_url %}
                          data-preview-img-url="{{ item.preview_img_url }}"
                          {% else %}
                          data-preview-img-url="https://img.youtube.com/vi/{{ item.yt_video_id }}/maxresdefault.jpg"
                          {% endif %}
                          data-yt-video-id="{{ item.yt_video_id }}"
                          data-start-at-in-seconds="{{ item.start_at_in_seconds | default: 0 }}"
-                         data-title="{{ item.title | default: '' }}">
-                    </div>
+                         data-title="{{ item.title | default: '' }}"
+                         data-release-date="{{ item.release_date }}"> </div>
                 </div>
             </div>
         </div>
@@ -44,25 +46,88 @@
         const ytLite = document.querySelectorAll(".youtube-lite");
         const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
+        // Fonction pour parser YYYY-MM-DD-HH-MM en objet Date UTC
+        function parseReleaseDateUTC(dateStr) {
+            if (!dateStr) return null;
+            const parts = dateStr.split('-');
+            if (parts.length < 5) return null;
+            // Date.UTC(year, monthIndex, day, hour, minute)
+            // Attention: le mois en JS commence à 0 (janvier = 0)
+            return new Date(Date.UTC(parts[0], parts[1] - 1, parts[2], parts[3], parts[4]));
+        }
+
         ytLite.forEach(el => {
             const previewImgUrl = el.dataset.previewImgUrl;
             const startAt = el.dataset.startAtInSeconds;
             const title = el.dataset.title;
             const videoId = el.dataset.ytVideoId;
+            const releaseDateStr = el.dataset.releaseDate;
 
+            const releaseDate = parseReleaseDateUTC(releaseDateStr);
+            let isLocked = false;
+
+            // Création de l'image de preview
             const video_img = document.createElement("img");
             video_img.className = "img-fluid object-fit-fill";
             video_img.src = previewImgUrl;
             video_img.alt = "YouTube preview image";
             video_img.loading = "lazy";
 
+            // Titre de la vidéo
             const video_title = document.createElement("div");
             video_title.className = "youtube-lite-title";
             video_title.textContent = title;
 
             el.replaceChildren(video_img, video_title);
 
+            // Gestion du Countdown
+            if (releaseDate && releaseDate > new Date()) {
+                isLocked = true;
+                el.classList.add("video-locked");
+
+                const countdownOverlay = document.createElement("div");
+                countdownOverlay.className = "youtube-lite-countdown";
+                el.appendChild(countdownOverlay);
+
+                const updateTimer = () => {
+                    const now = new Date();
+                    const diff = releaseDate - now;
+
+                    if (diff <= 0) {
+                        isLocked = false;
+                        el.classList.remove("video-locked");
+                        countdownOverlay.remove();
+                        clearInterval(timerInterval);
+                        return;
+                    }
+
+                    // Calculs de base
+                    const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+                    const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                    const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+                    // Formatage avec padStart pour garantir 2 chiffres (sauf pour les jours)
+                    const days = d.toString().padStart(2, '0');
+                    const hours = h.toString().padStart(2, '0');
+                    const minutes = m.toString().padStart(2, '0');
+                    const seconds = s.toString().padStart(2, '0');
+
+                    // Résultat : DD - HH:MM:SS
+                    if (d > 0) {
+                        countdownOverlay.textContent = `${days}D - ${hours}:${minutes}:${seconds}`;
+                    } else {
+                        countdownOverlay.textContent = `${hours}:${minutes}:${seconds}`;
+                    }
+                };
+
+                const timerInterval = setInterval(updateTimer, 1000);
+                updateTimer();
+            }
+
             el.addEventListener("click", function() {
+                if (isLocked) return; // Empêche le clic si pas encore sorti
+
                 const video_loadtext = document.createElement("div");
                 video_loadtext.className = "youtube-lite-loadtext";
                 video_loadtext.textContent = "Loading video...";
@@ -81,7 +146,6 @@
                 iframe.style.height = "100%";
                 iframe.onload = () => {
                     video_loadtext.remove();
-
                     if (isMute === 1) {
                         const unmute_btn = document.createElement("button");
                         unmute_btn.className = "btn btn-light youtube-lite-unmute-btn";
