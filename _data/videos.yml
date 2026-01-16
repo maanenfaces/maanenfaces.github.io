@@ -1,25 +1,22 @@
-- yt_video_id: ZSJXdmLLRPk
-  title: Maanen Faces - Robots (Music Video)
+- yt_video_id: glSNOxyV0GA
   css_class: col-lg-10
-  start_at_in_seconds: 175
-  preview_img_url: https://img.youtube.com/vi/ZSJXdmLLRPk/maxresdefault.jpg
+  title: Maanen Faces - Boogeyman (Live Video)
+  preview_img_url: https://img.youtube.com/vi/glSNOxyV0GA/maxresdefault.jpg
+  release_date: "2026-01-16-17-00"
+  release_date_preview_img_url: /assets/img/maanenfaces_boogeyman_live_video_preview.png
 
 - yt_video_id: VTuUiGRn8UI
+  css_class: col-lg-10
   title: Maanen Faces - Ligeia (Live Video)
   preview_img_url: https://img.youtube.com/vi/VTuUiGRn8UI/maxresdefault.jpg
 
+- yt_video_id: ZSJXdmLLRPk
+  title: Maanen Faces - Robots (Music Video)
+  preview_img_url: https://img.youtube.com/vi/ZSJXdmLLRPk/maxresdefault.jpg
+
 - yt_video_id: rlWcj0XZGqk
   title: Maanen Faces - Selfish Block (Music Video)
-  start_at_in_seconds: 159
   preview_img_url: https://img.youtube.com/vi/rlWcj0XZGqk/maxresdefault.jpg
-
-- yt_video_id: 070McgG3XWA
-  title: Darkness (Live) @ Le Floride (NANTES, FR) October 2025, by Maanen Faces
-  preview_img_url: https://img.youtube.com/vi/070McgG3XWA/maxresdefault.jpg
-
-- yt_video_id: v-e65pddTZQ
-  title: Robots (Live) @ Supersonic (PARIS, FR) July 2024, by Maanen Faces
-  preview_img_url: https://img.youtube.com/vi/v-e65pddTZQ/maxresdefault.jpg
 
 - yt_video_id: 4bgefnqWa5Y
   title: Maanen faces - A Brilliant Future (Full Album) - 666MrDoom Channel
