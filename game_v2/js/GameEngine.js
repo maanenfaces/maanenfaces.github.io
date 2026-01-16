@@ -1,11 +1,11 @@
 import * as THREE from 'three';
-import { World } from './World.js';
-import { Road } from './Road.js';
-import { EntityManager } from './Entities.js';
+import { World } from './Environment/World.js';
+import { Road } from './Environment/Road.js';
+import { EntityManager } from './Entities/EntityManager.js';
 import { Player } from './Player.js';
-import { BackgroundManager } from './BackgroundManager.js';
-import { MusicController } from './MusicController.js';
-import { SoundEffects } from './SoundEffects.js';
+import { BackgroundManager } from './Environment/BackgroundManager.js';
+import { MusicController } from './Audio/MusicController.js';
+import { SoundEffects } from './Audio/SoundEffects.js';
 import { DEV_MODE } from './Config.js';
 
 const DEFAULT_PHASE = {
