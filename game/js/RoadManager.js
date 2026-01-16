@@ -5,172 +5,98 @@ export class RoadManager {
         this.scene = scene;
         this.roadSegments = [];
         this.segmentLength = 10;
-        this.laneWidth = 5;
+        this.laneWidth = 15; // Largeur de la route centrale
+        this.terrainWidth = 400;
+        this.terrainDepth = 300;
         this.zOffset = 0;
-        this.curveFactor = 0;
+        this.time = 0;
+        this.phase = {};
+
+        this.segmentsZ = 120;
+        this.segmentsX = 60;
+
+        this.initRoad();
     }
 
-    createSegment(zPos, color, alpha) {
-        const group = new THREE.Group();
+    initRoad() {
+        // 1. LA NAPPE PRINCIPALE (Sol noir + Grille)
+        this.geometry = new THREE.PlaneGeometry(this.terrainWidth, this.terrainDepth, this.segmentsX, this.segmentsZ);
+        this.geometry.rotateX(-Math.PI / 2);
 
-        // --- SOL (TERRAIN) ---
-        const groundGeo = new THREE.PlaneGeometry(200, this.segmentLength, 40, 1);
-        groundGeo.rotateX(-Math.PI / 2);
+        this.solidMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+        this.wireMat = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true, transparent: true, opacity: 0.2 });
 
-        const groundFill = new THREE.Mesh(groundGeo, new THREE.MeshBasicMaterial({
-            color: color, wireframe: false, transparent: true, opacity: 0.1
-        }));
-        const groundWire = new THREE.Mesh(groundGeo, new THREE.MeshBasicMaterial({
-            color: color, wireframe: true, transparent: true, opacity: 0.3
-        }));
-        group.add(groundFill, groundWire);
+        this.mainMesh = new THREE.Mesh(this.geometry, this.solidMat);
+        this.wireMesh = new THREE.Mesh(this.geometry, this.wireMat);
+        this.wireMesh.position.y = 0.01;
 
-        // --- PISTE CENTRALE (ROUTE) ---
-        const laneGeo = new THREE.PlaneGeometry(this.laneWidth * 3, this.segmentLength, 3, 1);
-        laneGeo.rotateX(-Math.PI / 2);
+        // 2. LA ROUTE CENTRALE (Bande gris foncé/bleuté)
+        this.roadGeo = new THREE.PlaneGeometry(this.laneWidth, this.terrainDepth, 10, this.segmentsZ);
+        this.roadGeo.rotateX(-Math.PI / 2);
+        this.roadMat = new THREE.MeshBasicMaterial({ color: 0x111111, transparent: true, opacity: 0.5 });
+        this.roadMesh = new THREE.Mesh(this.roadGeo, this.roadMat);
+        this.roadMesh.position.y = 0.02;
 
-        const laneFill = new THREE.Mesh(laneGeo, new THREE.MeshBasicMaterial({
-            color: 0xffffff, transparent: true, opacity: 0.1
-        }));
-        laneFill.position.y = 0.01;
-
-        const laneWire = new THREE.Mesh(laneGeo, new THREE.MeshBasicMaterial({
-            color: 0xffffff, wireframe: true, transparent: true, opacity: 0.8
-        }));
-        laneWire.position.y = 0.02;
-        group.add(laneFill, laneWire);
-
-        // Fond noir
-        const solidMesh = new THREE.Mesh(
-            new THREE.PlaneGeometry(200, this.segmentLength).rotateX(-Math.PI / 2),
-            new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 1.0 })
-        );
-        solidMesh.position.y = -0.1;
-        group.add(solidMesh);
-
-        // --- LIGNES ---
-        // CORRECTION : On recrée la géométrie pour chaque segment pour éviter les bugs de Culling (disparition)
-        const lineGeo = new THREE.PlaneGeometry(0.2, this.segmentLength);
+        // 3. LES LIGNES DE BORDURE (Néon)
+        const lineGeo = new THREE.PlaneGeometry(0.5, this.terrainDepth, 1, this.segmentsZ);
         lineGeo.rotateX(-Math.PI / 2);
+        this.lineMat = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
 
-        const lineMat = new THREE.MeshBasicMaterial({
-            color: 0xffffff,
-            transparent: true,
-            side: THREE.DoubleSide,
-            polygonOffset: true,
-            polygonOffsetFactor: -4,
-            polygonOffsetUnits: 1
-        });
+        this.leftLine = new THREE.Mesh(lineGeo, this.lineMat);
+        this.rightLine = new THREE.Mesh(lineGeo, this.lineMat);
+        this.leftLine.position.y = 0.03;
+        this.rightLine.position.y = 0.03;
 
-        const leftLine = new THREE.Mesh(lineGeo, lineMat);
-        leftLine.position.set(-(this.laneWidth * 1.5), 0.04, 0);
-        leftLine.frustumCulled = false; // Force l'affichage même si le moteur pense qu'elle est hors champ
+        this.scene.add(this.mainMesh, this.wireMesh, this.roadMesh, this.leftLine, this.rightLine);
 
-        const rightLine = new THREE.Mesh(lineGeo, lineMat);
-        rightLine.position.set((this.laneWidth * 1.5), 0.04, 0);
-        rightLine.frustumCulled = false; // Force l'affichage
-
-        // Force le rendu des lignes après le reste
-        leftLine.renderOrder = 2;
-        rightLine.renderOrder = 2;
-
-        group.add(leftLine, rightLine);
-
-        // Stockage des références
-        group.userData = { groundFill, groundWire, laneFill, laneWire, solidMesh, leftLine, rightLine, needsContent: true };
-
-        group.position.z = -zPos;
-        this.scene.add(group);
-        this.roadSegments.push(group);
-        return group;
+        // Sauvegarde des positions initiales
+        this.basePos = this.geometry.attributes.position.array.slice();
+        this.baseRoadPos = this.roadGeo.attributes.position.array.slice();
+        this.baseLinePos = lineGeo.attributes.position.array.slice();
     }
 
-    update(speed, delta, time, phase, currentGridColor, currentFloorAlpha) {
-        // 1. Mise à jour de la progression globale (pour le bruit/vagues)
+    getTerrainData(z) {
+        const worldZ = z - this.zOffset;
+        const waveAmp = this.phase.waveHeight || 0;
+        const curveStr = this.phase.curveStrength || 0;
+
+        const y = Math.sin(this.time * 2 + worldZ * 0.1) * waveAmp;
+        const x = Math.sin(worldZ * 0.02 + this.time * 0.5) * curveStr * 20;
+
+        return { x, y };
+    }
+
+    createSegment(zPos) {
+        const anchor = new THREE.Group();
+        anchor.position.z = -zPos;
+        this.scene.add(anchor);
+        this.roadSegments.push(anchor);
+        return anchor;
+    }
+
+    update(speed, delta, time, phase, currentGridColor) {
         this.zOffset += speed * delta;
-        this.curveFactor = Math.sin(time * 0.5) * (phase.curveStrength || 0);
+        this.time = time;
+        this.phase = phase;
 
-        const waveAmp = phase.waveHeight || 0;
-        const waveType = phase.waveType || 1;
+        this.wireMat.color.copy(currentGridColor);
+        this.lineMat.color.copy(currentGridColor);
 
-        // Fonction interne pour calculer la hauteur (Y) selon le Z
-        const getWaveY = (z) => {
-            if (waveType === 2) {
-                return (Math.sin(time * 2 + z * 0.2) + Math.cos(time * 1.5 + z * 0.1)) * 0.6 * waveAmp;
-            }
-            return Math.sin(time * 2 + z * 0.1) * waveAmp;
-        };
+        // Mise à jour de la déformation pour TOUS les éléments visuels
+        this._applyDeformation(this.geometry, this.basePos);
+        this._applyDeformation(this.roadGeo, this.baseRoadPos);
+        this._applyDeformation(this.leftLine.geometry, this.baseLinePos, -this.laneWidth/2);
+        this._applyDeformation(this.rightLine.geometry, this.baseLinePos, this.laneWidth/2);
+    }
 
-        // 2. Boucle sur chaque segment de route
-        this.roadSegments.forEach(seg => {
-            // Déplacement du segment vers la caméra
-            // Note: On utilise delta pour garantir la même vitesse quel que soit le FPS
-            seg.position.z += speed * delta;
-
-            // --- SYSTEME DE RECYCLAGE (POOLING) ---
-            // Si le segment dépasse 10 unités derrière la caméra (z > 10)
-            if (seg.position.z > 15) {
-                // On le renvoie tout au bout de la file (à l'horizon)
-                // Calcul : Position actuelle - (Nombre de segments * Longueur d'un segment)
-                seg.position.z -= this.roadSegments.length * this.segmentLength;
-            }
-
-            // 3. Calcul de la position X (Courbure)
-            // On utilise zOffset pour que la courbe "défile" avec la route
-            seg.position.x = Math.sin((seg.position.z + this.zOffset) * 0.02) * this.curveFactor;
-
-            // 4. Calcul de la position Y (Ondulations)
-            const y = getWaveY(seg.position.z);
-            seg.position.y = y;
-
-            // 5. Calcul de la rotation (Tangente)
-            // On regarde la hauteur un peu plus loin pour incliner le segment
-            const step = 1.0;
-            const nextY = getWaveY(seg.position.z + step);
-            seg.rotation.x = Math.atan((nextY - y) / step);
-
-            // 6. Mise à jour visuelle (Couleurs et Opacité)
-            const ud = seg.userData;
-            const isVisible = currentFloorAlpha > 0.01;
-
-            // Sol et Grillage
-            if (ud.groundFill) {
-                ud.groundFill.material.color.copy(currentGridColor);
-                ud.groundFill.material.opacity = 0.1 * currentFloorAlpha;
-                ud.groundFill.visible = isVisible;
-            }
-            if (ud.groundWire) {
-                ud.groundWire.material.color.copy(currentGridColor);
-                ud.groundWire.material.opacity = 0.3 * currentFloorAlpha;
-                ud.groundWire.visible = isVisible;
-            }
-
-            // Piste centrale
-            if (ud.laneFill) {
-                ud.laneFill.material.opacity = 0.1 * currentFloorAlpha;
-                ud.laneFill.visible = isVisible;
-            }
-            if (ud.laneWire) {
-                ud.laneWire.material.opacity = 0.8 * currentFloorAlpha;
-                ud.laneWire.visible = isVisible;
-            }
-            if (ud.solidMesh) {
-                ud.solidMesh.material.opacity = currentFloorAlpha;
-                ud.solidMesh.visible = isVisible;
-            }
-
-            // --- LIGNES LATÉRALES (Correction visuelle) ---
-            // On s'assure qu'elles restent toujours opaques et visibles
-            if (ud.leftLine && ud.rightLine) {
-                ud.leftLine.visible = true;
-                ud.rightLine.visible = true;
-                ud.leftLine.material.opacity = 1.0;
-                ud.rightLine.material.opacity = 1.0;
-
-                // On force l'ordre de rendu pour éviter qu'elles passent sous le sol noir
-                ud.leftLine.renderOrder = 10;
-                ud.rightLine.renderOrder = 10;
-            }
-        });
+    _applyDeformation(geo, baseArray, xOffsetLocal = 0) {
+        const pos = geo.attributes.position;
+        for (let i = 0; i < pos.count; i++) {
+            const initX = baseArray[i * 3] + xOffsetLocal;
+            const initZ = baseArray[i * 3 + 2];
+            const data = this.getTerrainData(initZ);
+            pos.setXYZ(i, initX + data.x, data.y, initZ);
+        }
+        pos.needsUpdate = true;
     }
 }
