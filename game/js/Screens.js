@@ -322,108 +322,72 @@ export class GameScreen extends Screen {
     }
 
     updatePlayer(delta, speed) {
-        // 1. Mouvement Latéral
-        const curveX = Math.sin((0 + this.app.env.zOffset) * 0.02) * this.app.env.curveFactor;
+        // 1. Mouvement latéral local (Lanes)
         const targetLaneX = this.currentLane * 5;
         this.currentLaneX += (targetLaneX - this.currentLaneX) * 10 * delta;
 
-        // 2. Gestion du Saut (Physique locale)
+        // 2. Gestion du Saut
         if (this.isJumping) {
             this.playerJumpY += this.jumpVelocity * delta;
-            this.jumpVelocity -= this.jumpGravity * delta;
-
+            this.jumpVelocity -= 40 * delta; // Gravité
             if (this.playerJumpY <= 0) {
                 this.playerJumpY = 0;
                 this.isJumping = false;
-                this.jumpVelocity = 0;
             }
-        } else {
-            this.playerJumpY = 0;
         }
 
-        // 3. Positionnement final (Suivi du terrain)
-        // On cherche le segment sous le joueur (Z=3)
+        // 3. Positionnement sur le segment (Ancre) sous le joueur
         const playerZ = 3;
         const segments = this.app.env.roadSegments;
         const segmentUnderPlayer = segments.find(s => Math.abs(s.position.z - playerZ) < 5);
 
-        let groundHeight = 0;
         if (segmentUnderPlayer) {
-            groundHeight = segmentUnderPlayer.position.y;
+            // Le joueur s'aligne sur l'ancre qui suit déjà la courbe/vague
+            this.player.position.x = segmentUnderPlayer.position.x + this.currentLaneX;
+            this.player.position.y = segmentUnderPlayer.position.y + this.playerJumpY;
         }
-
-        this.player.position.x = isNaN(this.currentLaneX + curveX) ? 0 : (this.currentLaneX + curveX);
-        this.player.position.y = isNaN(groundHeight + this.playerJumpY) ? 0 : (groundHeight + this.playerJumpY);
         this.player.position.z = playerZ;
 
-        const targetCamX = this.player.position.x * 0.3;
-        this.app.env.camera.position.x += (targetCamX - this.app.env.camera.position.x) * 2 * delta;
-        this.app.env.camera.position.y = 4;
+        // 4. CAMÉRA : Centrée et fluide (Correction lookData ici)
+        const camTargetX = this.player.position.x;
+        this.app.env.camera.position.x += (camTargetX - this.app.env.camera.position.x) * 5 * delta;
+        this.app.env.camera.position.y = 5;
         this.app.env.camera.position.z = 14;
 
-        const lookTargetX = this.player.position.x * 0.5;
-        this.app.env.camera.lookAt(isNaN(lookTargetX) ? 0 : lookTargetX, 0, -20);
+        // On anticipe la courbe à -40 unités devant
+        const lookAheadData = this.app.env.roadManager.getTerrainData(-40);
+        this.app.env.camera.lookAt(lookAheadData.x, lookAheadData.y, -40);
 
-        // Animation
+        // 5. ANIMATION & COLLISIONS
         const time = this.app.music.audio.currentTime;
         if (this.player.update) this.player.update(time, this.isJumping);
 
-        // Caméra
-        let shake = 0;
-        if (this.currentPhase && this.currentPhase.effects.includes("shake")) shake = 0.5;
-        //this.app.env.camera.position.x += (this.player.position.x * 0.3 - this.app.env.camera.position.x) * 2 * delta + (Math.random()-0.5)*shake;
-        //this.app.env.camera.lookAt(this.player.position.x * 0.5, 0, -20);
-
-        // 4. Collisions
         if (segmentUnderPlayer) {
             const playerWorldPos = new THREE.Vector3();
             this.player.getWorldPosition(playerWorldPos);
 
-            // On utilise une boite englobante simple pour le joueur
-            const pBox = new THREE.Box3().setFromCenterAndSize(playerWorldPos, new THREE.Vector3(0.8, 1.0, 0.8));
-
             segmentUnderPlayer.children.forEach(obj => {
-                if (!obj.visible) return;
-                if (!obj.userData.isObstacle && !obj.userData.isBonus) return;
+                if (!obj.visible || (!obj.userData.isObstacle && !obj.userData.isBonus)) return;
 
                 const objWorldPos = new THREE.Vector3();
                 obj.getWorldPosition(objWorldPos);
 
-                // Distance simple en X et Z (on ignore Y pour l'instant pour détecter la colonne)
                 const dx = Math.abs(playerWorldPos.x - objWorldPos.x);
                 const dz = Math.abs(playerWorldPos.z - objWorldPos.z);
 
-                if (dx < 1.0 && dz < 1.0) {
-                    // COLLISION DÉTECTÉE
-
-                    if (obj.userData.isBonus) {
-                        this.collectBonus(obj);
-                    }
+                if (dx < 1.2 && dz < 1.0) {
+                    if (obj.userData.isBonus) this.collectBonus(obj);
                     else if (obj.userData.isObstacle) {
-                        const isFalling = this.jumpVelocity < 0;
-                        const isAbove = playerWorldPos.y > objWorldPos.y + 0.5;
-
-                        // Bonus Invincible actif
-                        if (this.invincibleTimer > 0) {
+                        if (this.invincibleTimer > 0 || this.devInvincible) {
                             this.createExplosion(objWorldPos);
                             obj.visible = false;
-                        }
-                        // Logique STOMP (Écrasement)
-                        // Si le joueur tombe (vitesse négative) et qu'il est au-dessus de l'obstacle
-                        // On considère qu'il est au dessus si ses pieds sont plus haut que le centre de l'obstacle
-                        else if (isFalling && isAbove) {
-                            this.jumpVelocity = 15; // Rebondir
+                        } else if (this.jumpVelocity < 0 && playerWorldPos.y > objWorldPos.y + 0.5) {
+                            this.jumpVelocity = 15;
                             this.isJumping = true;
                             this.createExplosion(objWorldPos);
                             obj.visible = false;
                             this.score += 50;
-                        }
-                        // Dev mode = Invincible
-                        else if (this.devInvincible) {
-                            obj.visible = false;
-                        }
-                        // Otherwise, game over
-                        else {
+                        } else {
                             this.gameOver();
                         }
                     }

@@ -41,9 +41,15 @@ export class Environment {
 
     setupRenderer() {
         const existingCanvas = document.getElementById('gl-canvas');
-        this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, canvas: existingCanvas || undefined });
+
+        this.renderer = new THREE.WebGLRenderer({
+            antialias: true,
+            alpha: true,
+            canvas: existingCanvas || undefined
+        });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.setPixelRatio(window.devicePixelRatio);
+
         if(!existingCanvas) {
             this.renderer.domElement.id = 'gl-canvas';
             this.renderer.domElement.style.position = 'absolute';
@@ -61,47 +67,50 @@ export class Environment {
         this.scene.add(dirLight);
     }
 
-    reset() {
+reset() {
+        // Nettoyage
         this.roadManager.roadSegments.forEach(s => this.scene.remove(s));
         this.roadManager.roadSegments = [];
         this.roadManager.zOffset = 0;
         this.obstacleCooldown = 0;
 
+        // Création initiale des segments (ancres)
         for (let i = 0; i < 25; i++) {
-            const group = this.spawnSegment(i * this.roadManager.segmentLength);
+            const zPos = i * this.roadManager.segmentLength;
+            const anchor = this.spawnSegment(zPos);
             if (i > 4) {
-                this.generateObstacles(group, 0.03, i % 10 === 0 ? { spawnBonus: 'ammo' } : {});
+                this.generateObstacles(anchor, 0.03, i % 10 === 0 ? { spawnBonus: 'ammo' } : {});
             }
         }
     }
 
     spawnSegment(zPos) {
-        return this.roadManager.createSegment(zPos, this.currentGridColor, this.currentFloorAlpha);
+        return this.roadManager.createSegment(zPos);
     }
 
     update(delta, speed, phase, time) {
-        // Logique de couleur & fog
-        const targetColor = new THREE.Color(Array.isArray(phase.color) ? phase.color[0] : phase.color);
-        this.currentGridColor.lerp(targetColor, 0.05);
-        if (this.scene.fog) this.scene.fog.color.set(0x000000);
+        // 1. Mise à jour de la route (visuel)
+        this.roadManager.update(speed, delta, time, phase, this.currentGridColor);
 
-        const targetAlpha = (phase.gridOpacity !== undefined) ? phase.gridOpacity : 1.0;
-        this.currentFloorAlpha += (targetAlpha - this.currentFloorAlpha) * 0.05;
+        // 2. Mise à jour des obstacles (ancres)
+        this.roadSegments.forEach(seg => {
+            seg.position.z += speed * delta;
 
-        // Update Managers
-        this.roadManager.update(speed, delta, time, phase, this.currentGridColor, this.currentFloorAlpha);
-        this.bgManager.update(phase, this.currentFloorAlpha);
-
-        // Recyclage des segments et contenu
-        this.roadManager.roadSegments.forEach(seg => {
-            if (seg.position.z > 15) {
-                seg.position.z -= 25 * this.roadManager.segmentLength;
+            if (seg.position.z > 20) {
+                seg.position.z -= 25 * this.segmentLength;
                 this.resetSegmentContent(seg);
                 this.generateObstacles(seg, phase.density, phase);
             }
+
+            // On plaque l'ancre sur la courbe mathématique
+            const data = this.roadManager.getTerrainData(seg.position.z);
+            seg.position.x = data.x;
+            seg.position.y = data.y;
+
             seg.children.forEach(child => child.update?.(time));
         });
 
+        this.bgManager.update(phase, this.currentFloorAlpha);
         this.handleEffects(phase);
         this.updateCameraEffects();
     }
