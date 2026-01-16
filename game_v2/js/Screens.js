@@ -1,5 +1,5 @@
 import { DEV_MODE, DREAMLO_PUBLIC_KEY, DREAMLO_PRIVATE_KEY } from './Config.js';
-import { SoundEffects } from './SoundEffects.js';
+import { SoundEffects } from './Audio/SoundEffects.js';
 
 export class Screens {
     constructor(engine) {
