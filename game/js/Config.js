@@ -17,7 +17,7 @@ export const OBSTACLE_RATIOS = {
 
 export const SONG_STRUCTURE = [
     // INTRO
-    { start: 0,  end: 28, label: "INTRO", speed: 1, density: 0.1, effects: [], waveHeight: 0, curveStrength: 0, color: 0x00ff00 },
+    { start: 0,  end: 28, label: "INTRO", speed: 1, density: 0.1, effects: [], waveHeight: 0.5, curveStrength: 4, color: 0x00ff00 },
 
     // VERSE 1 WARMUP: DISCOVERING THE GAME
     { start: 28, end: 31, label: "VERSE 1 WARMUP", speed: 1, density: 0.1,  effects: [], waveHeight: 0, curveStrength: 2, color: 0xffff00 },
