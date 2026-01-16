@@ -72,7 +72,7 @@
         </li>
 
         <li>
-          <a href="https://www.youtube.com/@MaanenFaces">
+          <a href="https://www.youtube.com/@MaanenFaces?sub_confirmation=1">
             <img alt="Youtube" class="sn-icon" fetchpriority="high"
                  src="/assets/img/icon-youtube.png">
           </a>
@@ -114,3 +114,51 @@
     </div>
   </div>
 </nav>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const navbarCollapse = document.getElementById('navbarNav');
+        const navLinks = navbarCollapse.querySelectorAll('.nav-link:not(.dropdown-toggle)');
+        const bsCollapse = new bootstrap.Collapse(navbarCollapse, { toggle: false });
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                const href = this.getAttribute('href');
+                if (href.includes('#')) {
+                    const targetId = href.split('#')[1];
+                    const targetElement = document.getElementById(targetId);
+
+                    if (targetElement && navbarCollapse.classList.contains('show')) {
+                        e.preventDefault();
+                        bsCollapse.hide();
+
+                        navbarCollapse.addEventListener('hidden.bs.collapse', () => {
+                            const offset = 30;
+                            const elementPosition = targetElement.getBoundingClientRect().top;
+                            const offsetPosition = elementPosition + window.pageYOffset - offset;
+
+                            window.scrollTo({
+                                top: offsetPosition,
+                                behavior: "smooth"
+                            });
+                        }, { once: true });
+                    }
+                }
+            });
+        });
+    });
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const mobileTitle = document.querySelector('.navbar-mf-title');
+
+        if (mobileTitle) {
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 250) {
+                    mobileTitle.classList.add('is-visible');
+                } else {
+                    mobileTitle.classList.remove('is-visible');
+                }
+            });
+        }
+    });
+</script>
