@@ -524,6 +524,10 @@ a.nav-link.btn-mf.dropdown-toggle.py-0 {
   }
 }
 
+/**
+ * Scroll to top button
+ */
+
 #scrollToTop {
     position: fixed;
     bottom: 20px;
@@ -550,4 +554,21 @@ a.nav-link.btn-mf.dropdown-toggle.py-0 {
     box-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
     background-color: rgba(0, 0, 0, 0.7) !important;
     color: #fff !important;
+}
+
+/**
+ * Bandsintown widget adjustements
+ */
+#bandsintown .bit-upcoming-events .bit-date {
+    color: #f92100;
+}
+#bandsintown .bit-upcoming-events .bit-description {
+    color: #aaa;
+    padding-left: 20px;
+    text-align: left !important;
+}
+#bandsintown .bit-upcoming-events .bit-description::before {
+    content: "→ ";
+    display: inline-block;
+    margin-right: 5px;
 }
