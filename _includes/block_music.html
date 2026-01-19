@@ -1,7 +1,7 @@
 {% assign show_as_overlays = include.show_as_overlays | default: "true" %}
 {% assign show_section_title = include.show_section_title | default: "true" %}
 
-<div id="music" class="container scroll-margin pb-3">
+<section id="music" class="container scroll-margin pb-3">
     {% if show_section_title == "true" %}
     <div class="row">
         <div class="col text-center pb-4">
@@ -92,7 +92,7 @@
             </div>
         </div>
     </div>
-</div>
+</section>
 
 {% if show_as_overlays == "true" %}
 <link rel="stylesheet" href="/assets/css/album-hover.css">
