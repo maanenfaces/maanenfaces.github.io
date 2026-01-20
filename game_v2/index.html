@@ -328,10 +328,118 @@
             to { opacity: 0.2; }
         }
 
+        /* --- CATALOGUE DE GLITCHES --- */
+
+        /* 1. DISPLACEMENT : Décalage latéral brutal */
+        @keyframes glitch-1 {
+            0%, 100% { transform: translate(0); filter: none; }
+            20% { transform: translate(-15px, 5px); filter: hue-rotate(90deg); }
+            40% { transform: translate(15px, -5px); }
+        }
+
+        /* 2. CHROMATIC : Séparation des couleurs (RGB Split) */
+        @keyframes glitch-2 {
+            0%, 100% { text-shadow: none; box-shadow: 0 0 20px var(--neon-red); }
+            30% { text-shadow: 3px 0 var(--neon-blue), -3px 0 var(--neon-pink); box-shadow: -5px 0 var(--neon-blue), 5px 0 var(--neon-pink); }
+        }
+
+        /* 3. SKEW : Torsion de la structure */
+        @keyframes glitch-3 {
+            0%, 100% { transform: skew(0deg); }
+            20% { transform: skew(10deg) scaleY(1.1); }
+            50% { transform: skew(-10deg) scaleX(0.9); }
+        }
+
+        /* 4. FLASH : Inversion des couleurs et luminosité */
+        @keyframes glitch-4 {
+            0%, 100% { filter: invert(0); background: rgba(30, 0, 0, 0.98); opacity: 1; }
+            50% { filter: invert(1); background: #fff; opacity: 1; }
+        }
+
+        /* 5. V-SCAN : Effet de saut de fréquence vertical */
+        @keyframes glitch-5 {
+            0%, 100% { clip-path: inset(0 0 0 0); }
+            25% { clip-path: inset(20% 0 50% 0); transform: translateY(-10px); }
+            50% { clip-path: inset(80% 0 5% 0); transform: translateY(10px); }
+        }
+
+        /* Classes de déclenchement */
+        .g-1 { animation: glitch-1 0.2s ease-in-out; }
+        .g-2 { animation: glitch-2 0.2s linear; }
+        .g-3 { animation: glitch-3 0.15s Math.random() infinite; } /* Saccadé */
+        .g-4 { animation: glitch-4 0.1s steps(2); }
+        .g-5 { animation: glitch-5 0.2s contrast(2); }
+
+        /* Animation de fond (plus discrète pour accompagner) */
+        @keyframes bg-shake {
+            0% { filter: brightness(1); }
+            50% { filter: brightness(1.5) sepia(1) hue-rotate(300deg); }
+        }
+        .bg-glitch { animation: bg-shake 0.2s steps(2); }
+
+        /* --- NOUVEAUX EFFETS MATRICIELS --- */
+
+        /* G-6 : HoneyComb reveal avec fond noir opaque */
+        @keyframes glitch-6 {
+            0% { opacity: 0; background-color: transparent; }
+            1% { opacity: 1; background-color: #000; } /* Fond noir immédiat pour masquer le jeu */
+            10%, 90% { opacity: 1; transform: scale(1.05); }
+            50% { filter: hue-rotate(180deg) brightness(2); background-color: #050000; }
+            100% { opacity: 0; background-color: transparent; }
+        }
+
+        /* G-7 : Secousse sismique du fond (Vibration violente) */
+        @keyframes glitch-7 {
+            0% { transform: translate(0); }
+            10% { transform: translate(-20px, 10px); }
+            20% { transform: translate(20px, -5px); }
+            30% { transform: translate(-10px, -15px); }
+            40% { transform: translate(0); }
+        }
+
+        /* G-8 : Scanline Corrompue (Décalage de segments) */
+        @keyframes glitch-8 {
+            0% { clip-path: polygon(0 20%, 100% 20%, 100% 25%, 0 25%); transform: translateX(-50px); opacity: 1; }
+            50% { clip-path: polygon(0 60%, 100% 60%, 100% 65%, 0 65%); transform: translateX(50px); }
+            100% { opacity: 0; }
+        }
+
+        /* G-9 : Électrisation (Flash Matrix) */
+        @keyframes glitch-9 {
+            0% { background: #000; opacity: 1; }
+            20% { background: var(--neon-red); opacity: 1; }
+            40% { background: var(--neon-blue); opacity: 1; }
+            60% { background: #fff; opacity: 1; }
+            80% { background: var(--dark-red); opacity: 1; }
+            100% { background: radial-gradient(circle, #1a0000 0%, #000000 100%); opacity: 1; }
+        }
+
+        /* --- OVERLAY STRUCTURE ABEILLE --- */
+        #glitch-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            pointer-events: none;
+            z-index: 2000; /* Doit être supérieur au .screen (1000) */
+            opacity: 0;
+            /* Motif plus visible : opacity 0.5 au lieu de 0.2 */
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="28" height="49" viewBox="0 0 28 49"><path fill-rule="evenodd" d="M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM15 11.12l11 6.35v12.7l-11 6.35-11-6.35v-12.7l11-6.35z" fill="%23ff0000" fill-opacity="0.2"/></svg>');
+            background-size: 56px 98px;
+            background-color: transparent;
+            transition: opacity 0.1s;
+        }
+
+        .g-6 { animation: glitch-6 0.4s ease-out; }
+        .g-7 { animation: glitch-7 0.2s steps(2); }
+        .g-8 { animation: glitch-8 0.3s linear; }
+        .g-9 {
+            animation: glitch-9 0.25s steps(5) forwards;
+            z-index: 1001 !important; /* Force le passage devant tout pendant le flash */
+        }
+
     </style>
 </head>
 <body>
-
     <div id="audio-layers">
         <audio id="game-audio" src="./track.mp3" preload="auto"></audio>
         <div id="yt-audio-container" style="position:absolute; visibility:hidden; pointer-events:none;">
@@ -396,6 +504,8 @@
     </div>
 
     <div id="screens-container">
+        <div id="glitch-overlay"></div>
+
         <div id="start-screen" class="screen active">
             <div class="screen-content">
                 <div id="status-display" style="color: var(--neon-red); font-size: 1rem; letter-spacing: 4px; opacity: 0.8;">
@@ -458,5 +568,60 @@
         { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
     </script>
     <script type="module" src="./App.js"></script>
+
+    <script>
+        (function() {
+            const BOX_EFFECTS = ['g-1', 'g-2', 'g-3', 'g-4', 'g-5'];
+            const BACKGROUND_EFFECTS = ['g-7', 'g-9'];
+            const MATRIX_EFFECTS = ['g-6', 'g-8'];
+
+            function triggerAdvancedGlitch() {
+                const overlay = document.getElementById('glitch-overlay');
+                const activeScreen = document.querySelector('.screen.active');
+
+                if (!activeScreen || !overlay) {
+                    setTimeout(triggerAdvancedGlitch, 1000);
+                    return;
+                }
+
+                const content = activeScreen.querySelector('.screen-content');
+                const dice = Math.random();
+
+                let targetElement = null;
+                let effectClass = '';
+
+                if (dice < 0.4 && content) {
+                    targetElement = content;
+                    effectClass = BOX_EFFECTS[Math.floor(Math.random() * BOX_EFFECTS.length)];
+                } else if (dice < 0.7) {
+                    targetElement = overlay;
+                    effectClass = MATRIX_EFFECTS[Math.floor(Math.random() * MATRIX_EFFECTS.length)];
+                    overlay.style.opacity = "1"; // On affiche l'abeille
+                } else {
+                    targetElement = activeScreen;
+                    effectClass = BACKGROUND_EFFECTS[Math.floor(Math.random() * BACKGROUND_EFFECTS.length)];
+                }
+
+                targetElement.classList.add(effectClass);
+
+                setTimeout(() => {
+                    targetElement.classList.remove(effectClass);
+                    // On cache l'overlay si c'était la cible
+                    if (targetElement === overlay) {
+                        overlay.style.opacity = "0";
+                    }
+
+                    // Relance aléatoire entre 2s et 6s
+                    setTimeout(triggerAdvancedGlitch, 2000 + Math.random() * 4000);
+                }, 400);
+            }
+
+            // On attend un peu que la page soit bien chargée
+            window.addEventListener('load', () => {
+                setTimeout(triggerAdvancedGlitch, 2000);
+            });
+        })();
+    </script>
+
 </body>
 </html>
