@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { Building } from './Building.js';
+import { Building2 } from './Building2.js';
 import { FlyingShip } from './FlyingShip.js';
 
 export class World {
@@ -121,10 +122,16 @@ export class World {
 
         sides.forEach(side => {
             if (Math.random() > 0.1) {
-                // Création de l'élément (Building, Néon, etc.)
-                const element = new Building(side, zSpawn, getProjection, state.params.color);
-                this.scene.add(element.mesh);
-                this.scenery.push(element);
+                let element = null;
+                if (Math.random() > 0.5) {
+                    element = new Building2(side, zSpawn, getProjection, state.params.color);
+                } else {
+                    element = new Building(side, zSpawn, getProjection, state.params.color);
+                }
+                if (element) {
+                    this.scene.add(element.mesh);
+                    this.scenery.push(element);
+                }
             }
 
             if (Math.random() > 0.6) {
