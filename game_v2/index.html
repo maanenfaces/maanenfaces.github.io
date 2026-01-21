@@ -35,6 +35,7 @@
             justify-content: center;
             align-items: center;
             pointer-events: none;
+            background: radial-gradient(circle, #1a0000 0%, #000000 100%);
         }
 
         /* Full Screen Overlay */
@@ -42,7 +43,6 @@
             position: fixed;
             top: 0; left: 0;
             width: 100vw; height: 100vh;
-            background: radial-gradient(circle, #1a0000 0%, #000000 100%);
             display: none;
             justify-content: center;
             align-items: center;
@@ -379,13 +379,12 @@
 
         /* --- NOUVEAUX EFFETS MATRICIELS --- */
 
-        /* G-6 : HoneyComb reveal avec fond noir opaque */
+        /* G-6 : Apparition légère du circuit */
         @keyframes glitch-6 {
-            0% { opacity: 0; background-color: transparent; }
-            1% { opacity: 1; background-color: #000; } /* Fond noir immédiat pour masquer le jeu */
-            10%, 90% { opacity: 1; transform: scale(1.05); }
-            50% { filter: hue-rotate(180deg) brightness(2); background-color: #050000; }
-            100% { opacity: 0; background-color: transparent; }
+            0% { opacity: 0; transform: scale(1.05); }
+            10% { opacity: 0.4; transform: scale(1); } /* Pas d'opacité totale pour rester discret */
+            90% { opacity: 0.4; }
+            100% { opacity: 0; }
         }
 
         /* G-7 : Secousse sismique du fond (Vibration violente) */
@@ -397,44 +396,50 @@
             40% { transform: translate(0); }
         }
 
-        /* G-8 : Scanline Corrompue (Décalage de segments) */
+        /* G-8 : Scanline Corrompue (On retire le fond noir opaque) */
         @keyframes glitch-8 {
-            0% { clip-path: polygon(0 20%, 100% 20%, 100% 25%, 0 25%); transform: translateX(-50px); opacity: 1; }
-            50% { clip-path: polygon(0 60%, 100% 60%, 100% 65%, 0 65%); transform: translateX(50px); }
+            0% { opacity: 0.5; clip-path: inset(0 0 70% 0); transform: translateX(-10px); }
+            20% { clip-path: inset(30% 0 30% 0); transform: translateX(10px); }
+            40% { clip-path: inset(70% 0 0 0); transform: translateX(-5px); }
+            60% { clip-path: none; opacity: 0.3; }
             100% { opacity: 0; }
         }
 
         /* G-9 : Électrisation (Flash Matrix) */
         @keyframes glitch-9 {
-            0% { background: #000; opacity: 1; }
-            20% { background: var(--neon-red); opacity: 1; }
-            40% { background: var(--neon-blue); opacity: 1; }
-            60% { background: #fff; opacity: 1; }
-            80% { background: var(--dark-red); opacity: 1; }
-            100% { background: radial-gradient(circle, #1a0000 0%, #000000 100%); opacity: 1; }
+            0% { background: #000; }
+            20% { background: #002222; } /* Cyan très sombre */
+            40% { background: #1a0000; } /* Rouge sombre */
+            60% { background: #003333; box-shadow: inset 0 0 100px rgba(0,255,255,0.2); }
+            80% { background: #000; }
+            100% { background: radial-gradient(circle, #1a0000 0%, #000000 100%); }
         }
 
-        /* --- OVERLAY STRUCTURE ABEILLE --- */
+        /* --- OVERLAY STRUCTURE CIRCUIT --- */
         #glitch-overlay {
             position: fixed;
             top: 0; left: 0;
             width: 100vw; height: 100vh;
             pointer-events: none;
-            z-index: 2000; /* Doit être supérieur au .screen (1000) */
+            z-index: 999;
             opacity: 0;
-            /* Motif plus visible : opacity 0.5 au lieu de 0.2 */
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="28" height="49" viewBox="0 0 28 49"><path fill-rule="evenodd" d="M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM15 11.12l11 6.35v12.7l-11 6.35-11-6.35v-12.7l11-6.35z" fill="%23ff0000" fill-opacity="0.2"/></svg>');
-            background-size: 56px 98px;
+            /* On diminue drastiquement l'opacité des lignes de grille */
+            background-image:
+                linear-gradient(90deg, rgba(255, 0, 0, 0.05) 1px, transparent 1px),
+                linear-gradient(rgba(255, 0, 0, 0.05) 1px, transparent 1px),
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><g fill="none" stroke="%23ff0000" stroke-width="0.5" stroke-opacity="0.15"><path d="M0 50 l20 0 l10 -10 l20 0 l10 10 l40 0" /><path d="M50 0 l0 20 l10 10 l0 20 l-10 10 l0 40" /><circle cx="50" cy="50" r="1.5" fill="%23ff0000" fill-opacity="0.2" /></g></svg>');
+            background-size: 150px 150px, 150px 150px, 300px 300px; /* Agrandit le motif pour qu'il soit moins dense */
             background-color: transparent;
-            transition: opacity 0.1s;
+            transition: opacity 0.2s;
         }
 
         .g-6 { animation: glitch-6 0.4s ease-out; }
         .g-7 { animation: glitch-7 0.2s steps(2); }
         .g-8 { animation: glitch-8 0.3s linear; }
-        .g-9 {
-            animation: glitch-9 0.25s steps(5) forwards;
-            z-index: 1001 !important; /* Force le passage devant tout pendant le flash */
+        g-9 {
+            animation: glitch-9 0.3s ease-in-out;
+            z-index: 1001 !important;
+            filter: contrast(1.2) brightness(1.1);
         }
 
     </style>
@@ -590,29 +595,32 @@
                 let targetElement = null;
                 let effectClass = '';
 
-                if (dice < 0.4 && content) {
-                    targetElement = content;
-                    effectClass = BOX_EFFECTS[Math.floor(Math.random() * BOX_EFFECTS.length)];
-                } else if (dice < 0.7) {
+                if (dice < 0.7) {
                     targetElement = overlay;
                     effectClass = MATRIX_EFFECTS[Math.floor(Math.random() * MATRIX_EFFECTS.length)];
-                    overlay.style.opacity = "1"; // On affiche l'abeille
+
+                    // Effet TRON : Rotation aléatoire (0, 90, 180, 270 deg) pour varier le sens des circuits
+                    const rotations = [0, 90, 180, 270];
+                    overlay.style.transform = `rotate(${rotations[Math.floor(Math.random()*rotations.length)]}deg) scale(1.5)`;
+                    overlay.style.opacity = "1";
                 } else {
                     targetElement = activeScreen;
-                    effectClass = BACKGROUND_EFFECTS[Math.floor(Math.random() * BACKGROUND_EFFECTS.length)];
+                    // On rajoute G-9 dans les effets de fond
+                    const bgList = [...BACKGROUND_EFFECTS, 'g-9'];
+                    effectClass = bgList[Math.floor(Math.random() * bgList.length)];
                 }
 
                 targetElement.classList.add(effectClass);
 
                 setTimeout(() => {
                     targetElement.classList.remove(effectClass);
-                    // On cache l'overlay si c'était la cible
                     if (targetElement === overlay) {
                         overlay.style.opacity = "0";
+                        overlay.style.transform = "none";
                     }
 
-                    // Relance aléatoire entre 2s et 6s
-                    setTimeout(triggerAdvancedGlitch, 2000 + Math.random() * 4000);
+                    // Intervalle plus court pour plus de nervosité (1s à 4s)
+                    setTimeout(triggerAdvancedGlitch, 1000 + Math.random() * 3000);
                 }, 400);
             }
 

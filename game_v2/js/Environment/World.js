@@ -320,4 +320,59 @@ export class World {
         this.lCtx.restore();
     }
 
+    reset() {
+        // 1. Nettoyage des éléments de décor (Buildings, Ships)
+        // On doit les retirer de la scène ET vider le tableau
+        this.scenery.forEach(el => {
+            if (el.mesh) {
+                this.scene.remove(el.mesh);
+                if (el.dispose) el.dispose(); // Nettoyage de la géométrie/matériaux si implémenté
+            }
+        });
+        this.scenery = [];
+        this.lastSceneryZ = 0;
+
+        // 2. Nettoyage des effets visuels (Éclairs entre bâtiments)
+        this.activeArcs = [];
+        if (this.lCtx) {
+            this.lCtx.clearRect(0, 0, this.lCanvas.width, this.lCanvas.height);
+        }
+
+        // 3. Réinitialisation de la grille et du sol
+        if (!this.scene.children.includes(this.mesh)) {
+            this.scene.add(this.mesh);
+        }
+        if (!this.scene.children.includes(this.grid)) {
+            this.scene.add(this.grid);
+        }
+
+        // Remise à zéro du défilement de la texture
+        if (this.gridMaterial && this.gridMaterial.map) {
+            this.gridMaterial.map.offset.y = 0;
+            this.gridMaterial.map.offset.x = 0;
+        }
+
+        // 4. Remise à plat de la géométrie du terrain
+        // On réinitialise les sommets (Y=0) pour éviter de commencer avec une bosse ou un glitch
+        const pos = this.mesh.geometry.attributes.position;
+        for (let i = 0; i < pos.count; i++) {
+            // On utilise les valeurs initiales stockées dans baseVertices pour X et Z, et 0 pour Y
+            pos.setY(i, 0);
+        }
+        pos.needsUpdate = true;
+
+        // Synchronisation de la grille filaire sur le mesh de base
+        if (this.grid.geometry.attributes.position) {
+            this.grid.geometry.attributes.position.copy(pos);
+            this.grid.geometry.attributes.position.needsUpdate = true;
+        }
+
+        // 5. Reset du Fog (Brouillard) au cas où il aurait été modifié
+        if (this.scene.fog) {
+            this.scene.fog.near = 200;
+            this.scene.fog.far = 500;
+            this.scene.fog.color.setHex(0x000000);
+        }
+    }
+
 }
