@@ -1,47 +1,116 @@
-<div>
-  <video id="bg-video" class="bg-obj bg-obj-video band-video" autoplay loop muted playsinline>
-    <source src="/assets/video/Maanen-Faces-Extrait-Live-Ligeia-Floride-25-10-360.mp4" type="video/mp4">
-  </video>
-  <!--
-  <script language="JavaScript">
-    window.addEventListener('load', function() {
-      var bgVideo = document.getElementById('bg-video');
-      bgVideo.addEventListener('ended', function() {
-            this.currentTime = 0;
-            this.play();
-      }, false);
-      bgVideo.play();
-    });
-  </script>
-  -->
+<style>
+  .site-bg-video-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1000;
+    overflow: hidden;
+    background: #000;
+  }
 
-  <script language="JavaScript">
-    window.addEventListener('load', function() {
-      const bgVideo = document.getElementById('bg-video');
-      bgVideo.addEventListener('ended', function() {
-        this.currentTime = 0;
-        this.play();
-      });
-      bgVideo.play().catch(()=>{});
+  .site-bg-glitch {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('/assets/img/bg-placeholder-glitch.png');
+    z-index: -990;
+    transition: opacity 1.5s ease;
+    opacity: 0.3;
+  }
 
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            bgVideo.play().catch(() => {});
-          }
-        });
-      }, {
-        threshold: 0.1
-      });
-      observer.observe(bgVideo);
+  #site-bg-yt-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -995;
+    pointer-events: none;
+  }
 
-      const fallbackInterval = setInterval(() => {
-        const rect = bgVideo.getBoundingClientRect();
-        const visible = rect.bottom > 0 && rect.top < (window.innerHeight || document.documentElement.clientHeight);
-        if (visible && (bgVideo.paused || bgVideo.readyState < 2)) {
-          bgVideo.play().catch(()=>{});
-        }
-      }, 1000);
-    });
-  </script>
+  #site-bg-yt-player {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100vw;
+    height: 56.25vw;
+    min-height: 100vh;
+    min-width: 177.77vh;
+    transform: translate(-50%, -50%) scale(1.3);
+    opacity: 0;
+    transition: opacity 2.5s ease-in-out;
+  }
+
+  @media (max-width: 1199.98px) {
+    #site-bg-yt-wrapper {
+      min-height: 80% !important;
+      min-width: unset !important;
+      top: 50%;
+      transform: translate(-50%, -60%) !important;
+    }
+  }
+
+  @media (max-width: 575.98px) {
+    #site-bg-yt-wrapper {
+      min-height: 100% !important;
+      min-width: unset !important;
+      top: 50%;
+      transform: translate(-30%, -50%) !important;
+    }
+  }
+
+  .site-bg-active #site-bg-yt-player { opacity: 1; }
+  .site-bg-active #site-bg-placeholder { opacity: 0; }
+</style>
+
+<div class="site-bg-video-container">
+  <div id="site-bg-placeholder" class="site-bg-glitch"></div>
+
+  <div id="site-bg-yt-wrapper">
+    <div id="site-bg-yt-player"></div>
+  </div>
 </div>
+
+<script src="https://www.youtube.com/iframe_api"></script>
+
+<script>
+  const SITE_BG_VIDEO_ID = 'UZaZJ3_Emlg';
+  let siteBackgroundPlayer;
+
+  function initializeSiteBackgroundVideo() {
+    siteBackgroundPlayer = new YT.Player('site-bg-yt-player', {
+      videoId: SITE_BG_VIDEO_ID,
+      playerVars: {
+        'autoplay': 1,
+        'controls': 0,        // Pas de boutons
+        'rel': 0,             // Pas de suggestions
+        'mute': 1,            // Muet obligatoire pour l'autoplay
+        'loop': 1,            // Boucle
+        'playlist': SITE_BG_VIDEO_ID, // Requis pour le loop
+        'modestbranding': 1,  // Moins de logo YouTube
+        'iv_load_policy': 3,  // Pas d'annotations
+        'disablekb': 1,       // Désactive le clavier
+        'playsinline': 1
+      },
+      events: {
+        'onReady': (event) => {
+          event.target.mute();
+          event.target.playVideo();
+        },
+        'onStateChange': (event) => {
+          if (event.data === YT.PlayerState.PLAYING) {
+            document.querySelector('.site-bg-video-container').classList.add('site-bg-active');
+          }
+        }
+      }
+    });
+  }
+
+  function onYouTubeIframeAPIReady() {
+    setTimeout(initializeSiteBackgroundVideo, 500);
+  }
+</script>
