@@ -169,7 +169,10 @@ export const SONG_STRUCTURE = [
         label: "POST-CHORUS 1",
         start: 163, end: 190,
         speed: 2,
-        theme: { colors: [0xffff00] },
+        theme: {
+            colors: [0xffff00],
+            gridOpacity: 1
+        },
         obstacles: { density: 0.15 },
         effects: { curve: { intensity: 2 }, wave: { intensity: 0.03 } }
     },

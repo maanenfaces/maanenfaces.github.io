@@ -190,11 +190,8 @@ export class GameEngine {
         // 1. GESTION PHASE MUSICALE ET CONSOLIDATION
         const musicStatus = this.music.update();
         if (this.music.hasPhaseChanged) {
-            if (this.time < 5) {
-                this.consolidatePhase(DEFAULT_PHASE, musicStatus.phase);
-            } else {
-                this.currentPhase = this.consolidatePhase(this.currentPhase, musicStatus.phase);
-            }
+            const base = (this.time < 5) ? DEFAULT_PHASE : this.currentPhase;
+            this.currentPhase = this.consolidatePhase(base, musicStatus.phase);
         }
         const p = this.currentPhase;
 
@@ -527,6 +524,8 @@ export class GameEngine {
         this.colorTimer = 0;
         this.colorIndex = 0;
 
+        this.world.reset();
+
         // 2. Reset des bonus actifs
         this.activeBonus = {
             item: null,
@@ -537,12 +536,13 @@ export class GameEngine {
         };
 
         // 3. Reset de la phase musicale
-        this.currentPhase = this.songPhases[0];
+        this.currentPhase = this.consolidatePhase(DEFAULT_PHASE, this.songPhases[0]);
         this.currentParams = {
-            speed: 1,
+            speed: this.currentPhase.speed || 1,
             waveHeight: 0,
             curveStrength: 0,
-            color: new THREE.Color(0x00ffff),
+            rollStrength: 0, // Ajouté pour correspondre à update()
+            color: new THREE.Color(this.currentPhase.theme?.colors[0] || 0x00ffff),
             gridOpacity: 0.5
         };
 
