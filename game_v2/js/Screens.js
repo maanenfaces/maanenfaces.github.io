@@ -179,12 +179,14 @@ export class Screens {
             this.step = 'PAUSE';
             this.engine.onTogglePause(true);
             document.getElementById('hud').classList.add('hidden');
+            document.getElementById('screens-container').classList.remove('hidden');
             document.getElementById('pause-screen').classList.add('active');
         } else {
             SoundEffects.pause(false);
             this.step = 'PLAYING';
             this.engine.onTogglePause(false);
             document.getElementById('hud').classList.remove('hidden');
+            document.getElementById('screens-container').classList.add('hidden');
             document.getElementById('pause-screen').classList.remove('active');
         }
         this.menuIndex = 0;
@@ -196,6 +198,7 @@ export class Screens {
         this.engine.isPaused = true;
 
         document.getElementById('hud').classList.add('hidden');
+        document.getElementById('screens-container').classList.remove('hidden');
         document.getElementById('game-over-screen').classList.add('active');
         document.getElementById('final-score').innerText = "SCORE: " + this.score.toString().padStart(6, '0');
 
@@ -344,6 +347,7 @@ export class Screens {
     restartGame() {
         SoundEffects.validate();
 
+        document.getElementById('screens-container').classList.remove('hidden');
         document.getElementById('game-over-screen').classList.remove('active');
         document.getElementById('pause-screen').classList.remove('active');
 
@@ -377,6 +381,7 @@ export class Screens {
             document.getElementById('hud').style.display = 'flex';
             document.getElementById('hud').classList.remove('hidden');
             document.getElementById('touch-controls').classList.add('active');
+            document.getElementById('screens-container').classList.add('hidden');
         }, 300);
     }
 
