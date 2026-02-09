@@ -164,14 +164,30 @@ h2 {
   text-decoration: none;
 }
 
-#navbar-mf .collapsing .mf-btn-lang-container-divider,
-#navbar-mf .show .mf-btn-lang-container-divider {
+#navbar-mf .collapsing .menu-divider,
+#navbar-mf .show .menu-divider {
+  border-color: rgba(255, 255, 255, 0.5) !important;
+  border-top: 1px solid;
+  margin-bottom: 0.5em;
+  margin-top:0.5em;
+  margin-left: 1em;
+  margin-right: 10em;
+}
+#navbar-mf .collapsing .menu-divider .vr,
+#navbar-mf .show .menu-divider .vr {
   display: none !important;
 }
 #navbar-mf .collapsing li.mf-btn-lang-list,
 #navbar-mf .show li.mf-btn-lang-list {
+  margin-bottom: 1em;
   margin-left: 0.5em;
   margin-top: 0.6em;
+}
+
+#navbar-mf .show li.mf-btn-lang-list .dropdown-menu {
+  --bs-dropdown-bg: transparent !important;
+  --bs-dropdown-border-width: 0 !important;
+  background-color: transparent !important;
 }
 
 .mf-btn-lang-container {
