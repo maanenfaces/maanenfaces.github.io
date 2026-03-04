@@ -16,9 +16,80 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: linear-gradient(rgba(30, 30, 30, 0.5), rgba(0, 0, 0, 0.5)), url('/assets/img/bg-band-2-maanenfaces-black-opale-photo.jpg');
+    background-image: linear-gradient(rgba(30, 30, 30, 0.5), rgba(0, 0, 0, 0.5)), url('/assets/img/bg-band-2-maanenfaces-black-opale-photo-compressed.jpg');
+    background-size: cover;
+    background-position: center;
     z-index: -990;
-    transition: opacity 1.5s ease;
+    transition: opacity 0.3s ease;
+  }
+
+  .site-bg-glitch::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-image: inherit;
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    z-index: -989;
+    pointer-events: none;
+  }
+
+  .site-bg-video-container:not(.site-bg-active) .site-bg-glitch::after {
+    animation: glitch-long-cycle 30s steps(1) infinite;
+  }
+
+  @keyframes glitch-long-cycle {
+    /* --- SECONDE 1 : IMPACT PRONONCÉ (3.3%) --- */
+    3.3% {
+      opacity: 1; transform: translate(-25px, 15px) skew(10deg);
+      clip-path: inset(10% 0 60% 0); filter: hue-rotate(120deg) contrast(180%);
+    }
+    3.6% {
+      opacity: 1; transform: translate(20px, -10px);
+      clip-path: inset(50% 0 5% 0); filter: hue-rotate(-120deg);
+    }
+    4% { opacity: 0; transform: translate(0); filter: none; }
+
+    /* --- SECONDE 7 : SURSAUT RAPIDE (23%) --- */
+    23% {
+      opacity: 0.8; transform: scale(1.1) translate(10px, 10px);
+      clip-path: inset(0 0 80% 0); filter: invert(20%);
+    }
+    23.3% { opacity: 0; transform: scale(1); }
+
+    /* --- SECONDE 14 : GROS GLITCH TECHNIQUE (46%) --- */
+    46% {
+      opacity: 1; transform: translate(-30px, 0);
+      clip-path: inset(40% 0 40% 0); filter: brightness(2);
+    }
+    46.4% {
+      opacity: 1; transform: translate(30px, 0);
+      clip-path: inset(20% 0 70% 0); filter: sepia(1);
+    }
+    47% { opacity: 0; }
+
+    /* --- SECONDE 22 : FRISSON NERVEUX (73%) --- */
+    73% {
+      opacity: 0.7; transform: translate(2px, -20px);
+      clip-path: inset(85% 0 1% 0);
+    }
+    73.5% {
+      opacity: 0.9; transform: translate(-10px, 20px);
+      clip-path: inset(1% 0 85% 0);
+    }
+    74% { opacity: 0; }
+
+    /* --- SECONDE 28 : IMPACT FINAL AVANT REBOUCLE (93%) --- */
+    93% {
+      opacity: 1; transform: skew(-15deg) scale(0.9);
+      clip-path: inset(30% 0 30% 0); filter: saturate(5);
+    }
+    93.5% {
+      opacity: 1; transform: translate(40px, 5px);
+      clip-path: inset(10% 0 80% 0);
+    }
+    94.5% { opacity: 0; transform: translate(0) skew(0); }
   }
 
   #site-bg-yt-wrapper {
@@ -41,7 +112,7 @@
     min-width: 177.77vh;
     transform: translate(-50%, -50%) scale(1.3);
     opacity: 0;
-    transition: opacity 2.5s ease-in-out;
+    transition: opacity 0.4s ease-in-out;
   }
 
   @media (max-width: 1199.98px) {
@@ -66,9 +137,8 @@
   .site-bg-active #site-bg-placeholder { opacity: 0; }
 </style>
 
-<div class="site-bg-video-container">
+<div class="site-bg-video-container" id="bg-container">
   <div id="site-bg-placeholder" class="site-bg-glitch"></div>
-
   <div id="site-bg-yt-wrapper">
     <div id="site-bg-yt-player"></div>
   </div>
@@ -78,39 +148,80 @@
 
 <script>
   const SITE_BG_VIDEO_ID = 'UZaZJ3_Emlg';
-  let siteBackgroundPlayer;
+  let player;
+  let currentPass = 1; // 1 = Glitch (53s), 2 = Full (0s)
+  let timeWatcher;
 
-  function initializeSiteBackgroundVideo() {
-    siteBackgroundPlayer = new YT.Player('site-bg-yt-player', {
+  const STOP_TIME = 54;
+  const START_GLITCH = 52.5;
+  const LOOP_DELAY = 20000;
+
+  function onYouTubeIframeAPIReady() {
+    player = new YT.Player('site-bg-yt-player', {
       videoId: SITE_BG_VIDEO_ID,
       playerVars: {
-        'autoplay': 1,
-        'controls': 0,        // Pas de boutons
-        'rel': 0,             // Pas de suggestions
-        'mute': 1,            // Muet obligatoire pour l'autoplay
-        'loop': 1,            // Boucle
-        'playlist': SITE_BG_VIDEO_ID, // Requis pour le loop
-        'modestbranding': 1,  // Moins de logo YouTube
-        'iv_load_policy': 3,  // Pas d'annotations
-        'disablekb': 1,       // Désactive le clavier
-        'playsinline': 1,
-        'start': 53
+        'autoplay': 0,
+        'controls': 0,
+        'rel': 0,
+        'mute': 1,
+        'modestbranding': 1,
+        'iv_load_policy': 3,
+        'disablekb': 1,
+        'playsinline': 1
       },
       events: {
-        'onReady': (event) => {
-          event.target.mute();
-          event.target.playVideo();
-        },
-        'onStateChange': (event) => {
-          if (event.data === YT.PlayerState.PLAYING) {
-            document.querySelector('.site-bg-video-container').classList.add('site-bg-active');
-          }
-        }
+        'onReady': onPlayerReady,
+        'onStateChange': onPlayerStateChange
       }
     });
   }
 
-  function onYouTubeIframeAPIReady() {
-    setTimeout(initializeSiteBackgroundVideo, 500);
+  function onPlayerReady(event) {
+    event.target.mute();
+    setTimeout(() => {
+        runSequence(START_GLITCH);
+    }, 3000);
+  }
+
+  function runSequence(startTime) {
+    if (player) {
+      player.seekTo(startTime);
+      player.playVideo();
+      startTimeMonitoring();
+    }
+  }
+
+  function startTimeMonitoring() {
+    clearInterval(timeWatcher);
+    timeWatcher = setInterval(() => {
+      if (player.getCurrentTime() >= STOP_TIME) {
+        clearInterval(timeWatcher);
+        processNextStep();
+      }
+    }, 100);
+  }
+
+  function processNextStep() {
+    const container = document.getElementById('bg-container');
+
+    if (currentPass === 1) {
+      currentPass = 2;
+      runSequence(0);
+    } else {
+      player.pauseVideo();
+      container.classList.remove('site-bg-active');
+
+      setTimeout(() => {
+        currentPass = 1;
+        runSequence(START_GLITCH);
+      }, LOOP_DELAY);
+    }
+  }
+
+  function onPlayerStateChange(event) {
+    const container = document.getElementById('bg-container');
+    if (event.data === YT.PlayerState.PLAYING) {
+      container.classList.add('site-bg-active');
+    }
   }
 </script>
