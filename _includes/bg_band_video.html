@@ -92,6 +92,20 @@
     94.5% { opacity: 0; transform: translate(0) skew(0); }
   }
 
+  .glitch-transition {
+    animation: glitch-anim-flash 1s steps(2) forwards;
+    filter: contrast(150%) brightness(1.5) hue-rotate(90deg);
+  }
+
+  @keyframes glitch-anim-flash {
+    0% { transform: translate(0); opacity: 1; clip-path: inset(10% 0 30% 0); }
+    20% { transform: translate(-15px, 10px); clip-path: inset(50% 0 10% 0); }
+    40% { transform: translate(15px, -10px); filter: bronze; }
+    60% { transform: translate(-5px, 20px) scale(1.1); clip-path: inset(10% 0 70% 0); }
+    80% { transform: translate(20px, 0); clip-path: inset(80% 0 5% 0); }
+    100% { transform: translate(0); opacity: 1; clip-path: inset(0 0 0 0); }
+  }
+
   #site-bg-yt-wrapper {
     position: absolute;
     top: 0;
@@ -203,25 +217,38 @@
 
   function processNextStep() {
     const container = document.getElementById('bg-container');
+    const placeholder = document.getElementById('site-bg-placeholder');
 
     if (currentPass === 1) {
       currentPass = 2;
       runSequence(0);
     } else {
-      player.pauseVideo();
-      container.classList.remove('site-bg-active');
+      placeholder.classList.add('glitch-transition');
 
       setTimeout(() => {
-        currentPass = 1;
-        runSequence(START_GLITCH);
-      }, LOOP_DELAY);
+        player.pauseVideo();
+        container.classList.remove('site-bg-active');
+        placeholder.classList.remove('glitch-transition');
+
+        setTimeout(() => {
+          currentPass = 1;
+          runSequence(START_GLITCH);
+        }, LOOP_DELAY);
+      }, 1000);
     }
   }
 
   function onPlayerStateChange(event) {
     const container = document.getElementById('bg-container');
+    const placeholder = document.getElementById('site-bg-placeholder');
+
     if (event.data === YT.PlayerState.PLAYING) {
-      container.classList.add('site-bg-active');
+      placeholder.classList.add('glitch-transition');
+
+      setTimeout(() => {
+        container.classList.add('site-bg-active');
+        placeholder.classList.remove('glitch-transition');
+      }, 1000);
     }
   }
 </script>
