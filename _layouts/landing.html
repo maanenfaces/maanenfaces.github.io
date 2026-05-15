@@ -1,0 +1,154 @@
+<!doctype html>
+
+<html lang="{{ site.lang }}" class="h-100">
+  <head>
+    <title>{{ page.title | t | default: page.title }}</title>
+
+    <meta charset="utf-8" />
+    <meta name="author" content="Maanen Faces" />
+    <meta
+      name="description"
+      content="{{ page.description | t | default: page.description }}"
+    />
+    <meta name="docsearch:language" content="{{ site.lang }}" />
+    <meta name="docsearch:version" content="5.0" />
+    <meta name="theme-color" content="#000" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <meta
+      property="og:title"
+      content="{{ page.title | t | default: page.title }}"
+    />
+    <meta
+      property="og:description"
+      content="{{ page.description | t | default: page.description }}"
+    />
+    <meta property="og:type" content="website" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="{{ page.title | t | default: page.title }}"
+    />
+    <meta
+      name="twitter:description"
+      content="{{ page.description | t | default: page.description }}"
+    />
+
+    {% if page.og_image %}
+    <meta property="og:image" content="{{ page.og_image }}" />
+    <meta name="twitter:image" content="{{ page.og_image }}" />
+    {% endif %}
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Caveat"
+    />
+    <link rel="stylesheet" href="/assets/css/main.css" />
+
+    {% for lang in site.languages %} {% if lang == site.languages[0] %}
+    <link
+      rel="alternate"
+      href="https://maanenfaces.com{{ page.url }}"
+      hreflang="x-default"
+    />
+    <link
+      rel="alternate"
+      href="https://maanenfaces.com{{ page.url }}"
+      hreflang="{{ lang }}"
+    />
+    {% else %}
+    <link
+      rel="alternate"
+      href="https://maanenfaces.com/{{ lang }}{{ page.url }}"
+      hreflang="{{ lang }}"
+    />
+    <meta
+      property="og:url"
+      content="https://maanenfaces.com/{{ lang }}{{ page.url }}"
+    />
+    {% endif %} {% endfor %}
+
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap");
+
+      .blacked-top-texture {
+        background-image: url(/assets/img/texturetop.png);
+        background-repeat: repeat-x;
+        padding-top: 32px;
+      }
+      .blacked-bg {
+        background-image:
+          linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+          url({{ page.background }});
+        background-position: center;
+      }
+    </style>
+
+    <!-- Favicons -->
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="/assets/favicons/apple-touch-icon.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="/assets/favicons/favicon-32x32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="/assets/favicons/favicon-16x16.png"
+    />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link
+      rel="mask-icon"
+      href="/assets/favicons/safari-pinned-tab.svg"
+      color="#111111"
+    />
+    <link rel="shortcut icon" href="/assets/favicons/favicon.ico" />
+    <meta name="msapplication-TileColor" content="#111111" />
+    <meta name="msapplication-config" content="/browserconfig.xml" />
+
+    {% include analytics_counter_dev.html %}
+  </head>
+
+  <body id="main" class="text-light bg-black">
+    {{ content }}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5/dist/js/bootstrap.bundle.min.js"></script>
+
+    <button id="scrollToTop" class="btn btn-outline-light" aria-label="Up">
+      <i class="bi bi-arrow-up"></i>
+    </button>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const scrollBtn = document.getElementById("scrollToTop");
+
+        window.addEventListener("scroll", function () {
+          if (window.scrollY > 300) {
+            scrollBtn.classList.add("show");
+          } else {
+            scrollBtn.classList.remove("show");
+          }
+        });
+
+        scrollBtn.addEventListener("click", function () {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+      });
+    </script>
+  </body>
+</html>
