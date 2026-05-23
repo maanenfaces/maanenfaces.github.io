@@ -57,6 +57,10 @@ page:
     index:
       description: Bonus page for the Album A Brilliant Future by Maanen Faces rock band
       title: A Brilliant Future
+  contact:
+    index:
+      description: Contact Maanen Faces
+      title: Contact Maanen Faces
   dad:
     index:
       description: Bonus page for the Damned And Doomed EP by Maanen Faces rock band

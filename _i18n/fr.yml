@@ -53,6 +53,10 @@ page:
     index:
       description: Page bonus de l'album A Brilliant Future du groupe Maanen Faces
       title: A Brilliant Future
+  contact:
+    index:
+      description: Contacter Maanen Faces
+      title: Contacter Maanen Faces
   dad:
     index:
       description: Page bonus de l'EP Damned And Doomed du groupe Maanen Faces
