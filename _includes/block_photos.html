@@ -19,12 +19,14 @@
                         <img src="{{ item.src }}"
                              class="img-fluid"
                              loading="lazy"
-                             alt="{{ item.title }}"
+                             alt="{{ item.title }} - Photo: {{ item.author_name }}"
                              style="height: 250px; object-fit: cover; cursor: pointer;"
                              data-bs-toggle="modal"
                              data-bs-target="#photoModal"
                              data-photo-src="{{ item.src }}"
-                             data-photo-alt="{{ item.title }}">
+                             data-photo-alt="{{ item.title }}"
+                             data-photo-author-name="{{ item.author_name }}"
+                             data-photo-author-link="{{ item.author_link }}">
                     </div>
                 </div>
                 {% endfor %}
@@ -68,7 +70,9 @@
       const photos = Array.from(document.querySelectorAll('.photo-wrapper img'))
         .map(img => ({
           src: img.getAttribute('data-photo-src'),
-          alt: img.getAttribute('data-photo-alt')
+          alt: img.getAttribute('data-photo-alt'),
+          author_name: img.getAttribute('data-photo-author-name'),
+          author_link: img.getAttribute('data-photo-author-link')
         }));
 
       let currentIndex = 0;
@@ -80,7 +84,18 @@
 
         modalPhoto.src = photos[currentIndex].src;
         modalPhoto.alt = photos[currentIndex].alt;
-        modalTitle.textContent = photos[currentIndex].alt;
+
+        const authorName = photos[currentIndex].author_name;
+        const authorLink = photos[currentIndex].author_link;
+        let modalTitleText = photos[currentIndex].alt;
+        if (authorName) {
+          if (authorLink) {
+            modalTitleText += ` - Photo: <a href="${authorLink}">${authorName}</a>`
+          } else {
+            modalTitleText += ` - Photo: ${authorName}`
+          }
+        }
+        modalTitle.innerHTML = modalTitleText;
       }
 
       photoModal.addEventListener('show.bs.modal', function(event) {
