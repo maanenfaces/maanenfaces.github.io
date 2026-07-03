@@ -1,15 +1,16 @@
 <section id="shows" class="container scroll-margin pb-3">
     <div class="row">
-        <div class="col text-center pb-4">
+        <div class="col text-center pb-3">
             <h2 class="visually-hidden">{% t h2_sections.shows %}</h2>
             <img class="mf-section-title-img"
                  src="/assets/img/section-title-shows-{{ site.lang }}.png" width="200" />
             <p>
-                {% t _.for_booking_a_show_contact_us_on %}
-                <span class="mf-hidden-email p-1">maanenfaces<span style="display: none;">ANTISPAM</span>@tuta.io</span>.
+              {% t _.for_booking_a_show_contact_us_on %}
+              <span class="mf-hidden-email p-1">maanenfaces<span style="display: none;">ANTISPAM</span>@tuta.io</span>.
             </p>
         </div>
     </div>
+    {% tf booking_shows.html %}
     <div class="row justify-content-center">
         <div class="col-lg-10 text-center">
             <div class="bg-dark p-4 lh-lg rounded-2" style="--bs-bg-opacity: 0.6;">
