@@ -14,6 +14,7 @@
 - title_key: navbar.shop
   url: "https://maanenfaces.bandcamp.com/merch"
   external: true
+  no_lang: true
 - title_key: navbar.epk
   url: "/epk/"
   external: true
