@@ -1,11 +1,11 @@
-- title_key: navbar.biography
-  url: "/#band"
 - title_key: navbar.videos
   url: "/#videos"
 - title_key: navbar.music
   url: "/#music"
 - title_key: navbar.shows
   url: "/#shows"
+- title_key: navbar.biography
+  url: "/#band"
 - title_key: navbar.photos
   url: "/#photos"
 - title_key: navbar.contact
