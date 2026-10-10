@@ -69,10 +69,13 @@ h2 {
  * Navbar adjustements
  */
 
-#navbar-mf,
+#navbar-mf {
+  background-color: initial !important;
+  padding: 0;
+}
+
 #navbar-mf.bg-dark {
   background-color: rgba(0, 0, 0, 0.7) !important;
-  padding: 0;
 }
 
 #navbar-mf .navbar-mf-title {
