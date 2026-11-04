@@ -176,6 +176,7 @@ export class EntityManager {
         this.entities.forEach(ent => {
             ent.updatePosition(state.speed, state.delta, getProjection, this.entities);
             if(ent.animate) ent.animate(state.time);
+            if(ent.isDead && !ent.particles) this.removeEntity(ent);
             if(ent.z > 20) this.removeEntity(ent);
         });
     }
