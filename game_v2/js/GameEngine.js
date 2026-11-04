@@ -445,7 +445,7 @@ export class GameEngine {
 
                 // CAS B : C'est un MUR
                 else if (ent.type === "wall") {
-                    const hasInvincibilityBonus = this.activeBonus.item?.subType === "invincible" && this.activeBonus.timeLeft > 0;
+                    const hasInvincibilityBonus = this.activeBonus.item?.subType === "ghost" && this.activeBonus.timeLeft > 0;
                     const isDevGodMode = DEV_MODE && this.devSettings.isInvincible;
                     const isPhaseTransition = this.isRotating;
 
@@ -490,14 +490,15 @@ export class GameEngine {
         this.activeBonus.timeLeft = bonusDuration;
 
         switch(bonus.subType) {
-            case 'invincible':
-                this.activeBonus.scoreMultiplier -= 0.25;
+            case 'ghost':
+                this.activeBonus.scoreMultiplier += 0.25;
                 break;
             case 'speed':
                 this.activeBonus.scoreMultiplier += 0.25;
                 this.activeBonus.speedMultiplier += 0.2;
                 break;
             case 'jump':
+                this.activeBonus.scoreMultiplier += 0.25;
                 this.player.canJump = true;
                 break;
             case 'points':
