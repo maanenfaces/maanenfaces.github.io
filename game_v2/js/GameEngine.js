@@ -67,10 +67,10 @@ export class GameEngine {
 
         this.world = new World(scene, camera);
         this.road = new Road(scene);
-        this.entities = new EntityManager(scene);
+        this.entityManager = new EntityManager(scene);
         this.player = new Player(scene);
-        this.background = new BackgroundManager();
-        this.music = new MusicController();
+        this.backgroundManager = new BackgroundManager();
+        this.musicController = new MusicController();
 
         this.colorTimer = 0;
         this.colorIndex = 0;
@@ -188,8 +188,8 @@ export class GameEngine {
         this.time = currentTime;
 
         // 1. GESTION PHASE MUSICALE ET CONSOLIDATION
-        const musicStatus = this.music.update();
-        if (this.music.hasPhaseChanged) {
+        const musicStatus = this.musicController.update();
+        if (this.musicController.hasPhaseChanged) {
             const base = (this.time < 5) ? DEFAULT_PHASE : this.currentPhase;
             this.currentPhase = this.consolidatePhase(base, musicStatus.phase);
         }
@@ -369,10 +369,10 @@ export class GameEngine {
             this.world.triggerCityLightning(state, this.camera, p.effects.city_lightning.intensity);
         }
 
-        this.background.update(p, delta);
+        this.backgroundManager.update(p, delta);
         this.world.update(state, proj);
         this.road.update(state, proj);
-        this.entities.update(state, proj);
+        this.entityManager.update(state, proj);
         this.player.update(state, proj);
 
         this.handleSpawning(state, proj);
@@ -391,7 +391,7 @@ export class GameEngine {
             this.spawnWallTimer -= dt;
             if (this.spawnWallTimer <= 0) {
                 this.currentSafeLane = Math.floor(Math.random() * 3) - 1;
-                this.entities.spawnWallPattern(state, this.currentSafeLane, proj);
+                this.entityManager.spawnWallPattern(state, this.currentSafeLane, proj);
                 this.spawnWallTimer = 1 / (wallDensity * 5);
 
                 // Verrou
@@ -406,7 +406,7 @@ export class GameEngine {
         if (bonusDensity > 0) {
             this.spawnBonusTimer -= dt;
             if (this.spawnBonusTimer <= 0) {
-                this.entities.spawnBonusPattern(state, this.currentSafeLane, proj);
+                this.entityManager.spawnBonusPattern(state, this.currentSafeLane, proj);
                 this.spawnBonusTimer = 1 / (bonusDensity * 2);
 
                 // Verrou
@@ -418,7 +418,7 @@ export class GameEngine {
     }
 
     handleCollisions(state, proj) {
-        this.entities.entities.forEach(ent => {
+        this.entityManager.entities.forEach(ent => {
             if (!ent.isActive) return;
 
             // 1. Calcul de la distance
@@ -440,7 +440,7 @@ export class GameEngine {
                     }
                     this.onBonusStart(ent);
 
-                    this.entities.removeEntity(ent);
+                    this.entityManager.removeEntity(ent);
                 }
 
                 // CAS B : C'est un MUR
@@ -526,26 +526,27 @@ export class GameEngine {
     }
 
     onStart() {
-        this.music.play();
+        this.musicController.play();
         this.isPaused = false;
     }
 
     onStop() {
-        this.music.stop();
+        this.musicController.stop();
         this.isPaused = true;
     }
 
     onTogglePause(forcePause) {
         this.isPaused = forcePause !== undefined ? forcePause : !this.isPaused;
-        if (this.isPaused) this.music.pause();
-        else this.music.resume();
+        if (this.isPaused) this.musicController.pause();
+        else this.musicController.resume();
     }
 
     reset() {
-        // 1. Reset des paramètres logiques
+        // 1. Reset des paramètres logiques et des timers de spawn
         this.time = 0;
         this.zOffset = 0;
-        this.spawnTimer = 0;
+        this.spawnBonusTimer = 10; // Délai initial avant les premiers bonus
+        this.spawnWallTimer = 1;   // Délai initial avant les premiers murs
         this.isPaused = true;
         this.colorTimer = 0;
         this.colorIndex = 0;
@@ -567,37 +568,31 @@ export class GameEngine {
             speed: this.currentPhase.speed || 1,
             waveHeight: 0,
             curveStrength: 0,
-            rollStrength: 0, // Ajouté pour correspondre à update()
+            rollStrength: 0,
             color: new THREE.Color(this.currentPhase.theme?.colors[0] || 0x00ffff),
             gridOpacity: 0.5
         };
 
-        // 4. Nettoyage des entités
-        if (this.entities) {
-            this.entities.entities.forEach(ent => {
-                if (ent.mesh) this.scene.remove(ent.mesh);
-            });
-            this.entities.entities = [];
+        // 4. Nettoyage complet des entités et de leurs particules
+        if (this.entityManager) {
+            this.entityManager.reset();
         }
 
-        // Reset du joueur (position et état de saut)
+        // Reset du joueur (position, énergie et états)
         if (this.player) {
             this.player.reset((z) => this.getProjection(z));
         }
 
-        // Reset de la route et du monde (pour remettre les grilles à zéro)
+        // Reset de la route et du monde
         if (this.road) this.road.reset();
         if (this.world) this.world.reset();
 
         // 5. Reset de la musique
-        if (this.music) {
-            this.music.stop();
-            this.music.audio.currentTime = 0;
+        if (this.musicController) {
+            this.musicController.stop();
+            this.musicController.audio.currentTime = 0;
         }
 
         console.log("Engine Reset Complete");
     }
-
-
-
 }

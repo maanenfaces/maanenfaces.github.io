@@ -363,6 +363,16 @@ export class Player {
         this.isJumping = false;
         this.jumpTime = 0;
         this.canJump = false;
+        this.energy = 0;
+        this.isPowerReady = false;
+
+        if (this.particles) {
+            this.scene.remove(this.particles);
+            this.particles.geometry.dispose();
+            this.particles.material.dispose();
+            this.particles = null;
+        }
+        this.particleData = [];
 
         if (this.mesh) {
             this.mesh.visible = true;

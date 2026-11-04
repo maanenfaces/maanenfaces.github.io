@@ -12,12 +12,14 @@ export class Main {
     async init() {
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.5, 1000);
-        this.camera.position.set(0, 7, 12.5); // Reculée légèrement pour mieux voir
+        this.camera.position.set(0, 7, 12.5);
         this.camera.lookAt(0, 2, -10);
 
         this.renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true });
         this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
+
+        const container = document.getElementById('game-container');
+        this.renderer.setSize(container.clientWidth, container.clientHeight);
 
         document.getElementById('game-canvas').appendChild(this.renderer.domElement);
 
@@ -29,7 +31,6 @@ export class Main {
             rotationAlert.classList.remove('hidden');
         });
         window.addEventListener('uiRotationEnd', () => {
-            console.log("Hiding rotation alert");
             rotationAlert.classList.add('hidden');
         });
 
@@ -77,15 +78,12 @@ export class Main {
     }
 
     onWindowResize() {
-        const width = window.innerWidth;
-        const height = window.innerHeight;
+        const container = document.getElementById('game-container');
+        const width = container.clientWidth;
+        const height = container.clientHeight;
         const aspect = width / height;
 
-        // Calcul du FOV adaptatif
-        // Si l'écran est plus haut que large (Portrait), on augmente le FOV
         if (aspect < 1) {
-            // Formule pour maintenir la visibilité horizontale :
-            // fovVertical = 2 * atan(tan(fovHorizontal/2) / aspect)
             const initialFov = 75;
             const horizontalFov = 2 * Math.atan(Math.tan(initialFov * Math.PI / 360) * (16/9));
             this.camera.fov = (2 * Math.atan(Math.tan(horizontalFov / 2) / aspect)) * (180 / Math.PI);

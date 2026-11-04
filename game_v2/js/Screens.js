@@ -5,17 +5,17 @@ import * as THREE from 'three';
 export class Screens {
     constructor(engine) {
         this.engine = engine;
-        this.step = 'NAME';      // NAME, SELECTION, PLAYING, PAUSE, GAMEOVER
-        this.selectedIndex = 0;   // Index pour la sélection d'instrument
-        this.menuIndex = 0;       // Index pour les menus Pause/GameOver
+        this.step = 'NAME';
+        this.selectedIndex = 0;
+        this.menuIndex = 0;
         this.score = 0;
         this.bonusInterval = null;
 
-        // Cache des éléments DOM
         this.instruments = document.querySelectorAll('.instrument');
         this.nameInput = document.getElementById('player-name');
         this.touchControls = document.getElementById('touch-controls');
         this.pauseButton = document.getElementById('pause-btn');
+        this.superPowerTouchBtn = document.getElementById('super-power-touch-btn');
 
         this.bonusUI = {
             container: document.getElementById('bonus-container'),
@@ -62,7 +62,7 @@ export class Screens {
                     if (e.key === 'ArrowUp') this.engine.player.jump(this.engine.activeBonus);
                     if (e.key === 'ArrowDown') this.engine.player.fastFall();
                     if (e.code === 'Space' || e.key === ' ') {
-                        this.engine.player.useSuperPower(this.engine.state, this.engine.entities);
+                        this.engine.player.useSuperPower(this.engine.state, this.engine.entityManager);
                     }
                     break;
                 case 'PAUSE':
@@ -75,7 +75,11 @@ export class Screens {
         });
 
         this.touchControls.addEventListener('touchstart', (e) => {
+            console.log("Touch controls:", e.touches[0].clientX, e.touches[0].clientY);
+
             if (this.step !== 'PLAYING') return;
+            if (e.target.closest('#hud-bottom-controls')) return;
+
             const touch = e.touches[0];
             const x = touch.clientX;
             const y = touch.clientY;
@@ -91,7 +95,19 @@ export class Screens {
             }
         }, { passive: false });
 
-        this.pauseButton.addEventListener('click', () => this.togglePause());
+        this.pauseButton.addEventListener('pointerdown', (e) => {
+            console.log("Pause button");
+            e.stopPropagation(); // Empêche le touchControls de l'attraper
+            e.preventDefault();
+            this.togglePause();
+        });
+
+        this.superPowerTouchBtn.addEventListener('pointerdown', (e) => {
+            console.log("Super Power button");
+            e.stopPropagation(); // Empêche le touchControls de l'attraper
+            e.preventDefault();
+            this.engine.player.useSuperPower(this.engine.state, this.engine.entityManager);
+        });
 
         this.instruments.forEach((inst, index) => {
             inst.addEventListener('click', () => {
@@ -107,7 +123,6 @@ export class Screens {
 
         window.addEventListener('superPowerActivated', (e) => {
             const { role, color } = e.detail;
-            console.log("super power catched")
             this.triggerSuperPowerVisuals(color);
         });
 
@@ -115,47 +130,38 @@ export class Screens {
     }
 
     initDevTools() {
-        this.devUI.panel.style.display = 'block';
+        this.devUI.panel.style.display = 'flex';
 
         if (this.engine.devSettings) {
             this.engine.devSettings.isInvincible = this.devUI.invincible.checked;
         }
 
         const updateSliderMax = () => {
-            const duration = this.engine.music.audio.duration;
+            const duration = this.engine.musicController.audio.duration;
             if (duration && !isNaN(duration)) {
                 this.devUI.slider.max = duration;
-                console.log("Slider Dev configuré sur :", duration, "secondes");
             }
         };
 
-        // Gestion du chargement de l'audio pour le slider
-        if (this.engine.music.audio.readyState >= 1) {
+        if (this.engine.musicController.audio.readyState >= 1) {
             updateSliderMax();
         } else {
-            this.engine.music.audio.addEventListener('loadedmetadata', updateSliderMax);
+            this.engine.musicController.audio.addEventListener('loadedmetadata', updateSliderMax);
         }
 
-        // Checkbox Invincibilité
         this.devUI.invincible.addEventListener('change', (e) => {
             if (this.engine.devSettings) {
                 this.engine.devSettings.isInvincible = e.target.checked;
             }
         });
 
-        // Slider : Navigation temporelle
         this.devUI.slider.addEventListener('input', (e) => {
             const targetTime = parseFloat(e.target.value);
-
-            // 1. Appliquer le temps à l'audio
-            this.engine.music.audio.currentTime = targetTime;
-
-            // 2. Mettre à jour l'affichage 000
+            this.engine.musicController.audio.currentTime = targetTime;
             this.updateDevUI(targetTime);
 
-            // 3. Nettoyer les entités pour éviter les collisions fantômes lors du saut
-            if (this.engine.entities) {
-                this.engine.entities.entities.forEach(ent => this.engine.entities.removeEntity(ent));
+            if (this.engine.entityManager) {
+                this.engine.entityManager.entities.forEach(ent => this.engine.entityManager.removeEntity(ent));
             }
         });
     }
@@ -171,7 +177,7 @@ export class Screens {
 
     updateDevUI() {
         if (this.devUI) {
-            const currentTime = this.engine.music.audio.currentTime;
+            const currentTime = this.engine.musicController.audio.currentTime;
             const formattedTime = Math.floor(currentTime).toString().padStart(3, '0');
             this.devUI.slider.value = currentTime;
             this.devUI.timeVal.innerText = formattedTime;
@@ -235,8 +241,6 @@ export class Screens {
     }
 
     triggerSuperPowerVisuals(effectColor) {
-        // Si effectColor est une instance de THREE.Color, on récupère son code hexadécimal CSS
-        // (Ex: #ff3333). Si c'est déjà une string ou un nombre, on s'adapte.
         let hexColor = '#ffffff';
         if (effectColor instanceof THREE.Color) {
             hexColor = '#' + effectColor.getHexString();
@@ -246,9 +250,6 @@ export class Screens {
             hexColor = effectColor;
         }
 
-        console.log("effectColor CSS = " + hexColor);
-
-        // Création de l'effet visuel DOM (Flash plein écran)
         const flash = document.createElement('div');
         flash.className = 'super-power-active-effect';
         flash.style.backgroundColor = hexColor;
@@ -354,7 +355,7 @@ export class Screens {
         document.getElementById('selection-step').classList.remove('visually-hidden');
         document.getElementById('selection-step').classList.remove('hidden');
         this.nameInput.blur();
-        this.selectedIndex = 0; // Sécurité index initial
+        this.selectedIndex = 0;
         this.updateSelectionUI();
     }
 
@@ -372,7 +373,6 @@ export class Screens {
         this.instruments.forEach((el, i) => {
             const isActive = (i === this.selectedIndex);
 
-            // On force explicitement l'ajout/suppression de la classe CSS
             if (isActive) {
                 el.classList.add('active');
             } else {
@@ -466,14 +466,11 @@ export class Leaderboard {
 
             let scores = [];
 
-            // Extraction sécurisée des scores
             if (data.dreamlo.leaderboard && data.dreamlo.leaderboard.entry) {
                 scores = data.dreamlo.leaderboard.entry;
                 if (!Array.isArray(scores)) scores = [scores];
             }
 
-            // On crée un tableau de 10 éléments
-            // Si on a des scores, on les prend, sinon on complète avec du vide
             const fullList = Array.from({ length: 5 }, (_, index) => {
                 const entry = scores[index];
                 return {

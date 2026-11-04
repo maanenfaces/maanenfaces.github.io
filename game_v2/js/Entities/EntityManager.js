@@ -172,6 +172,24 @@ export class EntityManager {
         this.entities = this.entities.filter(e => e !== ent);
     }
 
+    reset() {
+        this.entities.forEach(ent => {
+            if (ent.mesh) this.scene.remove(ent.mesh);
+            if (ent.particles) {
+                const scene = ent.particles.parent;
+                if (scene) scene.remove(ent.particles);
+                ent.particles.geometry.dispose();
+                ent.particles.material.dispose();
+                ent.particles = null;
+            }
+            if (ent.dispose) ent.dispose();
+        });
+        this.entities = [];
+
+        this.lastSpawnDistance = undefined;
+        this.nextSpawnThreshold = undefined;
+    }
+
     update(state, getProjection) {
         this.entities.forEach(ent => {
             ent.updatePosition(state.speed, state.delta, getProjection, this.entities);

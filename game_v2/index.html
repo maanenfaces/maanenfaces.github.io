@@ -14,20 +14,66 @@
             --neon-pink: #ff0055;
         }
 
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; color: #fff; font-family: 'Rajdhani', sans-serif; }
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #000;
+            color: #fff;
+            font-family: 'Rajdhani', sans-serif;
+            display: flex;
+            flex-direction: column;
+        }
 
-        /* General UI Elements */
         input { background: transparent; border: 1px solid var(--neon-red); padding: 10px; color: white; font-size: 1.2rem; text-align: center; outline: none; }
 
+        /* Conteneur principal du jeu qui prend l'espace restant sous la barre de dev */
         #game-container {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
+            position: relative;
+            width: 100%;
+            flex: 1;
+            overflow: hidden;
             z-index: 1;
         }
 
-        #screens-container {
+        #game-canvas {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        /* --- DEV TOOLS (En haut dans le flux flex) --- */
+        #dev-tools {
+            display: none;
             position: relative;
+            width: 100%;
+            z-index: 9999;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(4px);
+            padding: 6px 130px 6px 12px;
+            border-bottom: 1px solid #00ff00;
+            color: #00ff00;
+            font-family: monospace;
+            font-size: 10px;
+            box-sizing: border-box;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 5px;
+            flex-shrink: 0;
+        }
+
+        #dev-tools input[type="range"] {
+            width: 70px !important;
+        }
+
+        #screens-container {
+            position: absolute;
+            top: 0;
+            left: 0;
             z-index: 10;
             width: 100%;
             height: 100%;
@@ -84,7 +130,6 @@
             margin: 0;
         }
 
-        /* Selection Grid - 4 colonnes strictes avec des icônes SVG */
         .instrument-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -139,7 +184,6 @@
             position: relative;
         }
 
-        /* Menu Buttons */
         .menu-options {
             display: flex;
             flex-direction: column;
@@ -204,14 +248,14 @@
             box-shadow: 0 0 20px var(--neon-red) !important;
         }
 
-        /* --- HUD (Responsive : resserré sur mobile, large en desktop) --- */
+        /* --- HUD (Seulement les infos du haut) --- */
         #hud {
             position: absolute;
             top: 15px;
             left: 50%;
             transform: translateX(-50%);
             width: 100%;
-            max-width: 414px; /* Mobile par défaut */
+            max-width: 414px;
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
@@ -219,10 +263,8 @@
             z-index: 50;
             padding: 0 15px;
             box-sizing: border-box;
-            height: 100vh;
         }
 
-        /* Élargissement automatique et élégant en mode Desktop */
         @media (min-width: 768px) {
             #hud {
                 max-width: 1200px;
@@ -251,7 +293,7 @@
             margin-top: 4px;
         }
 
-        /* --- SUPER POWER (Clignotement strict Magenta / Blanc toutes les 300ms) --- */
+        /* --- SUPER POWER --- */
         #super-power-container {
             display: flex;
             flex-direction: column;
@@ -289,7 +331,6 @@
             transition: width 0.05s linear;
         }
 
-        /* Animation exacte Magenta / Blanc toutes les 300ms (0.3s) */
         @keyframes magentaWhiteBlink {
             0% {
                 background: #ffffff !important;
@@ -317,7 +358,6 @@
             100% { color: #ffffff; text-shadow: 0 0 15px #ffffff, 0 0 30px var(--neon-pink); transform: scale(1.08); }
         }
 
-        /* Application de l'animation dès que la classe power-ready est présente */
         #super-power-container.power-ready #super-power-bar-fill,
         #super-power-bar-fill.power-ready {
             animation: magentaWhiteBlink 0.3s infinite steps(1) !important;
@@ -335,7 +375,7 @@
 
         #bonus-container {
             position: absolute;
-            top: 100px;
+            top: 70px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
@@ -377,16 +417,22 @@
             transition: width 0.1s linear;
         }
 
-        /* Zone tactile / Boutons du bas dans le HUD */
+        /* --- Conteneur global pour les boutons du bas --- */
         #hud-bottom-controls {
             position: absolute;
             bottom: 25px;
+            left: 15px;
             right: 15px;
-            pointer-events: auto;
+            display: flex;
+            justify-content: space-between; /* Espace les enfants : un à gauche, un à droite */
+            align-items: center;
+            pointer-events: auto !important;
+            z-index: 100;
         }
 
         @media (min-width: 768px) {
             #hud-bottom-controls {
+                left: 30px;
                 right: 30px;
             }
         }
@@ -402,6 +448,7 @@
             cursor: pointer;
             border-radius: 50%;
             box-shadow: 0 0 15px rgba(0, 255, 255, 0.4), inset 0 0 10px rgba(0, 255, 255, 0.2);
+            pointer-events: auto;
             transition: transform 0.2s, background 0.2s;
         }
 
@@ -417,6 +464,48 @@
             filter: drop-shadow(0 0 5px var(--neon-blue));
         }
 
+        /* Bouton Super Pouvoir Tactile (bas à droite) */
+        #super-power-touch-btn {
+            width: 50px;
+            height: 50px;
+            border: 2px solid var(--neon-pink);
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            box-shadow: 0 0 15px rgba(255, 0, 85, 0.4), inset 0 0 10px rgba(255, 0, 85, 0.2);
+            pointer-events: auto;
+            cursor: pointer;
+            user-select: none;
+            touch-action: manipulation;
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        #super-power-touch-btn:hover {
+            transform: scale(1.1);
+            background: rgba(40, 0, 20, 0.9);
+        }
+
+        #super-power-touch-btn svg {
+            width: 22px;
+            height: 22px;
+            fill: var(--neon-pink);
+            filter: drop-shadow(0 0 6px var(--neon-pink));
+        }
+
+        /* Optionnel : si tu veux qu'il pulse ou brille de la même façon que la jauge quand il est prêt */
+        #super-power-touch-btn.power-ready {
+            border-color: #fff;
+            box-shadow: 0 0 25px #ffffff, inset 0 0 15px var(--neon-pink);
+        }
+
+        @media (min-width: 768px) {
+            #super-power-touch-btn {
+                display: none;
+            }
+        }
+
         .hidden { display: none !important; }
         .visually-hidden { visibility: hidden; opacity: 0; position: absolute; pointer-events: none; }
 
@@ -424,8 +513,20 @@
         .bg-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: top center; opacity: 0; transition: opacity 1.5s; }
         .bg-visible { opacity: 0.5; }
         #horizon-mask { position: absolute; bottom: 0; left: 0; width: 100%; height: 50%; background: linear-gradient(to top, #000 0%, transparent 100%); z-index: 2; pointer-events: none; }
-        #touch-controls { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; display: none; touch-action: none; }
-        #touch-controls.active { display: block; }
+
+        #touch-controls {
+            position: absolute; /* ou fixed par rapport à l'écran */
+            top: 0; left: 0;
+            width: 100%;
+            height: 89%;
+            z-index: 2; /* Inférieur au HUD (50) et aux boutons du bas (100) */
+            display: none;
+            touch-action: none;
+        }
+
+        #touch-controls.active {
+          display: block;
+        }
 
         .credits {
             margin-top: 15px;
@@ -511,10 +612,9 @@
             width: 100vw;
             height: 100vh;
             pointer-events: none;
-            z-index: 99999; /* On met un z-index très haut pour être sûr qu'il passe devant le canvas 3D et le HUD */
+            z-index: 99999;
             animation: superPowerFlash 0.6s ease-out forwards;
         }
-
     </style>
 </head>
 <body>
@@ -536,61 +636,72 @@
         WORLD ROTATING<br/>INVERTING CONTROLS
     </div>
 
+    <!-- Barre de dev en haut -->
+    <div id="dev-tools">
+        <div style="display: flex; align-items: center; gap: 4px;">
+            <input type="checkbox" id="dev-invincible" style="width: auto; margin: 0; cursor: pointer;" checked>
+            <label for="dev-invincible" style="cursor: pointer; user-select: none;">GOD</label>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 4px;">
+            <span style="font-weight: bold;">T:</span>
+            <input type="range" id="dev-slider" min="0" value="0" step="0.1" style="cursor: pointer; margin: 0; padding: 0; border: none; height: 12px; background: transparent; accent-color: #00ff00;">
+            <span id="dev-time-val" style="min-width: 25px; text-align: right; font-weight: bold;">000</span>
+        </div>
+
+        <div style="display: flex; gap: 8px; opacity: 0.9;">
+            <div>% WALL: <span id="dev-wall-density" style="font-weight: bold;">0.0</span></div>
+            <div>% BONUS: <span id="dev-bonus-density" style="font-weight: bold;">0.0</span></div>
+            <div>FPS: <span id="dev-fps">0</span></div>
+        </div>
+
+        <div style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%);">
+            <span style="font-weight: bold; letter-spacing: 1px; background: #00ff00; color: #000; padding: 2px 6px; border-radius: 2px; font-size: 9px;">DEV MODE</span>
+        </div>
+    </div>
+
+    <!-- Conteneur de jeu regroupant le canvas, le HUD du haut, et le bouton pause ancré en bas à droite -->
     <div id="game-container">
         <div id="game-canvas"></div>
-    </div>
-    <div id="touch-controls"></div>
 
-    <div id="dev-tools" style="display:none; position: absolute; top: 20px; left: 20px; z-index: 9999; background: rgba(0,0,0,0.8); padding: 15px; border: 1px solid #00ff00; color: #00ff00; font-family: monospace; font-size: 12px; pointer-events: auto;">                                                                                                                         -        <div style="margin-bottom: 10px; font-weight: bold; border-bottom: 1px solid #00ff00; padding-bottom: 5px; letter-spacing: 1px;">DEV MODE</div>                                    -
-        <div style="margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
-            <input type="checkbox" id="dev-invincible" style="width: auto; margin: 0; cursor: pointer;" checked>
-            <label for="dev-invincible" style="cursor: pointer; user-select: none;">INVINCIBLE (GOD MODE)</label>
-        </div>
+        <div id="hud" class="hidden">
+            <div id="hud-left">
+                <div id="score-container"><span id="score-val">000000</span></div>
+                <div id="velocity-container">
+                    <span style="color: var(--neon-blue);">VELOCITY: </span>
+                    <span id="velocity-val" style="color: #fff; text-shadow: 0 0 8px var(--neon-blue);">1.0x</span>
+                </div>
+            </div>
 
-        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
-            <span style="font-weight: bold;">T:</span>
-            <input type="range" id="dev-slider" min="0" value="0" step="0.1" style="width: 200px; cursor: pointer; margin: 0; padding: 0; border: none; height: 14px; background: transparent; accent-color: #00ff00;">
-            <span id="dev-time-val" style="min-width: 35px; text-align: right; font-weight: bold;">000</span>
-        </div>
+            <div id="super-power-container">
+                <div id="super-power-label">SUPER POWER</div>
+                <div id="super-power-bar-container">
+                    <div id="super-power-bar-fill"></div>
+                </div>
+            </div>
 
-        <div style="display: flex; flex-direction: column; gap: 4px; border-left: 2px solid #00ff00; padding-left: 8px;">
-            <div>WALL DENSITY: <span id="dev-wall-density" style="font-weight: bold;">0.0</span></div>
-            <div>BONUS DENSITY: <span id="dev-bonus-density" style="font-weight: bold;">0.0</span></div>
-            <div>PERF: <span id="dev-perf">0.00</span>ms (<span id="dev-fps">0</span> FPS)</div>
-        </div>
-    </div>
-
-    <div id="hud" class="hidden">
-        <div id="hud-left">
-            <div id="score-container"><span id="score-val">000000</span></div>
-            <div id="velocity-container">
-                <span style="color: var(--neon-blue);">VELOCITY: </span>
-                <span id="velocity-val" style="color: #fff; text-shadow: 0 0 8px var(--neon-blue);">1.0x</span>
+            <div id="bonus-container" class="hidden">
+                <div id="bonus-info">
+                    <span id="bonus-name">SPEED</span> : <span id="bonus-timer">10</span>s
+                </div>
+                <div id="bonus-bar-container">
+                    <div id="bonus-bar-fill"></div>
+                </div>
             </div>
         </div>
 
-        <div id="super-power-container">
-            <div id="super-power-label">SUPER POWER</div>
-            <div id="super-power-bar-container">
-                <div id="super-power-bar-fill"></div>
-            </div>
-        </div>
-
-        <div id="bonus-container" class="hidden">
-            <div id="bonus-info">
-                <span id="bonus-name">SPEED</span> : <span id="bonus-timer">10</span>s
-            </div>
-            <div id="bonus-bar-container">
-                <div id="bonus-bar-fill"></div>
-            </div>
-        </div>
-
+        <!-- Boutons d'action tactiles en bas du jeu -->
         <div id="hud-bottom-controls">
             <div id="pause-btn">
                 <svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
             </div>
+            <div id="super-power-touch-btn">
+              <svg viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
+            </div>
         </div>
     </div>
+
+    <div id="touch-controls"></div>
 
     <div id="screens-container">
         <div id="glitch-overlay"></div>
@@ -609,7 +720,6 @@
                 <div id="selection-step" class="visually-hidden" style="display: flex; flex-direction: column; align-items: center; gap: 15px; width: 100%;">
                     <p style="letter-spacing: 2px; font-weight: bold; font-size: 0.9rem;">SELECT FREQUENCY MODULE</p>
 
-                    <!-- 4 modules sur une seule ligne avec icônes SVG -->
                     <div class="instrument-grid">
                         <div class="instrument" data-type="drums" data-color="0xff00ff">
                             <svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 1.12-9 2.5s4.03 2.5 9 2.5 9-1.12 9-2.5-4.03-2.5-9-2.5zm0 7c-4.69 0-8.64 1.03-8.97 2.33C3.06 13.04 3 13.75 3 14.5c0 1.38 4.03 2.5 9 2.5s9-1.12 9-2.5c0-.75-.06-1.46-.03-2.17C20.64 11.03 16.69 10 12 10zm0 7c-4.69 0-8.64 1.03-8.97 2.33-.03.71-.03 1.42-.03 2.17 0 1.38 4.03 2.5 9 2.5s9-1.12 9-2.5c0-.75 0-1.46-.03-2.17-.33-1.3-4.28-2.33-8.97-2.33z"/></svg>
@@ -675,7 +785,6 @@
 
     <script>
         (function() {
-            const BOX_EFFECTS = ['g-1', 'g-2', 'g-3', 'g-4', 'g-5'];
             const BACKGROUND_EFFECTS = ['g-7', 'g-9'];
             const MATRIX_EFFECTS = ['g-6', 'g-8'];
 
@@ -694,7 +803,7 @@
 
                 if (dice < 0.7) {
                     targetElement = overlay;
-                    effectClass = MATRIX_EXACTS = MATRIX_EFFECTS[Math.floor(Math.random() * MATRIX_EFFECTS.length)];
+                    effectClass = MATRIX_EFFECTS[Math.floor(Math.random() * MATRIX_EFFECTS.length)];
 
                     const rotations = [0, 90, 180, 270];
                     overlay.style.transform = `rotate(${rotations[Math.floor(Math.random()*rotations.length)]}deg) scale(1.5)`;
@@ -723,6 +832,5 @@
             });
         })();
     </script>
-
 </body>
 </html>
