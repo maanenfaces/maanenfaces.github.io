@@ -25,7 +25,7 @@ export class EntityManager {
             case 'invincible':
             case 'GhostBonus':
             case 'InvincibleBonus':
-                return new InvincibleBonus(lane, z, getProjection);
+                return new GhostBonus(lane, z, getProjection);
             case 'point':
             case 'PointBonus':
                 return new PointBonus(lane, z, getProjection);

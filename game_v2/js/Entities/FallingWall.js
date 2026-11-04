@@ -4,7 +4,7 @@ import { Wall } from './Wall.js';
 export class FallingWall extends Wall {
     constructor(lane, z, getProjection) {
         super(lane, z, getProjection);
-        this.type = 'falling_wall';
+        this.type = 'wall';
         this.color = 0x00ff88;
 
         this.fallCycleDuration = 0.8 + Math.random() * 0.6;

@@ -4,7 +4,7 @@ import { Wall } from './Wall.js';
 export class ChasingWall extends Wall {
     constructor(lane, z, getProjection) {
         super(lane, z, getProjection);
-        this.type = 'chasing_wall';
+        this.type = 'wall';
         this.color = 0x00BFFF; // Bleu électrique
 
         this.LANE_WIDTH = 6; // Largeur confirmée
