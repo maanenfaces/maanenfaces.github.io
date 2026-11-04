@@ -43,8 +43,56 @@ export class SoundEffects {
     // --- CATALOGUE DE SONS SOMBRES ---
 
     static beep() {
-        // Un petit choc métallique sourd
         this.playTone(80, 'sawtooth', 0.15, 0.4, 40);
+    }
+
+    // Bruit de glissement pour les mouvements latéraux (latéral / slide)
+    static move() {
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+
+        const duration = 0.18; // Durée courte pour le mouvement
+        const bufferSize = this.ctx.sampleRate * duration;
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+
+        // Génération d'un bruit blanc (bruit de frottement brut)
+        for (let i = 0; i < bufferSize; i++) {
+            data[i] = Math.random() * 2 - 1;
+        }
+
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = buffer;
+
+        // Filtre passe-bande pour sculpter le bruit (effet de texture de frottement)
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        // Le filtre balaie les fréquences vers le grave pour simuler la friction qui s'amortit
+        filter.frequency.setValueAtTime(400, this.ctx.currentTime);
+        filter.frequency.exponentialRampToValueAtTime(80, this.ctx.currentTime + duration);
+        filter.Q.value = 2; // Donne du corps au frottement
+
+        // Enveloppe de volume (fondu en fermeture)
+        const gain = this.ctx.createGain();
+        const finalVolume = 0.55 * this.masterVolume;
+        gain.gain.setValueAtTime(finalVolume, this.ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + duration);
+
+        // Connexions
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        noise.start();
+        noise.stop(this.ctx.currentTime + duration);
+    }
+
+    // Bruit de déclenchement du super pouvoir (sur barre espace ou bouton tactile)
+    static useSuperPower() {
+        // Une grosse descente de synthé/guitare lourde et saturée (effet dark/sci-fi)
+        this.playTone(300, 'sawtooth', 0.4, 0.5, 50);
+        setTimeout(() => {
+            this.playTone(150, 'square', 0.2, 0.3, 30);
+        }, 100);
     }
 
     static validate() {
