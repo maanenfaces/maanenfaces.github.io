@@ -258,10 +258,36 @@ export class GameEngine {
         this.currentParams.waveHeight += (p.effects.wave.intensity - this.currentParams.waveHeight) * lerpS;
         this.currentParams.rollStrength += (p.effects.roll.intensity - this.currentParams.rollStrength) * lerpS;
 
-        // 6. CAMERA ROTATION & REVERSE
+        // 6. CAMERA POSITION, ROTATION & REVERSE
+        if (this.baseCameraY === undefined) {
+            this.baseCameraY = this.camera.position.y;
+        }
+
+        // Détection dynamique du format (mobile portrait vs desktop)
+        const isPortrait = window.innerWidth < window.innerHeight;
+
+        // Sur mobile, on réduit l'influence du déplacement du joueur sur la caméra (ex: 0.15 au lieu de 0.25)
+        // pour que le cube ne sorte jamais du cadre étroit de l'écran.
+        const lateralFactor = isPortrait ? 0.15 : 0.25;
+        const targetCameraX = this.player.mesh.position.x * lateralFactor;
+
+        const targetCameraY = this.baseCameraY;
+
+        const cameraLerpFactor = 6.0 * delta;
+        this.camera.position.x += (targetCameraX - this.camera.position.x) * cameraLerpFactor;
+        this.camera.position.y += (targetCameraY - this.camera.position.y) * cameraLerpFactor;
+
+        // Rotation de la caméra (Reverse)
         const targetRotation = triggers.reverse ? Math.PI : 0;
         this.cameraRotation += (targetRotation - this.cameraRotation) * (lerpS * 5);
         this.camera.rotation.z = this.cameraRotation;
+
+        // Regard vers l'avant stable
+        this.camera.lookAt(
+            this.player.mesh.position.x * 0.1,
+            this.player.mesh.position.y,
+            this.player.mesh.position.z - 15
+        );
 
         // Événements de rotation (UI)
         const currentlyRotating = Math.abs(targetRotation - this.cameraRotation) > 0.1;

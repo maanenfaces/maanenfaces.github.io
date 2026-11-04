@@ -92,11 +92,11 @@ export class Player {
             this.nextMove = 0;
         }
 
-        // 1. Mouvement latéral fluide (Inchangé)
-        const lerpSpeed = 30;
+        // 1. Mouvement latéral fluide
+        const lerpSpeed = 8;
         this.currentX += (this.currentLane * 6 - this.currentX) * lerpSpeed * state.delta;
 
-        // 2. Logique du saut (Inchangé)
+        // 2. Logique du saut
         if (this.isJumping) {
             this.yOffset += this.jumpVel * state.delta;
             this.jumpVel -= 40 * state.delta;
@@ -116,13 +116,17 @@ export class Player {
             3
         );
 
-        // 4. Inclinaison visuelle du joueur
-        // Le mesh du joueur doit aussi pencher si la route penche
+        // 4. Inclinaison visuelle de la route (roulis) + Rotation droite sur l'axe vertical (Y) uniquement
         if (proj.rollAngle !== undefined) {
             this.mesh.rotation.z = proj.rollAngle;
+        } else {
+            this.mesh.rotation.z = 0;
         }
 
-        // 5. Effet d'invincibilité
+        this.mesh.rotation.x = 0;
+        this.mesh.rotation.y += state.delta * 2.0;
+
+        // 5. Effet d'invincibilité (clignotement)
         if (state.activeBonus && state.activeBonus.item && state.activeBonus.item.subType === 'invincible') {
             this.mesh.visible = Math.floor(Date.now() / 100) % 2 === 0;
         } else {
@@ -233,17 +237,17 @@ export class Player {
 
     reset(projectionFunction) {
         this.isDead = false;
-        this.currentLane = 0;       // Retour à la voie centrale
-        this.targetX = 0;           // Reset de la position cible
-        this.isJumping = false;     // Annule le saut
-        this.jumpTime = 0;          // Reset du chrono de saut
-        this.canJump = false;       // Désactive le bonus de saut
+        this.currentLane = 0;
+        this.currentX = 0;
+        this.isJumping = false;
+        this.jumpTime = 0;
+        this.canJump = false;
 
         if (this.mesh) {
             this.mesh.visible = true;
-            const proj = projectionFunction(3);
+            this.mesh.rotation.set(0, 0, 0);
+            const proj = projectionFunction(3, 0);
             this.mesh.position.set(proj.x + this.currentX, proj.y + this.yOffset + 1, 3);
         }
     }
-
 }

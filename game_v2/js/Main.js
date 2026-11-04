@@ -12,7 +12,7 @@ export class Main {
     async init() {
         this.scene = new THREE.Scene();
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.5, 1000);
-        this.camera.position.set(0, 7, 12); // Reculée légèrement pour mieux voir
+        this.camera.position.set(0, 7, 12.5); // Reculée légèrement pour mieux voir
         this.camera.lookAt(0, 2, -10);
 
         this.renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true });
