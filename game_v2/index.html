@@ -11,7 +11,7 @@
             --dark-red: #440000;
             --neon-blue: #00ffff;
             --neon-yellow: #ffff00;
-            --neon-pink: #ff00ff;
+            --neon-pink: #ff0055;
         }
 
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; color: #fff; font-family: 'Rajdhani', sans-serif; }
@@ -54,63 +54,68 @@
 
         /* Menu Box */
         .screen-content {
-            background: rgba(30, 0, 0, 0.98);
-            padding: 50px;
-            border: 3px solid var(--neon-red);
-            box-shadow: 0 0 20px var(--neon-red), inset 0 0 15px var(--dark-red);
+            padding: 35px 20px;
+            border: none;
             text-align: center;
-            width: 500px;
+            width: 90%;
+            max-width: 500px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 25px;
+            gap: 20px;
             position: relative;
-            animation: redPulse 2s infinite ease-in-out;
+            box-sizing: border-box;
         }
 
         .screen-content h1 {
             font-family: 'Orbitron', sans-serif;
             color: #fff;
             text-shadow: 0 0 10px var(--neon-red), 0 0 20px var(--neon-red), 0 0 40px var(--dark-red);
-            font-size: 3.5rem;
+            font-size: 2.8rem;
             margin: 0;
-            letter-spacing: 8px;
+            letter-spacing: 4px;
         }
 
         .screen-content p {
             color: #ff9999;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             text-transform: uppercase;
             letter-spacing: 1px;
             margin: 0;
         }
 
-        @keyframes redPulse {
-            0% { box-shadow: 0 0 15px var(--neon-red); }
-            50% { box-shadow: 0 0 30px var(--neon-red), inset 0 0 10px var(--neon-red); }
-            100% { box-shadow: 0 0 15px var(--neon-red); }
-        }
-
-        /* Selection Grid */
+        /* Selection Grid - 4 colonnes strictes avec des icônes SVG */
         .instrument-grid {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 15px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
             width: 100%;
-            margin: 10px 0;
+            margin: 5px 0;
         }
 
         .instrument {
-            padding: 15px;
+            padding: 12px 5px;
             border: 1px solid var(--dark-red);
             background: rgba(0,0,0,0.5);
             color: #888;
-            flex: 1;
             cursor: pointer;
             transition: 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 0.7rem;
             text-transform: uppercase;
             font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .instrument svg {
+            width: 24px;
+            height: 24px;
+            fill: #888;
+            transition: 0.3s;
         }
 
         .instrument.active {
@@ -118,6 +123,11 @@
             color: #fff;
             background: var(--dark-red);
             box-shadow: 0 0 15px var(--neon-red);
+        }
+
+        .instrument.active svg {
+            fill: #fff;
+            filter: drop-shadow(0 0 6px var(--neon-red));
         }
 
         .horizontal-divider {
@@ -128,21 +138,6 @@
             margin: 10px 0;
             position: relative;
         }
-
-        /**
-        .horizontal-divider::before, .horizontal-divider::after {
-            content: '';
-            position: absolute;
-            top: -2px;
-            width: 5px;
-            height: 5px;
-            background: var(--neon-red);
-            border-radius: 50%;
-            box-shadow: 0 0 10px var(--neon-red);
-        }
-        .horizontal-divider::before { left: 0; }
-        .horizontal-divider::after { right: 0; }
-        **/
 
         /* Menu Buttons */
         .menu-options {
@@ -159,11 +154,13 @@
             color: var(--neon-red);
             background: rgba(20, 0, 0, 0.6);
             cursor: pointer;
-            width: 250px;
+            width: 100%;
+            max-width: 250px;
             transition: all 0.2s ease;
             font-family: 'Orbitron', sans-serif;
             letter-spacing: 2px;
             text-transform: uppercase;
+            box-sizing: border-box;
         }
 
         .menu-btn.active {
@@ -175,13 +172,15 @@
         }
 
         #player-name {
-            width: 280px;
+            width: 100%;
+            max-width: 280px;
             background: #000;
             border: 1px solid var(--neon-red);
             color: #fff;
             padding: 12px;
             font-family: 'Rajdhani', sans-serif;
             box-shadow: inset 0 0 5px var(--dark-red);
+            box-sizing: border-box;
         }
 
         #player-name::placeholder {
@@ -205,50 +204,169 @@
             box-shadow: 0 0 20px var(--neon-red) !important;
         }
 
-        /* HUD */
+        /* --- HUD (Responsive : resserré sur mobile, large en desktop) --- */
         #hud {
             position: absolute;
-            top: 30px; left: 0;
-            width: 100vw;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 414px; /* Mobile par défaut */
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            justify-content: space-between;
+            align-items: flex-start;
             pointer-events: none;
             z-index: 50;
+            padding: 0 15px;
+            box-sizing: border-box;
+            height: 100vh;
+        }
+
+        /* Élargissement automatique et élégant en mode Desktop */
+        @media (min-width: 768px) {
+            #hud {
+                max-width: 1200px;
+                padding: 0 30px;
+            }
+        }
+
+        #hud-left {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            pointer-events: auto;
         }
 
         #score-container {
-            font-size: 3.5rem;
+            font-size: 1.6rem;
             color: var(--neon-yellow);
-            text-shadow: 0 0 20px var(--neon-yellow);
+            text-shadow: 0 0 10px var(--neon-yellow);
             font-family: 'Orbitron', sans-serif;
             line-height: 1;
         }
 
-        /* Bonus UI */
+        #velocity-container {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.85rem;
+            margin-top: 4px;
+        }
+
+        /* --- SUPER POWER (Clignotement strict Magenta / Blanc toutes les 300ms) --- */
+        #super-power-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+            z-index: 100;
+            pointer-events: auto;
+        }
+
+        #super-power-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            color: var(--neon-pink);
+            text-shadow: 0 0 8px var(--neon-pink), 0 0 20px var(--neon-pink);
+        }
+
+        #super-power-bar-container {
+            width: 190px;
+            height: 12px;
+            border: 2px solid var(--neon-pink);
+            background: rgba(0, 0, 0, 0.9);
+            box-shadow: 0 0 12px rgba(255, 0, 85, 0.6), inset 0 0 6px rgba(255, 0, 85, 0.4);
+            padding: 2px;
+            box-sizing: border-box;
+            border-radius: 2px;
+        }
+
+        #super-power-bar-fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #ff0055, #ff55aa);
+            box-shadow: 0 0 10px var(--neon-pink);
+            transition: width 0.05s linear;
+        }
+
+        /* Animation exacte Magenta / Blanc toutes les 300ms (0.3s) */
+        @keyframes magentaWhiteBlink {
+            0% {
+                background: #ffffff !important;
+                box-shadow: 0 0 25px #ffffff, 0 0 50px #ffffff !important;
+            }
+            50% {
+                background: var(--neon-pink) !important;
+                box-shadow: 0 0 10px var(--neon-pink) !important;
+            }
+            100% {
+                background: #ffffff !important;
+                box-shadow: 0 0 25px #ffffff, 0 0 50px #ffffff !important;
+            }
+        }
+
+        @keyframes borderMagentaWhiteBlink {
+            0% { border-color: #ffffff; box-shadow: 0 0 20px #ffffff; }
+            50% { border-color: var(--neon-pink); box-shadow: 0 0 8px var(--neon-pink); }
+            100% { border-color: #ffffff; box-shadow: 0 0 20px #ffffff; }
+        }
+
+        @keyframes labelMagentaWhiteBlink {
+            0% { color: #ffffff; text-shadow: 0 0 15px #ffffff, 0 0 30px var(--neon-pink); transform: scale(1.08); }
+            50% { color: var(--neon-pink); text-shadow: 0 0 8px var(--neon-pink); transform: scale(1); }
+            100% { color: #ffffff; text-shadow: 0 0 15px #ffffff, 0 0 30px var(--neon-pink); transform: scale(1.08); }
+        }
+
+        /* Application de l'animation dès que la classe power-ready est présente */
+        #super-power-container.power-ready #super-power-bar-fill,
+        #super-power-bar-fill.power-ready {
+            animation: magentaWhiteBlink 0.3s infinite steps(1) !important;
+        }
+
+        #super-power-container.power-ready #super-power-bar-container,
+        #super-power-bar-container.power-ready {
+            animation: borderMagentaWhiteBlink 0.3s infinite steps(1) !important;
+        }
+
+        #super-power-container.power-ready #super-power-label,
+        #super-power-label.power-ready {
+            animation: labelMagentaWhiteBlink 0.3s infinite steps(1) !important;
+        }
+
         #bonus-container {
-            margin-top: 20px;
+            position: absolute;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
             display: flex;
             flex-direction: column;
             align-items: center;
-            animation: pulse 1.5s infinite ease-in-out;
+            animation: bonusZoomLoop 1.2s infinite ease-in-out;
+            pointer-events: none;
+            z-index: 60;
+        }
+
+        @keyframes bonusZoomLoop {
+            0%, 100% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.12); }
         }
 
         #bonus-info {
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             font-weight: bold;
             color: var(--neon-pink);
-            text-shadow: 0 0 15px var(--neon-pink);
+            text-shadow: 0 0 12px var(--neon-pink);
             font-family: 'Orbitron', sans-serif;
+            letter-spacing: 2px;
         }
 
         #bonus-bar-container {
-            width: 250px; height: 8px;
-            background: rgba(0, 0, 0, 0.5);
-            margin-top: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 4px;
+            width: 180px;
+            height: 6px;
+            background: rgba(0, 0, 0, 0.6);
+            margin-top: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
             overflow: hidden;
         }
 
@@ -259,163 +377,100 @@
             transition: width 0.1s linear;
         }
 
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
+        /* Zone tactile / Boutons du bas dans le HUD */
+        #hud-bottom-controls {
+            position: absolute;
+            bottom: 25px;
+            right: 15px;
+            pointer-events: auto;
+        }
+
+        @media (min-width: 768px) {
+            #hud-bottom-controls {
+                right: 30px;
+            }
         }
 
         #pause-btn {
-            position: fixed;
-            top: 20px; right: 20px;
-            width: 45px; height: 45px;
+            width: 45px;
+            height: 45px;
             border: 2px solid var(--neon-blue);
-            color: var(--neon-blue);
-            background: rgba(0,0,0,0.5);
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; pointer-events: auto; z-index: 100;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 50%;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.4), inset 0 0 10px rgba(0, 255, 255, 0.2);
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        #pause-btn:hover {
+            transform: scale(1.1);
+            background: rgba(0, 40, 40, 0.9);
+        }
+
+        #pause-btn svg {
+            width: 18px;
+            height: 18px;
+            fill: var(--neon-blue);
+            filter: drop-shadow(0 0 5px var(--neon-blue));
         }
 
         .hidden { display: none !important; }
+        .visually-hidden { visibility: hidden; opacity: 0; position: absolute; pointer-events: none; }
 
-        .visually-hidden {
-            visibility: hidden;
-            opacity: 0;
-            position: absolute;
-            pointer-events: none;
-        }
-
-        /* Background Layers */
         #bg-media-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; background: #000; }
         .bg-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: top center; opacity: 0; transition: opacity 1.5s; }
         .bg-visible { opacity: 0.5; }
         #horizon-mask { position: absolute; bottom: 0; left: 0; width: 100%; height: 50%; background: linear-gradient(to top, #000 0%, transparent 100%); z-index: 2; pointer-events: none; }
-
         #touch-controls { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; display: none; touch-action: none; }
         #touch-controls.active { display: block; }
 
         .credits {
-            margin-top: 20px;
-            font-size: 1rem;
+            margin-top: 15px;
+            font-size: 0.85rem;
             color: var(--neon-red);
             opacity: 0.6;
         }
-        .credits a, .credits a:visited, .credits a:active, .credits a:hover {
-            color: var(--neon-red);
-            text-decoration: none;
-        }
-        .credits:hover {
-            opacity: 1;
-        }
+        .credits a { color: var(--neon-red); text-decoration: none; }
+        .credits:hover { opacity: 1; }
 
         #rotation-alert {
             position: fixed;
-            bottom: 30%;
-            left: 50%;
+            bottom: 30%; left: 50%;
             transform: translateX(-50%);
             font-family: 'Orbitron', sans-serif;
-            font-size: 3rem;
+            font-size: 2rem;
             color: var(--neon-red);
-            text-shadow: 0 0 40px var(--neon-red);
+            text-shadow: 0 0 20px var(--neon-red);
             z-index: 2000;
             pointer-events: none;
             animation: alertBlink 0.4s infinite alternate;
             text-align: center;
+            width: 90%;
         }
 
-        @keyframes alertBlink {
-            from { opacity: 1; }
-            to { opacity: 0.2; }
-        }
+        @keyframes alertBlink { from { opacity: 1; } to { opacity: 0.2; } }
 
-        /* --- CATALOGUE DE GLITCHES --- */
+        /* Glitches */
+        @keyframes glitch-1 { 0%, 100% { transform: translate(0); filter: none; } 20% { transform: translate(-15px, 5px); filter: hue-rotate(90deg); } 40% { transform: translate(15px, -5px); } }
+        @keyframes glitch-2 { 0%, 100% { text-shadow: none; box-shadow: 0 0 20px var(--neon-red); } 30% { text-shadow: 3px 0 var(--neon-blue), -3px 0 var(--neon-pink); box-shadow: -5px 0 var(--neon-blue), 5px 0 var(--neon-pink); } }
+        @keyframes glitch-3 { 0%, 100% { transform: skew(0deg); } 20% { transform: skew(10deg) scaleY(1.1); } 50% { transform: skew(-10deg) scaleX(0.9); } }
+        @keyframes glitch-4 { 0%, 100% { filter: invert(0); background: rgba(30, 0, 0, 0.98); opacity: 1; } 50% { filter: invert(1); background: #fff; opacity: 1; } }
+        @keyframes glitch-5 { 0%, 100% { clip-path: inset(0 0 0 0); } 25% { clip-path: inset(20% 0 50% 0); transform: translateY(-10px); } 50% { clip-path: inset(80% 0 5% 0); transform: translateY(10px); } }
 
-        /* 1. DISPLACEMENT : Décalage latéral brutal */
-        @keyframes glitch-1 {
-            0%, 100% { transform: translate(0); filter: none; }
-            20% { transform: translate(-15px, 5px); filter: hue-rotate(90deg); }
-            40% { transform: translate(15px, -5px); }
-        }
-
-        /* 2. CHROMATIC : Séparation des couleurs (RGB Split) */
-        @keyframes glitch-2 {
-            0%, 100% { text-shadow: none; box-shadow: 0 0 20px var(--neon-red); }
-            30% { text-shadow: 3px 0 var(--neon-blue), -3px 0 var(--neon-pink); box-shadow: -5px 0 var(--neon-blue), 5px 0 var(--neon-pink); }
-        }
-
-        /* 3. SKEW : Torsion de la structure */
-        @keyframes glitch-3 {
-            0%, 100% { transform: skew(0deg); }
-            20% { transform: skew(10deg) scaleY(1.1); }
-            50% { transform: skew(-10deg) scaleX(0.9); }
-        }
-
-        /* 4. FLASH : Inversion des couleurs et luminosité */
-        @keyframes glitch-4 {
-            0%, 100% { filter: invert(0); background: rgba(30, 0, 0, 0.98); opacity: 1; }
-            50% { filter: invert(1); background: #fff; opacity: 1; }
-        }
-
-        /* 5. V-SCAN : Effet de saut de fréquence vertical */
-        @keyframes glitch-5 {
-            0%, 100% { clip-path: inset(0 0 0 0); }
-            25% { clip-path: inset(20% 0 50% 0); transform: translateY(-10px); }
-            50% { clip-path: inset(80% 0 5% 0); transform: translateY(10px); }
-        }
-
-        /* Classes de déclenchement */
         .g-1 { animation: glitch-1 0.2s ease-in-out; }
         .g-2 { animation: glitch-2 0.2s linear; }
-        .g-3 { animation: glitch-3 0.15s Math.random() infinite; } /* Saccadé */
+        .g-3 { animation: glitch-3 0.15s infinite; }
         .g-4 { animation: glitch-4 0.1s steps(2); }
         .g-5 { animation: glitch-5 0.2s contrast(2); }
 
-        /* Animation de fond (plus discrète pour accompagner) */
-        @keyframes bg-shake {
-            0% { filter: brightness(1); }
-            50% { filter: brightness(1.5) sepia(1) hue-rotate(300deg); }
-        }
-        .bg-glitch { animation: bg-shake 0.2s steps(2); }
+        @keyframes glitch-6 { 0% { opacity: 0; transform: scale(1.05); } 10% { opacity: 0.4; transform: scale(1); } 90% { opacity: 0.4; } 100% { opacity: 0; } }
+        @keyframes glitch-7 { 0% { transform: translate(0); } 10% { transform: translate(-20px, 10px); } 20% { transform: translate(20px, -5px); } 30% { transform: translate(-10px, -15px); } 40% { transform: translate(0); } }
+        @keyframes glitch-8 { 0% { opacity: 0.5; clip-path: inset(0 0 70% 0); transform: translateX(-10px); } 20% { clip-path: inset(30% 0 30% 0); transform: translateX(10px); } 40% { clip-path: inset(70% 0 0 0); transform: translateX(-5px); } 60% { clip-path: none; opacity: 0.3; } 100% { opacity: 0; } }
+        @keyframes glitch-9 { 0% { background: #000; } 20% { background: #002222; } 40% { background: #1a0000; } 60% { background: #003333; box-shadow: inset 0 0 100px rgba(0,255,255,0.2); } 80% { background: #000; } 100% { background: radial-gradient(circle, #1a0000 0%, #000000 100%); } }
 
-        /* --- NOUVEAUX EFFETS MATRICIELS --- */
-
-        /* G-6 : Apparition légère du circuit */
-        @keyframes glitch-6 {
-            0% { opacity: 0; transform: scale(1.05); }
-            10% { opacity: 0.4; transform: scale(1); } /* Pas d'opacité totale pour rester discret */
-            90% { opacity: 0.4; }
-            100% { opacity: 0; }
-        }
-
-        /* G-7 : Secousse sismique du fond (Vibration violente) */
-        @keyframes glitch-7 {
-            0% { transform: translate(0); }
-            10% { transform: translate(-20px, 10px); }
-            20% { transform: translate(20px, -5px); }
-            30% { transform: translate(-10px, -15px); }
-            40% { transform: translate(0); }
-        }
-
-        /* G-8 : Scanline Corrompue (On retire le fond noir opaque) */
-        @keyframes glitch-8 {
-            0% { opacity: 0.5; clip-path: inset(0 0 70% 0); transform: translateX(-10px); }
-            20% { clip-path: inset(30% 0 30% 0); transform: translateX(10px); }
-            40% { clip-path: inset(70% 0 0 0); transform: translateX(-5px); }
-            60% { clip-path: none; opacity: 0.3; }
-            100% { opacity: 0; }
-        }
-
-        /* G-9 : Électrisation (Flash Matrix) */
-        @keyframes glitch-9 {
-            0% { background: #000; }
-            20% { background: #002222; } /* Cyan très sombre */
-            40% { background: #1a0000; } /* Rouge sombre */
-            60% { background: #003333; box-shadow: inset 0 0 100px rgba(0,255,255,0.2); }
-            80% { background: #000; }
-            100% { background: radial-gradient(circle, #1a0000 0%, #000000 100%); }
-        }
-
-        /* --- OVERLAY STRUCTURE CIRCUIT --- */
         #glitch-overlay {
             position: fixed;
             top: 0; left: 0;
@@ -423,12 +478,11 @@
             pointer-events: none;
             z-index: 999;
             opacity: 0;
-            /* On diminue drastiquement l'opacité des lignes de grille */
             background-image:
                 linear-gradient(90deg, rgba(255, 0, 0, 0.05) 1px, transparent 1px),
                 linear-gradient(rgba(255, 0, 0, 0.05) 1px, transparent 1px),
                 url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><g fill="none" stroke="%23ff0000" stroke-width="0.5" stroke-opacity="0.15"><path d="M0 50 l20 0 l10 -10 l20 0 l10 10 l40 0" /><path d="M50 0 l0 20 l10 10 l0 20 l-10 10 l0 40" /><circle cx="50" cy="50" r="1.5" fill="%23ff0000" fill-opacity="0.2" /></g></svg>');
-            background-size: 150px 150px, 150px 150px, 300px 300px; /* Agrandit le motif pour qu'il soit moins dense */
+            background-size: 150px 150px, 150px 150px, 300px 300px;
             background-color: transparent;
             transition: opacity 0.2s;
         }
@@ -436,10 +490,29 @@
         .g-6 { animation: glitch-6 0.4s ease-out; }
         .g-7 { animation: glitch-7 0.2s steps(2); }
         .g-8 { animation: glitch-8 0.3s linear; }
-        g-9 {
-            animation: glitch-9 0.3s ease-in-out;
-            z-index: 1001 !important;
-            filter: contrast(1.2) brightness(1.1);
+
+        @keyframes superPowerFlash {
+            0% {
+                opacity: 0.8;
+                transform: scale(1.02);
+                filter: brightness(2.5) contrast(1.5);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(1);
+                filter: brightness(1) contrast(1);
+            }
+        }
+
+        .super-power-active-effect {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 99999; /* On met un z-index très haut pour être sûr qu'il passe devant le canvas 3D et le HUD */
+            animation: superPowerFlash 0.6s ease-out forwards;
         }
 
     </style>
@@ -459,9 +532,16 @@
         <div id="horizon-mask"></div>
     </div>
 
-    <div id="dev-tools" style="display:none; position: absolute; top: 20px; left: 20px; z-index: 9999; background: rgba(0,0,0,0.8); padding: 15px; border: 1px solid #00ff00; color: #00ff00; font-family: monospace; font-size: 12px; pointer-events: auto;">
-        <div style="margin-bottom: 10px; font-weight: bold; border-bottom: 1px solid #00ff00; padding-bottom: 5px; letter-spacing: 1px;">DEV MODE</div>
+    <div id="rotation-alert" class="hidden">
+        WORLD ROTATING<br/>INVERTING CONTROLS
+    </div>
 
+    <div id="game-container">
+        <div id="game-canvas"></div>
+    </div>
+    <div id="touch-controls"></div>
+
+    <div id="dev-tools" style="display:none; position: absolute; top: 20px; left: 20px; z-index: 9999; background: rgba(0,0,0,0.8); padding: 15px; border: 1px solid #00ff00; color: #00ff00; font-family: monospace; font-size: 12px; pointer-events: auto;">                                                                                                                         -        <div style="margin-bottom: 10px; font-weight: bold; border-bottom: 1px solid #00ff00; padding-bottom: 5px; letter-spacing: 1px;">DEV MODE</div>                                    -
         <div style="margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
             <input type="checkbox" id="dev-invincible" style="width: auto; margin: 0; cursor: pointer;" checked>
             <label for="dev-invincible" style="cursor: pointer; user-select: none;">INVINCIBLE (GOD MODE)</label>
@@ -480,22 +560,20 @@
         </div>
     </div>
 
-    <div id="rotation-alert" class="hidden">
-        WORLD ROTATING<br/>INVERTING CONTROLS
-    </div>
-
-    <div id="game-container">
-        <div id="game-canvas"></div>
-    </div>
-    <div id="touch-controls"></div>
-
     <div id="hud" class="hidden">
-        <div id="pause-btn">||</div>
-        <div id="score-container">SCORE: <span id="score-val">000000</span></div>
+        <div id="hud-left">
+            <div id="score-container"><span id="score-val">000000</span></div>
+            <div id="velocity-container">
+                <span style="color: var(--neon-blue);">VELOCITY: </span>
+                <span id="velocity-val" style="color: #fff; text-shadow: 0 0 8px var(--neon-blue);">1.0x</span>
+            </div>
+        </div>
 
-        <div id="velocity-container" style="margin-top: 5px;">
-            <span style="color: var(--neon-blue); font-family: 'Orbitron', sans-serif; font-size: 1.2rem;">VELOCITY: </span>
-            <span id="velocity-val" style="color: #fff; font-family: 'Orbitron', sans-serif; font-size: 1.2rem; text-shadow: 0 0 10px var(--neon-blue);">1.0x</span>
+        <div id="super-power-container">
+            <div id="super-power-label">SUPER POWER</div>
+            <div id="super-power-bar-container">
+                <div id="super-power-bar-fill"></div>
+            </div>
         </div>
 
         <div id="bonus-container" class="hidden">
@@ -506,6 +584,12 @@
                 <div id="bonus-bar-fill"></div>
             </div>
         </div>
+
+        <div id="hud-bottom-controls">
+            <div id="pause-btn">
+                <svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+            </div>
+        </div>
     </div>
 
     <div id="screens-container">
@@ -513,27 +597,42 @@
 
         <div id="start-screen" class="screen active">
             <div class="screen-content">
-                <div id="status-display" style="color: var(--neon-red); font-size: 1rem; letter-spacing: 4px; opacity: 0.8;">
+                <div id="status-display" style="color: var(--neon-red); font-size: 0.9rem; letter-spacing: 2px; opacity: 0.8;">
                     SYSTEM STATUS: ONLINE
                 </div>
 
-                <div id="name-step" style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
+                <div id="name-step" style="display: flex; flex-direction: column; align-items: center; gap: 15px; width: 100%;">
                     <input type="text" id="player-name" placeholder="YOUR NAME..." autofocus>
                     <p>Press [ENTER] to identify yourself</p>
                 </div>
 
-                <div id="selection-step" class="visually-hidden" style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
-                    <p style="letter-spacing: 3px; font-weight: bold;">SELECT FREQUENCY MODULE</p>
+                <div id="selection-step" class="visually-hidden" style="display: flex; flex-direction: column; align-items: center; gap: 15px; width: 100%;">
+                    <p style="letter-spacing: 2px; font-weight: bold; font-size: 0.9rem;">SELECT FREQUENCY MODULE</p>
+
+                    <!-- 4 modules sur une seule ligne avec icônes SVG -->
                     <div class="instrument-grid">
-                        <div class="instrument" data-type="bass" data-color="0x00ffff">Bass</div>
-                        <div class="instrument" data-type="drums" data-color="0xff00ff">Drums</div>
-                        <div class="instrument" data-type="guitar" data-color="0xff0000">Guitar</div>
-                        <div class="instrument" data-type="keys" data-color="0xffff00">Keys</div>
+                        <div class="instrument" data-type="drums" data-color="0xff00ff">
+                            <svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 1.12-9 2.5s4.03 2.5 9 2.5 9-1.12 9-2.5-4.03-2.5-9-2.5zm0 7c-4.69 0-8.64 1.03-8.97 2.33C3.06 13.04 3 13.75 3 14.5c0 1.38 4.03 2.5 9 2.5s9-1.12 9-2.5c0-.75-.06-1.46-.03-2.17C20.64 11.03 16.69 10 12 10zm0 7c-4.69 0-8.64 1.03-8.97 2.33-.03.71-.03 1.42-.03 2.17 0 1.38 4.03 2.5 9 2.5s9-1.12 9-2.5c0-.75 0-1.46-.03-2.17-.33-1.3-4.28-2.33-8.97-2.33z"/></svg>
+                            Drums
+                        </div>
+                        <div class="instrument" data-type="guitar" data-color="0xff0000">
+                            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                            Guitar
+                        </div>
+                        <div class="instrument" data-type="voice" data-color="0x00ffff">
+                            <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm-1-9c0-.55.45-1 1-1s1 .45 1 1v6c0 .55-.45 1-1 1s-1-.45-1-1V5zm6 6c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+                            Voice
+                        </div>
+                        <div class="instrument" data-type="synths" data-color="0xffff00">
+                            <svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
+                            Synths
+                        </div>
                     </div>
-                    <p>← → : Select | [ENTER] : Play</p>
-                    <div id="leaderboard-container" style="width: 100%; margin-top: 10px;">
-                        <div style="font-size: 1rem; color: var(--neon-red); border-bottom: 1px solid var(--dark-red); letter-spacing: 4px; padding-bottom: 10px; margin-bottom: 20px;">GLOBAL RANKINGS</div>
-                        <div id="leaderboard-list" style="font-family: monospace; font-size: 1rem; text-align: left; max-height: 150px; overflow-y: auto;">
+
+                    <p style="font-size: 0.8rem;">← → : Select | [ENTER] : Play</p>
+                    <div id="leaderboard-container" style="width: 100%; margin-top: 5px;">
+                        <div style="font-size: 0.9rem; color: var(--neon-red); border-bottom: 1px solid var(--dark-red); letter-spacing: 2px; padding-bottom: 5px; margin-bottom: 10px;">GLOBAL RANKINGS</div>
+                        <div id="leaderboard-list" style="font-family: monospace; font-size: 0.85rem; text-align: left; max-height: 120px; overflow-y: auto;">
                             LOADING DATA...
                         </div>
                     </div>
@@ -589,23 +688,19 @@
                     return;
                 }
 
-                const content = activeScreen.querySelector('.screen-content');
                 const dice = Math.random();
-
                 let targetElement = null;
                 let effectClass = '';
 
                 if (dice < 0.7) {
                     targetElement = overlay;
-                    effectClass = MATRIX_EFFECTS[Math.floor(Math.random() * MATRIX_EFFECTS.length)];
+                    effectClass = MATRIX_EXACTS = MATRIX_EFFECTS[Math.floor(Math.random() * MATRIX_EFFECTS.length)];
 
-                    // Effet TRON : Rotation aléatoire (0, 90, 180, 270 deg) pour varier le sens des circuits
                     const rotations = [0, 90, 180, 270];
                     overlay.style.transform = `rotate(${rotations[Math.floor(Math.random()*rotations.length)]}deg) scale(1.5)`;
                     overlay.style.opacity = "1";
                 } else {
                     targetElement = activeScreen;
-                    // On rajoute G-9 dans les effets de fond
                     const bgList = [...BACKGROUND_EFFECTS, 'g-9'];
                     effectClass = bgList[Math.floor(Math.random() * bgList.length)];
                 }
@@ -619,12 +714,10 @@
                         overlay.style.transform = "none";
                     }
 
-                    // Intervalle plus court pour plus de nervosité (1s à 4s)
                     setTimeout(triggerAdvancedGlitch, 1000 + Math.random() * 3000);
                 }, 400);
             }
 
-            // On attend un peu que la page soit bien chargée
             window.addEventListener('load', () => {
                 setTimeout(triggerAdvancedGlitch, 2000);
             });
