@@ -4,6 +4,8 @@ export const DREAMLO_PRIVATE_KEY = "hs-2UxzkEE63Qe2M03wFnw54oKmXEjbE24PZxu_IlWYA
 export const DEV_MODE = true;
 export const SONG_START_AT = 1;
 
+export const LANE_WIDTH = 6;
+
 export const SONG_STRUCTURE = [
 
     // ---------------------------------------------------------
