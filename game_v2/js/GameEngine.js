@@ -91,12 +91,16 @@ export class GameEngine {
         this.cameraRotation = 0;
         this.isRotating = false;
 
+        this.activeSuperPower = null; // { role: 'bass'|'synths', timeLeft: 4.0, maxTime: 4.0 }
+        this.tempSlowMoTimer = 0;
+
         this.activeBonus = {
             item: null,
             type: null,
             timeLeft: 0,
             scoreMultiplier: 1,
             speedMultiplier: 1,
+            slowRatio: 1,
         };
 
         this.devSettings = {
@@ -349,6 +353,10 @@ export class GameEngine {
             this.currentTotalSpeed = baseSpeed + this.bonusVelocity;
         }
 
+        if (this.activeBonus.slowRatio && this.activeBonus.slowRatio > 0) {
+            this.currentTotalSpeed /= this.activeBonus.slowRatio;
+        }
+
         // Distance totale parcourue
         this.zOffset += this.currentTotalSpeed * delta * 50;
 
@@ -485,12 +493,17 @@ export class GameEngine {
         setTimeout(() => flash.remove(), 100);
 
         const bonusDuration = bonus.bonusDuration;
+        const hideDuration = bonus.hideDuration || false;
 
         this.activeBonus.item = bonus;
         this.activeBonus.timeLeft = bonusDuration;
 
         switch(bonus.subType) {
             case 'ghost':
+                this.activeBonus.scoreMultiplier += 0.25;
+                break;
+            case 'slow':
+                this.activeBonus.slowRatio = bonus.slowRatio || 2;
                 this.activeBonus.scoreMultiplier += 0.25;
                 break;
             case 'speed':
@@ -510,7 +523,7 @@ export class GameEngine {
             detail: 150 * this.activeBonus.scoreMultiplier
         }));
         window.dispatchEvent(new CustomEvent('bonusAcquired', {
-            detail: { type: bonus, duration: bonusDuration }
+            detail: { type: bonus, duration: bonusDuration, hideDuration: hideDuration }
         }));
     }
 
@@ -520,6 +533,7 @@ export class GameEngine {
         if (this.activeBonus.timeLeft <= 0) {
             this.activeBonus.scoreMultiplier = 1;
             this.activeBonus.speedMultiplier = 1;
+            this.activeBonus.slowRatio = 1;
         }
 
         this.player.canJump = false;
@@ -560,7 +574,8 @@ export class GameEngine {
             type: null,
             timeLeft: 0,
             scoreMultiplier: 1,
-            speedMultiplier: 1
+            speedMultiplier: 1,
+            slowRatio: 1
         };
 
         // 3. Reset de la phase musicale

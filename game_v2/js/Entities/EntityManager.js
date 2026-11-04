@@ -2,6 +2,7 @@ import { GhostBonus } from './GhostBonus.js';
 import { JumpBonus } from './JumpBonus.js';
 import { PointBonus } from './PointBonus.js';
 import { SpeedBonus } from './SpeedBonus.js';
+import { SlowBonus } from './SlowBonus.js';
 import { ChasingWall } from './ChasingWall.js';
 import { FallingWall } from './FallingWall.js';
 import { MovingWall } from './MovingWall.js';
@@ -21,6 +22,9 @@ export class EntityManager {
             case 'speed':
             case 'SpeedBonus':
                 return new SpeedBonus(lane, z, getProjection);
+            case 'slow':
+            case 'SlowBonus':
+                return new SlowBonus(lane, z, getProjection);
             case 'ghost':
             case 'invincible':
             case 'GhostBonus':

@@ -21,7 +21,9 @@ export class Screens {
             container: document.getElementById('bonus-container'),
             name: document.getElementById('bonus-name'),
             timer: document.getElementById('bonus-timer'),
-            bar: document.getElementById('bonus-bar-fill')
+            timerContainer: document.getElementById('bonus-timer-container'),
+            bar: document.getElementById('bonus-bar-fill'),
+            barContainer: document.getElementById('bonus-bar-container'),
         };
 
         if (DEV_MODE) {
@@ -57,13 +59,11 @@ export class Screens {
                     break;
                 case 'PLAYING':
                     if (e.key === 'Escape') this.togglePause();
-                    if (e.key === 'ArrowLeft') this.engine.player.move(-1, this.engine.state);
-                    if (e.key === 'ArrowRight') this.engine.player.move(1);
-                    if (e.key === 'ArrowUp') this.engine.player.jump(this.engine.activeBonus);
-                    if (e.key === 'ArrowDown') this.engine.player.fastFall();
-                    if (e.code === 'Space' || e.key === ' ') {
-                        this.engine.player.useSuperPower(this.engine.state, this.engine.entityManager);
-                    }
+                    if (e.key === 'ArrowLeft') this.playerMove(-1);
+                    if (e.key === 'ArrowRight') this.playerMove(1);
+                    if (e.key === 'ArrowUp') this.playerJump();
+                    if (e.key === 'ArrowDown') this.playerFastFall();
+                    if (e.code === 'Space' || e.key === ' ') this.playerUseSuperPower();
                     break;
                 case 'PAUSE':
                 case 'GAMEOVER':
@@ -87,11 +87,11 @@ export class Screens {
             const h = window.innerHeight;
 
             if (y < h * 0.3) {
-                this.engine.player.jump(this.engine.activeBonus);
+                this.playerJump();
             } else if (x < w / 2) {
-                this.engine.player.move(-1);
+                this.playerMove(-1);
             } else {
-                this.engine.player.move(1);
+                this.playerMove(1);
             }
         }, { passive: false });
 
@@ -106,7 +106,7 @@ export class Screens {
             console.log("Super Power button");
             e.stopPropagation(); // Empêche le touchControls de l'attraper
             e.preventDefault();
-            this.engine.player.useSuperPower(this.engine.state, this.engine.entityManager);
+            this.playerUseSuperPower();
         });
 
         this.instruments.forEach((inst, index) => {
@@ -227,6 +227,22 @@ export class Screens {
         this.updateMenuUI();
     }
 
+    playerFastFall() {
+        if (this.engine.player.fastFall()) SoundEffects.move();
+    }
+
+    playerJump() {
+        if (this.engine.player.jump(this.engine.activeBonus)) SoundEffects.move();
+    }
+
+    playerMove(direction) {
+        if (this.engine.player.move(direction, this.engine.state)) SoundEffects.move();
+    }
+
+    playerUseSuperPower() {
+        if (this.engine.player.useSuperPower(this.engine)) SoundEffects.useSuperPower();
+    }
+
     updateMenuUI() {
         const activeScreen = this.step === 'PAUSE' ? 'pause-screen' : 'game-over-screen';
         const buttons = document.querySelectorAll(`#${activeScreen} .menu-btn`);
@@ -267,15 +283,20 @@ export class Screens {
             this.bonusUI.timer.innerText = Math.ceil(activeBonus.timeLeft);
 
             const progress = (activeBonus.timeLeft / activeBonus.item.bonusDuration) * 100;
-            this.bonusUI.bar.style.width = `${progress}%`;
-
             const activeColor = bonus.colorHex || '#ffffff';
 
-            this.bonusUI.bar.style.backgroundColor = activeColor;
-            this.bonusUI.bar.style.boxShadow = `0 0 10px ${activeColor}`;
-
-            const barContainer = document.getElementById('bonus-bar-container');
-            if(barContainer) barContainer.style.borderColor = activeColor;
+            const hideDuration = activeBonus.item.hideDuration || false;
+            if (hideDuration) {
+                this.bonusUI.barContainer.classList.add('hidden');
+                this.bonusUI.timerContainer.classList.add('hidden');
+            } else {
+                this.bonusUI.bar.style.borderColor = activeColor;
+                this.bonusUI.bar.style.width = `${progress}%`;
+                this.bonusUI.bar.style.backgroundColor = activeColor;
+                this.bonusUI.bar.style.boxShadow = `0 0 10px ${activeColor}`;
+                this.bonusUI.barContainer.classList.remove('hidden');
+                this.bonusUI.timerContainer.classList.remove('hidden');
+            }
 
             const bonusInfo = document.getElementById('bonus-info');
             if(bonusInfo) {

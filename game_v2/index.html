@@ -373,6 +373,44 @@
             animation: labelMagentaWhiteBlink 0.3s infinite steps(1) !important;
         }
 
+        #super-power-timer-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            margin-top: 6px;
+            pointer-events: none;
+            z-index: 100;
+            width: 100%;
+        }
+
+        #super-power-timer-info {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 10px;
+            font-weight: bold;
+            color: var(--neon-blue);
+            text-shadow: 0 0 8px var(--neon-blue);
+            letter-spacing: 1px;
+        }
+
+        #super-power-timer-bar-container {
+            width: 190px;
+            height: 6px;
+            background: rgba(0, 0, 0, 0.8);
+            margin-top: 2px;
+            border: 1px solid var(--neon-blue);
+            border-radius: 2px;
+            overflow: hidden;
+            box-shadow: 0 0 8px rgba(0, 255, 255, 0.4);
+        }
+
+        #super-power-timer-bar-fill {
+            width: 100%;
+            height: 100%;
+            background: var(--neon-blue);
+            box-shadow: 0 0 8px var(--neon-blue);
+            transition: width 0.05s linear;
+        }
+
         #bonus-container {
             position: absolute;
             top: 70px;
@@ -462,6 +500,12 @@
             height: 18px;
             fill: var(--neon-blue);
             filter: drop-shadow(0 0 5px var(--neon-blue));
+        }
+
+        @media (min-width: 768px) {
+            #pause-btn {
+                display: none;
+            }
         }
 
         /* Bouton Super Pouvoir Tactile (bas à droite) */
@@ -678,11 +722,19 @@
                 <div id="super-power-bar-container">
                     <div id="super-power-bar-fill"></div>
                 </div>
+                <div id="super-power-timer-container" class="hidden">
+                    <div id="super-power-timer-info">
+                        <span id="super-power-timer-name">POWER</span> : <span id="super-power-timer-val">4.0</span>s
+                    </div>
+                    <div id="super-power-timer-bar-container">
+                        <div id="super-power-timer-bar-fill"></div>
+                    </div>
+                </div>
             </div>
 
             <div id="bonus-container" class="hidden">
                 <div id="bonus-info">
-                    <span id="bonus-name">SPEED</span> : <span id="bonus-timer">10</span>s
+                    <span id="bonus-name">SPEED</span><span id="bonus-timer-container"> : <span id="bonus-timer">10</span>s</span>
                 </div>
                 <div id="bonus-bar-container">
                     <div id="bonus-bar-fill"></div>

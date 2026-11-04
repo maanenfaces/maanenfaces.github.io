@@ -41,7 +41,7 @@ export class Player2 {
         const proj = getProjection(3);
         this.mesh.position.set(proj.x + this.currentX, proj.y + this.yOffset + 0.6, 3);
 
-        if (state.activeBonus && state.activeBonus.invincible > 0) {
+        if (state.activeBonus && state.activeBonus.item.subType === 'ghost') {
             this.mesh.visible = Math.floor(Date.now() / 100) % 2 === 0;
         } else {
             this.mesh.visible = true;
@@ -85,6 +85,7 @@ export class Player {
         // Correspondance entre le rôle et l'image associée
         this.roleImages = {
             'guitar': '/game_v2/assets/img-guitar.jpg',
+            'voice': '/game_v2/assets/img-bass.jpg',
             'bass': '/game_v2/assets/img-bass.jpg',
             'synth': '/game_v2/assets/img-synths.jpg',
             'synths': '/game_v2/assets/img-synths.jpg',
@@ -192,22 +193,20 @@ export class Player {
         this.mesh.rotation.y += state.delta * 2.0;
 
         // 5. Effet d'invincibilité (clignotement)
-        if (state.activeBonus && state.activeBonus.item && state.activeBonus.item.subType === 'invincible') {
+        if (state.activeBonus && state.activeBonus.item && state.activeBonus.item.subType === 'ghost') {
             this.mesh.visible = Math.floor(Date.now() / 100) % 2 === 0;
         } else {
             this.mesh.visible = true;
         }
     }
 
-    useSuperPower(state, entitiesManager) {
-        /*
-        if (this.isDead) return;
+    useSuperPower(engine) {
+        if (this.isDead) return false;
 
         if (!this.isPowerReady && this.energy < this.maxEnergy) {
             console.log("Super-pouvoir non disponible : énergie insuffisante !");
-            return;
+            return false;
         }
-         */
 
         console.log(`Activation du super-pouvoir pour le rôle : ${this.selectedRole}`);
 
@@ -219,8 +218,13 @@ export class Player {
         switch (this.selectedRole) {
             case 'guitar':
                 // OVERDRIVE : Détruit tous les murs situés à proximité immédiate
-                if (entitiesManager && entitiesManager.entities) {
-                  entitiesManager.entities.forEach(ent => {
+                engine.onBonusStart({
+                    name: 'Overdrive',
+                    subType: 'overdrive',
+                    bonusDuration: 1.0
+                });
+                if (engine.entityManager && engine.entityManager.entities) {
+                  engine.entityManager.entities.forEach(ent => {
                         if (ent.type === 'wall' && Math.abs(ent.mesh.position.z - this.mesh.position.z) < 100) {
                             ent.die();
                         }
@@ -228,27 +232,37 @@ export class Player {
                 }
                 break;
 
+            case 'voice':
             case 'bass':
                 // IMPULSION SISMIQUE : Ralentit temporairement la vitesse globale du jeu de moitié pendant 4 secondes
-                if (state) {
-                    state.tempSlowMoTimer = 4.0;
-                }
+                engine.onBonusStart({
+                    name: 'Slow',
+                    subType: 'slow',
+                    bonusDuration: 4.0,
+                    slowRatio: 2
+                });
                 break;
 
             case 'synths':
             case 'synth':
                 // PHASE SHIFT : Rend le joueur invincible / transparent pendant 4 secondes
-                if (state) {
-                    if (!state.activeBonus) state.activeBonus = {};
-                    state.activeBonus.item = { subType: 'invincible', bonusDuration: 4 };
-                    state.activeBonus.timeLeft = 4.0;
-                }
+                engine.onBonusStart({
+                    name: 'Invincible',
+                    subType: 'ghost',
+                    bonusDuration: 4.0
+                });
                 break;
 
             case 'drums':
                 // ASPIRATION MAGNÉTIQUE : Attire tous les bonus sur la voie du joueur
-                if (entitiesManager && entitiesManager.entities) {
-                    entitiesManager.entities.forEach(ent => {
+                engine.onBonusStart({
+                    name: 'Magnetic',
+                    subType: 'magnetic',
+                    bonusDuration: 1.0,
+                    hideDuration: true,
+                });
+                if (engine.entityManager && engine.entityManager.entities) {
+                    engine.entityManager.entities.forEach(ent => {
                         if (ent.type === 'bonus' || ent.type === 'pointBonus') {
                             ent.lane = this.currentLane;
                         }
@@ -259,27 +273,35 @@ export class Player {
 
         this.energy = 0;
         this.isPowerReady = false;
+
+        return true;
     }
 
     move(dir) {
-        if (this.isDead) return;
+        if (this.isDead) return false;
         this.nextMove = dir;
+        const potentialLaneLane = this.currentLane + this.nextMove;
+        if (potentialLaneLane < -1 || potentialLaneLane > 1) return false;
+        return true;
     }
 
     jump(activeBonus) {
-        if (this.isDead) return;
+        if (this.isDead) return false;
         const canJump = activeBonus && activeBonus.item && activeBonus.item.subType === 'jump';
         if (canJump && !this.isJumping) {
             this.isJumping = true;
             this.jumpVel = 15;
+            return true;
         }
+        return false;
     }
 
     fastFall() {
         if (this.isJumping && this.yOffset > 0) {
-            // On donne une impulsion brutale vers le bas
             this.jumpVel = -30;
+            return true;
         }
+        return false;
     }
 
     die() {
