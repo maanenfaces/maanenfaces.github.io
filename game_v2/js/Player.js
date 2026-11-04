@@ -339,21 +339,17 @@ export class Player {
             const data = this.particleData[i];
 
             positions[i * 3] += data.velocity.x * delta;
-            positions[i * 3 + 1] += data.velocity.y * delta;
+            positions[i * 3 + 1] + data.velocity.y * delta;
             positions[i * 3 + 2] += data.velocity.z * delta;
 
             data.velocity.multiplyScalar(data.friction);
         }
 
         this.particles.geometry.attributes.position.needsUpdate = true;
-
-        // --- DISPARITION PLUS RAPIDE ---
-        // delta * 2.0 signifie que les particules disparaissent en 0.5 seconde environ
         this.particles.material.opacity -= delta * 2.2;
 
         if (this.particles.material.opacity <= 0) {
             this.scene.remove(this.particles);
-            // Nettoyage mémoire
             this.particles.geometry.dispose();
             this.particles.material.dispose();
             this.particles = null;
