@@ -1,12 +1,13 @@
 import { DEV_MODE, DREAMLO_PUBLIC_KEY, DREAMLO_PRIVATE_KEY } from './Config.js';
 import { SoundEffects } from './Audio/SoundEffects.js';
+import * as THREE from 'three';
 
 export class Screens {
     constructor(engine) {
         this.engine = engine;
         this.step = 'NAME';      // NAME, SELECTION, PLAYING, PAUSE, GAMEOVER
-        this.selectedIndex = 0;  // Index pour la sélection d'instrument
-        this.menuIndex = 0;      // Index pour les menus Pause/GameOver
+        this.selectedIndex = 0;   // Index pour la sélection d'instrument
+        this.menuIndex = 0;       // Index pour les menus Pause/GameOver
         this.score = 0;
         this.bonusInterval = null;
 
@@ -59,7 +60,10 @@ export class Screens {
                     if (e.key === 'ArrowLeft') this.engine.player.move(-1, this.engine.state);
                     if (e.key === 'ArrowRight') this.engine.player.move(1);
                     if (e.key === 'ArrowUp') this.engine.player.jump(this.engine.activeBonus);
-                    if (e.key === 'ArrowDown') this.engine.player.fastFall();;
+                    if (e.key === 'ArrowDown') this.engine.player.fastFall();
+                    if (e.code === 'Space' || e.key === ' ') {
+                        this.engine.player.useSuperPower(this.engine.state, this.engine.entities);
+                    }
                     break;
                 case 'PAUSE':
                 case 'GAMEOVER':
@@ -101,15 +105,18 @@ export class Screens {
         window.addEventListener('gameStateGameOver', () => this.showGameOver());
         window.addEventListener('addScore', (e) => this.updateScore(e.detail));
 
-        // Init in the background when starting, to avoid table glitching
-        // This would be refresh when the user will validate its name
+        window.addEventListener('superPowerActivated', (e) => {
+            const { role, color } = e.detail;
+            console.log("super power catched")
+            this.triggerSuperPowerVisuals(color);
+        });
+
         Leaderboard.fetchScores();
     }
 
     initDevTools() {
         this.devUI.panel.style.display = 'block';
 
-        // Initialiser l'état d'invincibilité dans le moteur
         if (this.engine.devSettings) {
             this.engine.devSettings.isInvincible = this.devUI.invincible.checked;
         }
@@ -227,6 +234,29 @@ export class Screens {
         if (action === 'restart') this.restartGame();
     }
 
+    triggerSuperPowerVisuals(effectColor) {
+        // Si effectColor est une instance de THREE.Color, on récupère son code hexadécimal CSS
+        // (Ex: #ff3333). Si c'est déjà une string ou un nombre, on s'adapte.
+        let hexColor = '#ffffff';
+        if (effectColor instanceof THREE.Color) {
+            hexColor = '#' + effectColor.getHexString();
+        } else if (typeof effectColor === 'number') {
+            hexColor = '#' + effectColor.toString(16).padStart(6, '0');
+        } else if (typeof effectColor === 'string') {
+            hexColor = effectColor;
+        }
+
+        console.log("effectColor CSS = " + hexColor);
+
+        // Création de l'effet visuel DOM (Flash plein écran)
+        const flash = document.createElement('div');
+        flash.className = 'super-power-active-effect';
+        flash.style.backgroundColor = hexColor;
+        flash.style.boxShadow = `inset 0 0 150px ${hexColor}`;
+        document.body.appendChild(flash);
+        setTimeout(() => flash.remove(), 600);
+    }
+
     updateBonusUI() {
         const activeBonus = this.engine.activeBonus;
         if (activeBonus && activeBonus.item && activeBonus.timeLeft > 0) {
@@ -257,6 +287,8 @@ export class Screens {
     }
 
     updateHUD() {
+        const spBarFill = document.getElementById('super-power-bar-fill');
+        const spBarContainer = document.getElementById('super-power-bar-container');
         const velocityDisplay = document.getElementById('velocity-val');
         const currentSpeed = this.engine.currentTotalSpeed;
 
@@ -269,6 +301,16 @@ export class Screens {
             } else {
                 velocityDisplay.style.color = "#fff";
                 velocityDisplay.style.textShadow = "0 0 10px var(--neon-blue)";
+            }
+        }
+
+        if (spBarFill && spBarContainer && this.engine.player) {
+            const percent = (this.engine.player.energy / this.engine.player.maxEnergy) * 100;
+            spBarFill.style.width = `${percent}%`;
+            if (this.engine.player.isPowerReady) {
+                spBarContainer.classList.add('power-ready');
+            } else {
+                spBarContainer.classList.remove('power-ready');
             }
         }
     }

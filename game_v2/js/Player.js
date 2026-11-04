@@ -9,6 +9,12 @@ export class Player2 {
         this.jumpVel = 0;
         this.nextMove = 0;
 
+        // --- Jauge de Super-Pouvoir ---
+        this.energy = 0;
+        this.maxEnergy = 100;
+        this.energyFillRate = 4;
+        this.isPowerReady = false;
+
         const geo = new THREE.BoxGeometry(1.2, 1.2, 1.2);
         this.mesh = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({color: 0xff0000, transparent: true, opacity: 0.5}));
         this.mesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo), new THREE.LineBasicMaterial({color: 0xff0000})));
@@ -24,10 +30,18 @@ export class Player2 {
             if (this.yOffset <= 0) { this.yOffset = 0; this.isJumping = false; }
         }
 
+        if (this.energy < this.maxEnergy) {
+            this.energy += this.energyFillRate * state.delta;
+            if (this.energy >= this.maxEnergy) {
+                this.energy = this.maxEnergy;
+                this.isPowerReady = true;
+            }
+        }
+
         const proj = getProjection(3);
         this.mesh.position.set(proj.x + this.currentX, proj.y + this.yOffset + 0.6, 3);
 
-        if (state.activeBonus.invincible > 0) {
+        if (state.activeBonus && state.activeBonus.invincible > 0) {
             this.mesh.visible = Math.floor(Date.now() / 100) % 2 === 0;
         } else {
             this.mesh.visible = true;
@@ -47,7 +61,7 @@ export class Player2 {
 }
 
 export class Player {
-    constructor(scene) {
+    constructor(scene, selectedRole = 'guitar') {
         this.scene = scene;
         this.currentLane = 0;
         this.currentX = 0;
@@ -55,19 +69,46 @@ export class Player {
         this.isJumping = false;
         this.jumpVel = 0;
         this.nextMove = 0;
+        this.selectedRole = selectedRole;
 
-        // Configuration visuelle
-        const geo = new THREE.BoxGeometry(1.2, 1.2, 1.2);
+        // --- Jauge de Super-Pouvoir ---
+        this.energy = 0;
+        this.maxEnergy = 100;
+        this.energyFillRate = 4;
+        this.isPowerReady = false;
+
+        // --- Configuration Visuelle : Cube 3D Texturé (Rôle unique sur toutes les faces) ---
+        const size = 2;
+        const geo = new THREE.BoxGeometry(size, size, size);
         this.color = 0xff0000;
-        this.mesh = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({
-            color: this.color,
-            transparent: true,
-            opacity: 0.5
-        }));
 
+        // Correspondance entre le rôle et l'image associée
+        this.roleImages = {
+            'guitar': '/game_v2/assets/img-guitar.jpg',
+            'bass': '/game_v2/assets/img-bass.jpg',
+            'synth': '/game_v2/assets/img-synths.jpg',
+            'synths': '/game_v2/assets/img-synths.jpg',
+            'drums': '/game_v2/assets/img-drums.jpg'
+        };
+
+        const imagePath = this.roleImages[this.selectedRole] || this.roleImages['guitar'];
+
+        // Chargement de la texture unique pour le rôle sélectionné
+        const textureLoader = new THREE.TextureLoader();
+        const roleTexture = textureLoader.load(imagePath);
+
+        // Application de la même texture sur les 6 faces du cube
+        const materials = [];
+        for (let i = 0; i < 6; i++) {
+            materials.push(new THREE.MeshBasicMaterial({ map: roleTexture }));
+        }
+
+        this.mesh = new THREE.Mesh(geo, materials);
+
+        // Ajout de contours néons subtils
         const edges = new THREE.LineSegments(
             new THREE.EdgesGeometry(geo),
-            new THREE.LineBasicMaterial({color: this.color})
+            new THREE.LineBasicMaterial({ color: this.color, transparent: true, opacity: 0.6 })
         );
         this.mesh.add(edges);
         this.scene.add(this.mesh);
@@ -75,7 +116,23 @@ export class Player {
         // --- Système de désintégration ---
         this.isDead = false;
         this.particles = null;
-        this.particleData = []; // Stocke les vecteurs de direction
+        this.particleData = [];
+    }
+
+    // Méthode pour changer dynamiquement de rôle si le joueur le re-sélectionne
+    setRole(role) {
+        this.selectedRole = role;
+        const imagePath = this.roleImages[this.selectedRole] || this.roleImages['guitar'];
+        const textureLoader = new THREE.TextureLoader();
+        const newTexture = textureLoader.load(imagePath);
+
+        // Mise à jour de tous les matériaux du mesh
+        if (Array.isArray(this.mesh.material)) {
+            this.mesh.material.forEach(mat => {
+                mat.map = newTexture;
+                mat.needsUpdate = true;
+            });
+        }
     }
 
     update(state, getProjection) {
@@ -106,8 +163,16 @@ export class Player {
             }
         }
 
-        // 3. Positionnement 3D CORRIGÉ
-        // On passe this.currentX pour que le joueur suive l'inclinaison de la route !
+        // 2.1. Barre d'energie
+        if (this.energy < this.maxEnergy) {
+            this.energy += this.energyFillRate * state.delta;
+            if (this.energy >= this.maxEnergy) {
+                this.energy = this.maxEnergy;
+                this.isPowerReady = true;
+            }
+        }
+
+        // 3. Positionnement 3D
         const proj = getProjection(3, this.currentX);
 
         this.mesh.position.set(
@@ -134,15 +199,75 @@ export class Player {
         }
     }
 
+    useSuperPower(state, entitiesManager) {
+        /*
+        if (this.isDead) return;
+
+        if (!this.isPowerReady && this.energy < this.maxEnergy) {
+            console.log("Super-pouvoir non disponible : énergie insuffisante !");
+            return;
+        }
+         */
+
+        console.log(`Activation du super-pouvoir pour le rôle : ${this.selectedRole}`);
+
+        window.dispatchEvent(new CustomEvent('superPowerActivated', {
+            detail: { role: this.selectedRole, color: this.color }
+        }));
+
+        // Logique pure de gameplay de chaque rôle
+        switch (this.selectedRole) {
+            case 'guitar':
+                // OVERDRIVE : Détruit tous les murs situés à proximité immédiate
+                if (entitiesManager && entitiesManager.entities) {
+                  entitiesManager.entities.forEach(ent => {
+                        if (ent.type === 'wall' && Math.abs(ent.mesh.position.z - this.mesh.position.z) < 100) {
+                            ent.die();
+                        }
+                    });
+                }
+                break;
+
+            case 'bass':
+                // IMPULSION SISMIQUE : Ralentit temporairement la vitesse globale du jeu de moitié pendant 4 secondes
+                if (state) {
+                    state.tempSlowMoTimer = 4.0;
+                }
+                break;
+
+            case 'synths':
+            case 'synth':
+                // PHASE SHIFT : Rend le joueur invincible / transparent pendant 4 secondes
+                if (state) {
+                    if (!state.activeBonus) state.activeBonus = {};
+                    state.activeBonus.item = { subType: 'invincible', bonusDuration: 4 };
+                    state.activeBonus.timeLeft = 4.0;
+                }
+                break;
+
+            case 'drums':
+                // ASPIRATION MAGNÉTIQUE : Attire tous les bonus sur la voie du joueur
+                if (entitiesManager && entitiesManager.entities) {
+                    entitiesManager.entities.forEach(ent => {
+                        if (ent.type === 'bonus' || ent.type === 'pointBonus') {
+                            ent.lane = this.currentLane;
+                        }
+                    });
+                }
+                break;
+        }
+
+        this.energy = 0;
+        this.isPowerReady = false;
+    }
+
     move(dir) {
         if (this.isDead) return;
         this.nextMove = dir;
-        //this.currentLane = Math.max(-1, Math.min(1, this.currentLane + dir));
     }
 
     jump(activeBonus) {
         if (this.isDead) return;
-        // Le saut n'est possible que si le bonus 'jump' est actif
         const canJump = activeBonus && activeBonus.item && activeBonus.item.subType === 'jump';
         if (canJump && !this.isJumping) {
             this.isJumping = true;
