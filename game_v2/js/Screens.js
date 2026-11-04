@@ -354,6 +354,7 @@ export class Screens {
         document.getElementById('selection-step').classList.remove('visually-hidden');
         document.getElementById('selection-step').classList.remove('hidden');
         this.nameInput.blur();
+        this.selectedIndex = 0; // Sécurité index initial
         this.updateSelectionUI();
     }
 
@@ -364,15 +365,34 @@ export class Screens {
     }
 
     updateSelectionUI() {
+        if (!this.instruments || this.instruments.length === 0) {
+            this.instruments = document.querySelectorAll('.instrument');
+        }
+
         this.instruments.forEach((el, i) => {
-            const isActive = i === this.selectedIndex;
-            el.classList.toggle('active', isActive);
+            const isActive = (i === this.selectedIndex);
+
+            // On force explicitement l'ajout/suppression de la classe CSS
+            if (isActive) {
+                el.classList.add('active');
+            } else {
+                el.classList.remove('active');
+            }
+
             if (isActive) {
                 const hexColor = parseInt(el.getAttribute('data-color'));
-                this.engine.player.mesh.material.color.setHex(hexColor);
-                this.engine.player.color = hexColor;
-                if (this.engine.player.mesh.children[0]) {
-                    this.engine.player.mesh.children[0].material.color.setHex(hexColor);
+                const roleType = el.getAttribute('data-type');
+
+                if (this.engine && this.engine.player) {
+                    if (typeof this.engine.player.setRole === 'function') {
+                        this.engine.player.setRole(roleType);
+                    }
+                    if (this.engine.player.mesh && this.engine.player.mesh.material) {
+                        this.engine.player.color = hexColor;
+                        if (this.engine.player.mesh.children[0]) {
+                            this.engine.player.mesh.children[0].material.color.setHex(hexColor);
+                        }
+                    }
                 }
             }
         });
@@ -401,7 +421,9 @@ export class Screens {
         Leaderboard.fetchScores();
 
         this.step = 'SELECTION';
-        document.getElementById('start-screen').classList.remove('active'); // Au cas où
+        this.selectedIndex = 0;
+
+        document.getElementById('start-screen').classList.remove('active');
         document.getElementById('start-screen').classList.add('active');
         document.getElementById('name-step').classList.add('hidden');
         document.getElementById('selection-step').classList.remove('visually-hidden');
