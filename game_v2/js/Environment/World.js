@@ -1,7 +1,13 @@
 import * as THREE from 'three';
 import { Building } from './Building.js';
 import { Building2 } from './Building2.js';
+import { BurningBuilding } from './BurningBuilding.js';
+import { BurningBuilding2 } from './BurningBuilding2.js';
+import { BurningFlyingShip } from './BurningFlyingShip.js';
+import { ExplodingBuilding } from './ExplodingBuilding.js';
 import { FlyingShip } from './FlyingShip.js';
+import { HorizonCity } from './HorizonCity.js';
+import { BigBossMachine } from './BigBossMachine.js';
 
 export class World {
     constructor(scene, camera) {
@@ -12,6 +18,8 @@ export class World {
         this.scenery = [];
         this.lastSceneryZ = 0;
         this.activeArcs = [];
+        this.horizonCityInstance = null;
+        this.bigBossMachineInstance = null;
 
         // On augmente la profondeur (600) pour éviter de voir le bord
         const geo = new THREE.PlaneGeometry(600, 600, 80, 80);
@@ -58,7 +66,7 @@ export class World {
         this.grid.position.y = 0.02;
 
         this.scene.add(this.mesh, this.grid);
-        this.scene.fog = new THREE.Fog(0x000000, 200, 500);
+        this.scene.fog = new THREE.Fog(0x000000, 600, 1000);
 
         // Le canva pour les éclairs
         this.lCanvas = document.createElement('canvas');
@@ -83,6 +91,36 @@ export class World {
             x: (vector.x * 0.5 + 0.5) * this.lCanvas.width,
             y: (-(vector.y * 0.5) + 0.5) * this.lCanvas.height
         };
+    }
+
+    getRandomElementClass(elementsConfig) {
+        const classRegistry = {
+            "Building": Building,
+            "Building2": Building2,
+            "ExplodingBuilding": ExplodingBuilding,
+            "BurningBuilding": BurningBuilding,
+            "BurningBuilding2": BurningBuilding2,
+            "BurningFlyingShip": BurningFlyingShip,
+            "FlyingShip": FlyingShip
+        };
+
+        const totalWeight = elementsConfig.reduce((sum, el) => sum + el.weight, 0);
+        let randomVal = Math.random() * totalWeight;
+
+        let chosenElement = elementsConfig[0];
+        for (let el of elementsConfig) {
+            if (randomVal < el.weight) {
+                chosenElement = el;
+                break;
+            }
+            randomVal -= el.weight;
+        }
+
+        if (typeof chosenElement.class === 'string') {
+            return classRegistry[chosenElement.class] || Building;
+        }
+
+        return chosenElement.class;
     }
 
     reset() {
@@ -114,30 +152,53 @@ export class World {
     spawnScenery(state, getProjection) {
         const currentDistance = state.zOffset;
 
-        // On spawn un élément tous les X mètres (ex: tous les 40m)
-        if (currentDistance - this.lastSceneryZ < 40) return;
+        // On récupère la configuration du décor depuis la phase active de la chanson
+        const sceneryConfig = state.phase && state.phase.scenery;
 
-        const zSpawn = -350; // Assez loin
-        const sides = [ -1, 1 ]; // On tente de spawn de chaque côté
+        // 1. Gestion de l'instanciation unique d'HorizonCity
+        if (sceneryConfig && sceneryConfig.horizonCity && sceneryConfig.horizonCity.enabled) {
+            if (!this.horizonCityInstance || !this.horizonCityInstance.isActive) {
+                if (this.horizonCityInstance) {
+                    this.scene.remove(this.horizonCityInstance.mesh);
+                    if (this.horizonCityInstance.dispose) this.horizonCityInstance.dispose();
+                }
+                this.horizonCityInstance = new HorizonCity(getProjection, sceneryConfig.horizonCity.duration, state.params.color);
+                this.scene.add(this.horizonCityInstance.mesh);
+            }
+        }
+
+        if (sceneryConfig && sceneryConfig.bigBossMachine && sceneryConfig.bigBossMachine.enabled) {
+            if (!this.bigBossMachineInstance || !this.bigBossMachineInstance.isActive) {
+                if (this.bigBossMachineInstance) {
+                    this.scene.remove(this.bigBossMachineInstance.mesh);
+                    if (this.bigBossMachineInstance.dispose) this.bigBossMachineInstance.dispose();
+                }
+                const appearTime = sceneryConfig.bigBossMachine.appearStartTime !== undefined ? sceneryConfig.bigBossMachine.appearStartTime : 35.0;
+                this.bigBossMachineInstance = new BigBossMachine(getProjection, sceneryConfig.bigBossMachine.duration, state.params.color, appearTime);
+                this.scene.add(this.bigBossMachineInstance.mesh);
+            }
+        }
+
+        // Si la phase active n'a pas de configuration de décor latéral, on s'arrête là
+        if (!sceneryConfig || !sceneryConfig.elements) return;
+
+        const densityInterval = sceneryConfig.spawnInterval || 40;
+        if (currentDistance - this.lastSceneryZ < densityInterval) return;
+
+        const zSpawn = -350;
+        const sides = [ -1, 1 ];
 
         sides.forEach(side => {
-            if (Math.random() > 0.1) {
-                let element = null;
-                if (Math.random() > 0.5) {
-                    element = new Building2(side, zSpawn, getProjection, state.params.color);
-                } else {
-                    element = new Building(side, zSpawn, getProjection, state.params.color);
-                }
+            const spawnChance = sceneryConfig.density !== undefined ? sceneryConfig.density : 0.8;
+            if (Math.random() < spawnChance) {
+                // Choix de la classe d'élément de manière pondérée
+                const ElementClass = this.getRandomElementClass(sceneryConfig.elements);
+
+                const element = new ElementClass(side, zSpawn, getProjection, state.params.color);
                 if (element) {
                     this.scene.add(element.mesh);
                     this.scenery.push(element);
                 }
-            }
-
-            if (Math.random() > 0.6) {
-                const ship = new FlyingShip(side * 1.5, zSpawn, getProjection, state.params.color);
-                this.scene.add(ship.mesh);
-                this.scenery.push(ship);
             }
         });
 
@@ -181,7 +242,28 @@ export class World {
         this.grid.material.color.copy(state.params.color);
         this.mesh.material.opacity = currentOpacity;
 
+        if (this.horizonCityInstance && this.horizonCityInstance.isActive) {
+            this.horizonCityInstance.updatePosition(state.speed, state.delta, getProjection);
+            this.horizonCityInstance.animate(state.time);
+            if (!this.horizonCityInstance.isActive) {
+                this.scene.remove(this.horizonCityInstance.mesh);
+                this.horizonCityInstance.dispose();
+                this.horizonCityInstance = null;
+            }
+        }
+
+        if (this.bigBossMachineInstance && this.bigBossMachineInstance.isActive) {
+            this.bigBossMachineInstance.updatePosition(state.speed, state.delta, getProjection);
+            this.bigBossMachineInstance.animate(state.time);
+            if (!this.bigBossMachineInstance.isActive) {
+                this.scene.remove(this.bigBossMachineInstance.mesh);
+                this.bigBossMachineInstance.dispose();
+                this.bigBossMachineInstance = null;
+            }
+        }
+
         this.spawnScenery(state, getProjection);
+
         for (let i = this.scenery.length - 1; i >= 0; i--) {
             const el = this.scenery[i];
             el.updatePosition(state.speed, state.delta, getProjection, this.scenery);
@@ -321,6 +403,18 @@ export class World {
     }
 
     reset() {
+        if (this.horizonCityInstance) {
+            this.scene.remove(this.horizonCityInstance.mesh);
+            this.horizonCityInstance.dispose();
+            this.horizonCityInstance = null;
+        }
+
+        if (this.bigBossMachineInstance) {
+            this.scene.remove(this.bigBossMachineInstance.mesh);
+            this.bigBossMachineInstance.dispose();
+            this.bigBossMachineInstance = null;
+        }
+
         // 1. Nettoyage des éléments de décor (Buildings, Ships)
         // On doit les retirer de la scène ET vider le tableau
         this.scenery.forEach(el => {
@@ -369,8 +463,8 @@ export class World {
 
         // 5. Reset du Fog (Brouillard) au cas où il aurait été modifié
         if (this.scene.fog) {
-            this.scene.fog.near = 200;
-            this.scene.fog.far = 500;
+            this.scene.fog.near = 600;
+            this.scene.fog.far = 1000;
             this.scene.fog.color.setHex(0x000000);
         }
     }

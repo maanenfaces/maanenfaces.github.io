@@ -33,7 +33,10 @@ export class Screens {
                 slider: document.getElementById('dev-slider'),
                 timeVal: document.getElementById('dev-time-val'),
                 wallDensity: document.getElementById('dev-wall-density'),
-                bonusDensity: document.getElementById('dev-bonus-density')
+                bonusDensity: document.getElementById('dev-bonus-density'),
+                posX: document.getElementById('dev-position-x'),
+                posY: document.getElementById('dev-position-y'),
+                posZ: document.getElementById('dev-position-z')
             };
             this.initDevTools();
         }
@@ -183,6 +186,7 @@ export class Screens {
             this.devUI.timeVal.innerText = formattedTime;
             this.devUI.bonusDensity.innerText = this.engine.currentPhase.bonuses.density;
             this.devUI.wallDensity.innerText = this.engine.currentPhase.obstacles.density;
+            this.devUI.posZ.innerText = Math.round(this.engine.zOffset);
         }
     }
 

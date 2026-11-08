@@ -30,13 +30,31 @@ const DEFAULT_PHASE = {
         ]
     },
     obstacles: {
-        density: 0.2,
+        density: 0,
         distribution: [
             { entity: "Wall", percent: 25 },
             { entity: "MovingWall", percent: 25 },
             { entity: "FallingWall", percent: 25 },
             { entity: "ChasingWall", percent: 25 }
         ]
+    },
+    scenery: {
+        density: 0,
+        spawnInterval: 40,
+        elements: [
+            { class: "Building", weight: 0.4 },
+            { class: "ExplodingBuilding", weight: 0.3 },
+            { class: "BurningFlyingShip", weight: 0.3 }
+        ],
+        horizonCity: {
+            enabled: true,
+            duration: 120
+        },
+        bigBossMachine: {
+            enabled: true,
+            duration: 120,
+            appearStartTime: 5.0
+        }
     },
     effects: {
         city_lightning: { intensity: 0.5 },

@@ -12,6 +12,15 @@ export const SONG_STRUCTURE = [
     // INTRO
     // ---------------------------------------------------------
 
+    /*
+    { label: "INTRO 1",
+      start: 0, end: 28,
+      bonuses: { density: 0 },
+      obstacles: { density: 0 },
+      scenery: { density : 0 }
+    },
+    */
+
     { label: "INTRO 1",
       start: 0, end: 5,
       bonuses: { density: 0 },
@@ -95,6 +104,7 @@ export const SONG_STRUCTURE = [
         start: 116, end: 122,
         theme: { colors: [0xffff00] },
         obstacles: { density: 0.02 },
+        scenery: { horizonCity: { enabled: false } },
         effects: { curve: { intensity: 0 }, wave: { intensity: 0.2 }, roll: { intensity: 50 } }
     },
 
