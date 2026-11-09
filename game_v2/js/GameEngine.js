@@ -39,12 +39,15 @@ const DEFAULT_PHASE = {
         ]
     },
     scenery: {
-        density: 0,
+        density: 0.8,
         spawnInterval: 40,
         elements: [
-            { class: "Building", weight: 0.4 },
-            { class: "ExplodingBuilding", weight: 0.3 },
-            { class: "BurningFlyingShip", weight: 0.3 }
+            { class: "Building", weight: 0.2 },
+            { class: "ExplodingBuilding", weight: 0.1 },
+            { class: "BurningFlyingShip", weight: 0.1 },
+            { class: "GiantRobot",  weight: 0.2 },
+            { class: "GiantRobot2", weight: 0.2 },
+            { class: "GiantRobot3", weight: 0.2 }
         ],
         horizonCity: {
             enabled: true,
@@ -444,6 +447,34 @@ export class GameEngine {
     }
 
     handleCollisions(state, proj) {
+
+      if (this.world && typeof this.world.getActiveSceneryElements === 'function') {
+          const sceneryElements = this.world.getActiveSceneryElements();
+          sceneryElements.forEach(ent => {
+              if (typeof ent.handleCollisions === 'function' && ent.handleCollisions(this.player, proj)) {
+
+                  const hasInvincibilityBonus = this.activeBonus.item?.subType === "ghost" && this.activeBonus.timeLeft > 0;
+                  const isDevGodMode = DEV_MODE && this.devSettings.isInvincible;
+                  const isPhaseTransition = this.isRotating;
+                  const isInvincible = hasInvincibilityBonus || isDevGodMode || isPhaseTransition;
+
+                  if (isInvincible) {
+                      console.log("Laser traversé (Invincibilité)");
+                  } else {
+                      console.log("🔥 Touché par le laser du GiantRobot !");
+                      this.player.die();
+                      SoundEffects.gameOver();
+
+                      setTimeout(() => {
+                          this.onStop();
+                          window.dispatchEvent(new Event('gameStateGameOver'));
+                      }, 500);
+                      return;
+                  }
+              }
+          });
+      }
+
         this.entityManager.entities.forEach(ent => {
             if (!ent.isActive) return;
 

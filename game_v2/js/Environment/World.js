@@ -8,6 +8,9 @@ import { ExplodingBuilding } from './ExplodingBuilding.js';
 import { FlyingShip } from './FlyingShip.js';
 import { HorizonCity } from './HorizonCity.js';
 import { BigBossMachine } from './BigBossMachine.js';
+import { GiantRobot } from './GiantRobot.js';
+import { GiantRobot2 } from './GiantRobot2.js';
+import { GiantRobot3 } from './GiantRobot3.js';
 
 export class World {
     constructor(scene, camera) {
@@ -101,7 +104,10 @@ export class World {
             "BurningBuilding": BurningBuilding,
             "BurningBuilding2": BurningBuilding2,
             "BurningFlyingShip": BurningFlyingShip,
-            "FlyingShip": FlyingShip
+            "FlyingShip": FlyingShip,
+            "GiantRobot": GiantRobot,
+            "GiantRobot2": GiantRobot2,
+            "GiantRobot3": GiantRobot3
         };
 
         const totalWeight = elementsConfig.reduce((sum, el) => sum + el.weight, 0);
@@ -469,4 +475,7 @@ export class World {
         }
     }
 
+    getActiveSceneryElements() {
+        return this.scenery ? this.scenery.filter(el => el.isActive) : [];
+    }
 }
