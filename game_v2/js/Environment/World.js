@@ -1,16 +1,23 @@
 import * as THREE from 'three';
-import { Building } from './Building.js';
-import { Building2 } from './Building2.js';
-import { BurningBuilding } from './BurningBuilding.js';
-import { BurningBuilding2 } from './BurningBuilding2.js';
-import { BurningFlyingShip } from './BurningFlyingShip.js';
-import { ExplodingBuilding } from './ExplodingBuilding.js';
-import { FlyingShip } from './FlyingShip.js';
-import { HorizonCity } from './HorizonCity.js';
+
 import { BigBossMachine } from './BigBossMachine.js';
-import { GiantRobot } from './GiantRobot.js';
-import { GiantRobot2 } from './GiantRobot2.js';
-import { GiantRobot3 } from './GiantRobot3.js';
+import { HorizonCity } from './HorizonCity.js';
+
+// Buildings
+import { Building } from './Buildings/Building.js';
+import { Building2 } from './Buildings/Building2.js';
+import { BurningBuilding } from './Buildings/BurningBuilding.js';
+import { BurningBuilding2 } from './Buildings/BurningBuilding2.js';
+import { ExplodingBuilding } from './Buildings/ExplodingBuilding.js';
+
+// Ships
+import { FlyingShip } from './Ships/FlyingShip.js';
+import { BurningFlyingShip } from './Ships/BurningFlyingShip.js';
+
+// Robots
+import { GiantRobot } from './Robots/GiantRobot.js';
+import { GiantRobot2 } from './Robots/GiantRobot2.js';
+import { GiantRobot3 } from './Robots/GiantRobot3.js';
 
 export class World {
     constructor(scene, camera) {

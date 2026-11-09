@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { BaseCityScapeElement } from './BaseCityScapeElement.js';
-import { LANE_WIDTH } from '../Config.js';
+import { BaseCityScapeElement } from '../BaseCityScapeElement.js';
+import { LANE_WIDTH } from '../../Config.js';
 
 export class GiantRobot3 extends BaseCityScapeElement {
     constructor(lane, z, getProjection, roadColor) {

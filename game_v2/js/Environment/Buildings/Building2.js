@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { BaseCityScapeElement } from './BaseCityScapeElement.js';
+import { BaseCityScapeElement } from '../BaseCityScapeElement.js';
 
 export class Building2 extends BaseCityScapeElement {
     constructor(lane, z, getProjection, roadColor) {

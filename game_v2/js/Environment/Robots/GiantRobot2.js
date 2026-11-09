@@ -1,46 +1,37 @@
 import * as THREE from 'three';
-import { BaseCityScapeElement } from './BaseCityScapeElement.js';
-import { LANE_WIDTH } from '../Config.js';
+import { BaseCityScapeElement } from '../BaseCityScapeElement.js';
+import { LANE_WIDTH } from '../../Config.js';
 
-export class GiantRobot extends BaseCityScapeElement {
+export class GiantRobot2 extends BaseCityScapeElement {
     constructor(lane, z, getProjection, roadColor) {
         super(lane, z, getProjection);
         this.type = 'city_scape_element';
         this.getProjection = getProjection;
 
-        // --- GÉNÉRATION D'UN NOM ALÉATOIRE POUR LE DEBUG ---
-        const prefixes = ["XR", "Zeta", "Omega", "Titan", "Cyber", "Noxa", "Vortex", "Unit"];
+        const prefixes = ["Vanguard", "Stalker", "Apex", "Razor", "Strike"];
         const numbers = Math.floor(10 + Math.random() * 90);
         this.robotName = `${prefixes[Math.floor(Math.random() * prefixes.length)]}-${numbers}`;
 
-        // --- CONFIGURATION CENTRALISÉE ---
-        this.baseColor = 0x020202; // Noir ténébreux
+        this.baseColor = 0x020202;
         this.wireColor = (roadColor instanceof THREE.Color) ? roadColor.clone() : new THREE.Color(roadColor || 0x00ff00);
         this.sideOffset = 24 + Math.random() * 25;
 
-        // Paramètres ajustables et configurables
         this.config = {
-            walkSpeedFactor: 0.075,
-            laserInterval: 5.0,
-            laserDuration: 4.2,
-
-            laserDownAngleMin: 35,
-            laserDownAngleMax: 65,
-
-            torsoTurnFactor: 0.3,
-
+            walkSpeedFactor: 0.085, // Un peu plus vif
+            laserInterval: 4.5,
+            laserDuration: 4.0,
+            laserDownAngleMin: 40,
+            laserDownAngleMax: 70,
+            torsoTurnFactor: 0.35,
             visibilityRange: 800,
             hitboxZMax: 4.0,
-
             laserRadius: 1.5,
             overlapThreshold: 0.4,
-
             displayName: false
         };
 
         this.config.laserDownAngle = this.config.laserDownAngleMin + Math.random() * (this.config.laserDownAngleMax - this.config.laserDownAngleMin);
 
-        // --- STRUCTURE ---
         this.robotGroup = new THREE.Group();
         this.robotGroup.visible = false;
         this.mesh.add(this.robotGroup);
@@ -64,82 +55,54 @@ export class GiantRobot extends BaseCityScapeElement {
         this.laserProgress = 0;
         this.isActive = true;
 
-        this._buildStylizedMechaMesh();
+        this._buildVanguardMesh();
     }
 
-    _buildStylizedMechaMesh() {
+    _buildVanguardMesh() {
         const group = this.robotGroup;
         const mat = new THREE.MeshBasicMaterial({ color: this.baseColor });
         const edgeMat = new THREE.LineBasicMaterial({ color: this.wireColor, transparent: true, opacity: 0.85 });
 
-        // --- 1. TORSE MASSIF ET TRAPU ---
+        // --- TORSE : Forme trapézoïdale inversée (épaules larges) ---
         this.torsoGroup = new THREE.Group();
         this.torsoGroup.position.y = 31;
         group.add(this.torsoGroup);
 
-        const chestGeo = new THREE.CylinderGeometry(6, 8, 14, 8);
+        const chestGeo = new THREE.CylinderGeometry(8, 5, 14, 6);
         const chestMesh = new THREE.Mesh(chestGeo, mat);
         this.torsoGroup.add(chestMesh);
         chestMesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(chestGeo), edgeMat));
 
-        const ventGeo = new THREE.BoxGeometry(3.5, 5, 2);
-        const ventMesh = new THREE.Mesh(ventGeo, mat);
-        ventMesh.position.set(0, 2, 4.5);
-        this.torsoGroup.add(ventMesh);
-        ventMesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(ventGeo), edgeMat));
-
-        if (this.config.displayName) {
-            const canvas = document.createElement('canvas');
-            canvas.width = 512;
-            canvas.height = 128;
-            const ctx = canvas.getContext('2d');
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.font = 'bold 56px monospace';
-            ctx.fillStyle = '#00ff00';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(this.robotName, canvas.width / 2, canvas.height / 2);
-
-            const texture = new THREE.CanvasTexture(canvas);
-            const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true });
-            this.nameSprite = new THREE.Sprite(spriteMat);
-            this.nameSprite.scale.set(16, 4, 1);
-            this.nameSprite.position.set(0, 10, 8);
-            group.add(this.nameSprite);
-        }
-
-        // --- GROUPE TÊTE ---
+        // --- TÊTE : Forme pyramidale/anguleuse avec visière horizontale fine ---
         this.headGroup = new THREE.Group();
         this.headGroup.position.set(0, 11, 0);
         this.headGroup.rotation.order = 'YXZ';
         this.torsoGroup.add(this.headGroup);
 
-        const headGeo = new THREE.CylinderGeometry(3.5, 5.5, 4.5, 6);
+        const headGeo = new THREE.ConeGeometry(3.5, 4, 5);
         const headMesh = new THREE.Mesh(headGeo, mat);
-        // Rotation de 30 degrés pour placer une facette plate bien en face (et non une arête)
-        headMesh.rotation.y = Math.PI / 6;
+        headMesh.rotation.y = Math.PI / 5;
         this.headGroup.add(headMesh);
         headMesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(headGeo), edgeMat));
 
-        // --- GRANDE VISIÈRE UNIQUE DE CYCLOPE (Plaquée sur la facette avant) ---
-        const visorGeo = new THREE.PlaneGeometry(5.0, 0.8);
-        this.eyeMat = new THREE.MeshBasicMaterial({ color: 0xff0000, side: THREE.DoubleSide });
+        // Visière unique orange perçante
+        const visorGeo = new THREE.BoxGeometry(4.0, 0.4, 0.5);
+        this.eyeMat = new THREE.MeshBasicMaterial({ color: 0xff5500 });
         const visorMesh = new THREE.Mesh(visorGeo, this.eyeMat);
-        visorMesh.position.set(0, 0.2, 3.8); // Parfaitement alignée sur la face avant plate
+        visorMesh.position.set(0, 0.2, 2.3);
         this.headGroup.add(visorMesh);
+        visorMesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(visorGeo), edgeMat));
 
-        // Source lumineuse ponctuelle pour la visière
-        this.redLight = new THREE.PointLight(0xff0000, 5.0, 150);
-        this.redLight.position.set(0, 0.2, 4.4);
+        this.redLight = new THREE.PointLight(0xff5500, 5.0, 150);
+        this.redLight.position.set(0, 0.2, 3.0);
         this.headGroup.add(this.redLight);
 
-        // --- FAISCEAU LASER ---
+        // --- FAISCEAU LASER ORANGE ---
         const laserGeo = new THREE.CylinderGeometry(0.3, 1.8, 300, 6);
         laserGeo.rotateX(Math.PI / 2);
         laserGeo.translate(0, 0, 150);
         const laserMat = new THREE.MeshBasicMaterial({
-            color: 0xff0033,
+            color: 0xff5500,
             transparent: true,
             opacity: 0.9,
             blending: THREE.AdditiveBlending
@@ -149,37 +112,34 @@ export class GiantRobot extends BaseCityScapeElement {
         this.laserMesh.visible = false;
         this.headGroup.add(this.laserMesh);
 
-        // --- 2. ÉPAULES LOURDES ET SPHÉRIQUES ---
-        [-7.5, 7.5].forEach(xOff => {
-            const shoulderGeo = new THREE.SphereGeometry(3.5, 8, 8);
+        // --- ÉPAULES & BRAS ---
+        [-8.5, 8.5].forEach(xOff => {
+            const shoulderGeo = new THREE.BoxGeometry(4, 4, 4);
             const shoulderMesh = new THREE.Mesh(shoulderGeo, mat);
             shoulderMesh.position.set(xOff, 5, 0);
             this.torsoGroup.add(shoulderMesh);
             shoulderMesh.add(new THREE.LineSegments(new THREE.EdgesGeometry(shoulderGeo), edgeMat));
         });
 
-        // --- 3. BRAS ARTICULÉS ---
         this.leftArmGroup = new THREE.Group();
-        this.leftArmGroup.position.set(-10, 4, 0);
+        this.leftArmGroup.position.set(-10.5, 4, 0);
         this.torsoGroup.add(this.leftArmGroup);
         this._buildArm(this.leftArmGroup, mat, edgeMat);
 
         this.rightArmGroup = new THREE.Group();
-        this.rightArmGroup.position.set(10, 4, 0);
+        this.rightArmGroup.position.set(10.5, 4, 0);
         this.torsoGroup.add(this.rightArmGroup);
         this._buildArm(this.rightArmGroup, mat, edgeMat);
 
-        // --- 4. TUBES DE CONNEXION ---
-        [-2.2, 2.2].forEach(xOff => {
-            const tubeGeo = new THREE.CylinderGeometry(0.6, 0.6, 8, 6);
+        // --- HANCHES & JAMBES ---
+        [-2.5, 2.5].forEach(xOff => {
+            const tubeGeo = new THREE.CylinderGeometry(0.5, 0.5, 8, 6);
             const tube = new THREE.Mesh(tubeGeo, mat);
             tube.position.set(xOff, -9, 0);
-            tube.rotation.z = xOff < 0 ? -0.15 : 0.15;
             this.torsoGroup.add(tube);
             tube.add(new THREE.LineSegments(new THREE.EdgesGeometry(tubeGeo), edgeMat));
         });
 
-        // --- 5. HANCHES & JAMBES ---
         this.leftLegGroup = new THREE.Group();
         this.leftLegGroup.position.set(-4, 20, 0);
         group.add(this.leftLegGroup);
@@ -192,33 +152,21 @@ export class GiantRobot extends BaseCityScapeElement {
     }
 
     _buildArm(armGroup, mat, edgeMat) {
-        const upperGeo = new THREE.CylinderGeometry(2, 2, 7, 8);
+        const upperGeo = new THREE.BoxGeometry(2.5, 8, 2.5);
         const upper = new THREE.Mesh(upperGeo, mat);
-        upper.position.y = -3.5;
+        upper.position.y = -4;
         armGroup.add(upper);
         upper.add(new THREE.LineSegments(new THREE.EdgesGeometry(upperGeo), edgeMat));
 
-        const jointGeo = new THREE.SphereGeometry(2, 8, 8);
-        const joint = new THREE.Mesh(jointGeo, mat);
-        joint.position.y = -7.5;
-        armGroup.add(joint);
-        joint.add(new THREE.LineSegments(new THREE.EdgesGeometry(jointGeo), edgeMat));
-
-        const lowerGeo = new THREE.CylinderGeometry(2.5, 2, 7, 8);
+        const lowerGeo = new THREE.BoxGeometry(2, 7, 2);
         const lower = new THREE.Mesh(lowerGeo, mat);
-        lower.position.y = -11.5;
+        lower.position.y = -12;
         armGroup.add(lower);
         lower.add(new THREE.LineSegments(new THREE.EdgesGeometry(lowerGeo), edgeMat));
-
-        const handGeo = new THREE.BoxGeometry(2.5, 2.5, 2.5);
-        const hand = new THREE.Mesh(handGeo, mat);
-        hand.position.y = -15.5;
-        armGroup.add(hand);
-        hand.add(new THREE.LineSegments(new THREE.EdgesGeometry(handGeo), edgeMat));
     }
 
     _buildLeg(legGroup, mat, edgeMat) {
-        const thighGeo = new THREE.CylinderGeometry(2.8, 3.2, 8, 8);
+        const thighGeo = new THREE.CylinderGeometry(3, 2.5, 8, 6);
         const thigh = new THREE.Mesh(thighGeo, mat);
         thigh.position.y = -4;
         legGroup.add(thigh);
@@ -228,20 +176,15 @@ export class GiantRobot extends BaseCityScapeElement {
         shinGroup.position.y = -8;
         legGroup.add(shinGroup);
 
-        const kneeGeo = new THREE.SphereGeometry(2.5, 8, 8);
-        const knee = new THREE.Mesh(kneeGeo, mat);
-        shinGroup.add(knee);
-        knee.add(new THREE.LineSegments(new THREE.EdgesGeometry(kneeGeo), edgeMat));
-
-        const shinGeo = new THREE.CylinderGeometry(3.2, 2.5, 8, 8);
+        const shinGeo = new THREE.CylinderGeometry(2.5, 3, 8, 6);
         const shin = new THREE.Mesh(shinGeo, mat);
-        shin.position.y = -4.5;
+        shin.position.y = -4;
         shinGroup.add(shin);
         shin.add(new THREE.LineSegments(new THREE.EdgesGeometry(shinGeo), edgeMat));
 
-        const footGeo = new THREE.BoxGeometry(5, 2.5, 7);
+        const footGeo = new THREE.BoxGeometry(5.5, 2, 8);
         const foot = new THREE.Mesh(footGeo, mat);
-        foot.position.set(0, -9, 1);
+        foot.position.set(0, -8.5, 1);
         shinGroup.add(foot);
         foot.add(new THREE.LineSegments(new THREE.EdgesGeometry(footGeo), edgeMat));
 
@@ -253,9 +196,7 @@ export class GiantRobot extends BaseCityScapeElement {
     getTopPosition() {
         const pos = new THREE.Vector3();
         this.mesh.getWorldPosition(pos);
-        if (this.torsoGroup) {
-            pos.y += this.torsoGroup.position.y + 12;
-        }
+        if (this.torsoGroup) pos.y += this.torsoGroup.position.y + 12;
         return pos;
     }
 
@@ -276,7 +217,6 @@ export class GiantRobot extends BaseCityScapeElement {
             this.robotGroup.visible = Math.abs(this.z) <= this.config.visibilityRange;
         }
 
-        // --- SYNCHRONISATION DE LA MARCHE ET DES TIRS ---
         if (this.robotGroup.visible) {
             const effectiveSpeed = Math.abs(speed);
             this.walkPhase += effectiveSpeed * delta * this.config.walkSpeedFactor;
@@ -301,7 +241,6 @@ export class GiantRobot extends BaseCityScapeElement {
                 }
             }
 
-            // --- GESTION DU TIR LASER ---
             this.laserTimer += delta;
             const sideDir = (this.lane * this.sideOffset > 0) ? -1 : 1;
 
@@ -332,7 +271,6 @@ export class GiantRobot extends BaseCityScapeElement {
                         targetHeadRotY = turnAngle;
                         targetHeadRotX = downAngle;
                         this.laserMesh.visible = true;
-
                         if (this.redLight && this.eyeMat) {
                             this.redLight.intensity = 15.0;
                             this.eyeMat.opacity = 1.0;
@@ -368,21 +306,13 @@ export class GiantRobot extends BaseCityScapeElement {
     }
 
     handleCollisions(player) {
-        if (!this.robotGroup.visible || !this.isFiringLaser || !this.laserMesh || !this.laserMesh.visible) {
-            return false;
-        }
-
+        if (!this.robotGroup.visible || !this.isFiringLaser || !this.laserMesh || !this.laserMesh.visible) return false;
         const targetZ = 3.0;
         const robotWorldPos = new THREE.Vector3();
         this.mesh.getWorldPosition(robotWorldPos);
+        if (Math.abs(robotWorldPos.z - targetZ) > this.config.hitboxZMax) return false;
 
-        const distZ = Math.abs(robotWorldPos.z - targetZ);
-        if (distZ > this.config.hitboxZMax) {
-            return false;
-        }
-
-        const projFunc = this.getProjection;
-        const roadProj = projFunc ? projFunc(targetZ, 0) : { x: 0 };
+        const roadProj = this.getProjection ? this.getProjection(targetZ, 0) : { x: 0 };
         const playerX = roadProj.x + (player.currentLane * LANE_WIDTH);
         const playerY = player.mesh.position.y + 1.0;
         const playerPos = new THREE.Vector3(playerX, playerY, targetZ);
@@ -395,11 +325,7 @@ export class GiantRobot extends BaseCityScapeElement {
         const closestPoint = new THREE.Vector3();
         laserLine.closestPointToPoint(playerPos, true, closestPoint);
 
-        const distanceToLaser = playerPos.distanceTo(closestPoint);
-        const hitTolerance = (this.config.laserRadius || 1.5) + 1.0;
-        const isHit = distanceToLaser <= hitTolerance;
-
-        return isHit;
+        return playerPos.distanceTo(closestPoint) <= (this.config.laserRadius + 1.0);
     }
 
     dispose() {
