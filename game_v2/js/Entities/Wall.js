@@ -7,6 +7,9 @@ export class Wall extends BaseEntity {
         this.type = 'wall';
         this.color = 0xff0000;
 
+        // Variable demandée pour activer/désactiver le mode glitch du mur
+        this.isGlitched = false;
+
         this.glitchPalette = [
             0xaa0044, // Bordeaux/Rose sombre
             0xff2211, // Rouge vif
@@ -40,34 +43,41 @@ export class Wall extends BaseEntity {
         this.mesh.add(this.innerMesh);
     }
 
-    animate(time, intensity = 1.0) {
-        // 1. OPACITÉ ALÉATOIRE (Désynchronisée)
-        // On mélange deux ondes lentes pour casser la régularité du pulse
+    animate(time, intensity = 1.0, state = null) {
+        // 1. Mise à jour de la variable isGlitched selon la phase active de la chanson
+        if (state && state.phase && state.phase.theme) {
+            this.isGlitched = Boolean(state.phase.theme.glitchedWall);
+        }
+
+        // 2. OPACITÉ ALÉATOIRE (Désynchronisée)
         const slowPulse = Math.sin(time * 3 + this.pulseOffset);
         const microPulse = Math.sin(time * 11);
         this.innerMesh.material.opacity = 0.7 + (slowPulse * 0.1) + (microPulse * 0.05);
 
-        // 2. GLITCH LATÉRAL INTERMITTENT
-        const glitchBurst = Math.sin(time * 2.5 + this.pulseOffset) * Math.sin(time * 0.8);
+        // 3. GLITCH LATÉRAL INTERMITTENT (Uniquement si isGlitched est actif)
+        if (this.isGlitched) {
+            const glitchBurst = Math.sin(time * 2.5 + this.pulseOffset) * Math.sin(time * 0.8);
 
-        if (glitchBurst > 0.5) {
-            // --- PHYSIQUE DU GLITCH ---
-            const shakeX = Math.sin(time * 70) * (0.15 * intensity);
-            const jumpX = (Math.random() - 0.5) * (0.1 * intensity);
-            this.innerMesh.position.x = shakeX + jumpX;
+            if (glitchBurst > 0.5) {
+                // --- PHYSIQUE DU GLITCH ---
+                const shakeX = Math.sin(time * 70) * (0.15 * intensity);
+                const jumpX = (Math.random() - 0.5) * (0.1 * intensity);
+                this.innerMesh.position.x = shakeX + jumpX;
 
-            // On pioche une couleur au hasard dans la liste
-            const randomColor = this.glitchPalette[Math.floor(Math.random() * this.glitchPalette.length)];
-            this.innerMesh.material.color.setHex(randomColor);
-
-        } else {
-            // --- RETOUR À LA NORMALE ---
-            this.innerMesh.position.x *= 0.7;
-            if (Math.abs(this.innerMesh.position.x) < 0.001) {
-                this.innerMesh.position.x = 0;
+                // On pioche une couleur au hasard dans la liste
+                const randomColor = this.glitchPalette[Math.floor(Math.random() * this.glitchPalette.length)];
+                this.innerMesh.material.color.setHex(randomColor);
+            } else {
+                // --- RETOUR À LA NORMALE (TEMPORAIRE) ---
+                this.innerMesh.position.x *= 0.7;
+                if (Math.abs(this.innerMesh.position.x) < 0.001) {
+                    this.innerMesh.position.x = 0;
+                }
+                this.innerMesh.material.color.setHex(this.color);
             }
-
-            // Retour à la couleur rouge d'origine
+        } else {
+            // Si le mur n'est pas censé glitcher, on s'assure qu'il reste stable
+            this.innerMesh.position.x = 0;
             this.innerMesh.material.color.setHex(this.color);
         }
     }

@@ -2,6 +2,8 @@ import * as THREE from 'three';
 
 import { BigBossMachine } from './BigBossMachine.js';
 import { HorizonCity } from './HorizonCity.js';
+import { PropagandaBillboard } from './PropagandaBillboard.js';
+import { PropagandaBillboardFloating } from './PropagandaBillboardFloating.js';
 
 // Buildings
 import { Building } from './Buildings/Building.js';
@@ -31,6 +33,10 @@ export class World {
         this.horizonCityInstance = null;
         this.bigBossMachineInstance = null;
 
+        // Cache pour éviter de recharger la même texture en boucle
+        this.textureCache = {};
+        this.textureLoader = new THREE.TextureLoader();
+
         // On augmente la profondeur (600) pour éviter de voir le bord
         const geo = new THREE.PlaneGeometry(600, 600, 80, 80);
         geo.rotateX(-Math.PI / 2);
@@ -46,7 +52,6 @@ export class World {
         ctx.strokeRect(0, 0, 64, 64);
 
         const gridTexture = new THREE.CanvasTexture(canvas);
-        //gridTexture.generateMipmaps = false;
         gridTexture.wrapS = THREE.RepeatWrapping;
         gridTexture.wrapT = THREE.RepeatWrapping;
         gridTexture.repeat.set(40, 40); // Nombre de répétitions de la grille
@@ -55,6 +60,7 @@ export class World {
         gridTexture.minFilter = THREE.LinearMipmapLinearFilter;
         gridTexture.anisotropy = 16;
 
+        // Mesh de base du sol (par défaut en couleur unie)
         this.mesh = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({
             color: 0x000000,
             side: THREE.DoubleSide,
@@ -62,10 +68,10 @@ export class World {
             opacity: 1.0
         }));
 
-        // On utilise la texture sur le gridMaterial
+        // Matériau de la grille
         this.gridMaterial = new THREE.MeshBasicMaterial({
             color: 0x00ff00,
-            map: gridTexture, // La texture qui va défiler
+            map: gridTexture,
             transparent: true,
             opacity: 0.9,
             blending: THREE.AdditiveBlending,
@@ -94,6 +100,25 @@ export class World {
         this.lCanvas.height = window.innerHeight;
     }
 
+    // Méthode utilitaire pour récupérer ou charger une texture de manière sécurisée
+    getTexture(url) {
+        if (!url) return null;
+        if (this.textureCache[url]) {
+            return this.textureCache[url];
+        }
+
+        const texture = this.textureLoader.load(url, (loadedTex) => {
+            loadedTex.wrapS = THREE.RepeatWrapping;
+            loadedTex.wrapT = THREE.RepeatWrapping;
+            loadedTex.repeat.set(20, 20); // Répétition de la texture sur le sol
+            loadedTex.anisotropy = 16;
+            loadedTex.needsUpdate = true;
+        });
+
+        this.textureCache[url] = texture;
+        return texture;
+    }
+
     getCanvasPos(obj) {
         const vector = obj.getTopPosition();
         vector.project(this.camera);
@@ -114,7 +139,9 @@ export class World {
             "FlyingShip": FlyingShip,
             "GiantRobot": GiantRobot,
             "GiantRobot2": GiantRobot2,
-            "GiantRobot3": GiantRobot3
+            "GiantRobot3": GiantRobot3,
+            "PropagandaBillboard": PropagandaBillboard,
+            "PropagandaBillboardFloating": PropagandaBillboardFloating
         };
 
         const totalWeight = elementsConfig.reduce((sum, el) => sum + el.weight, 0);
@@ -136,39 +163,10 @@ export class World {
         return chosenElement.class;
     }
 
-    reset() {
-        // 1. On s'assure que les deux meshs sont bien dans la scène
-        if (!this.scene.children.includes(this.mesh)) {
-            this.scene.add(this.mesh);
-        }
-        if (!this.scene.children.includes(this.grid)) {
-            this.scene.add(this.grid);
-        }
-
-        // 2. Réinitialisation de l'offset de la texture pour éviter un saut visuel
-        if (this.gridMaterial && this.gridMaterial.map) {
-            this.gridMaterial.map.offset.y = 0;
-        }
-
-        // 3. Remise à plat de la géométrie (optionnel mais propre)
-        const pos = this.mesh.geometry.attributes.position;
-        for (let i = 0; i < pos.count; i++) {
-            pos.setY(i, 0);
-        }
-        pos.needsUpdate = true;
-
-        // On synchronise la grille sur le mesh plat
-        this.grid.geometry.attributes.position.copy(pos);
-        this.grid.geometry.attributes.position.needsUpdate = true;
-    }
-
     spawnScenery(state, getProjection) {
         const currentDistance = state.zOffset;
-
-        // On récupère la configuration du décor depuis la phase active de la chanson
         const sceneryConfig = state.phase && state.phase.scenery;
 
-        // 1. Gestion de l'instanciation unique d'HorizonCity
         if (sceneryConfig && sceneryConfig.horizonCity && sceneryConfig.horizonCity.enabled) {
             if (!this.horizonCityInstance || !this.horizonCityInstance.isActive) {
                 if (this.horizonCityInstance) {
@@ -192,30 +190,75 @@ export class World {
             }
         }
 
-        // Si la phase active n'a pas de configuration de décor latéral, on s'arrête là
         if (!sceneryConfig || !sceneryConfig.elements) return;
 
+        // Initialisation des compteurs de distance si inexistants
+        if (this.lastSceneryZ === undefined) this.lastSceneryZ = currentDistance;
+        if (this.lastBillboardZ === undefined) this.lastBillboardZ = currentDistance;
+
+        // --- 1. GESTION DES ÉLÉMENTS DE DÉCOR CLASSIQUES (on exclut TOUS les billboards) ---
         const densityInterval = sceneryConfig.spawnInterval || 40;
-        if (currentDistance - this.lastSceneryZ < densityInterval) return;
+        if (currentDistance - this.lastSceneryZ >= densityInterval) {
+            const zSpawn = -350;
+            const sides = [ -1, 1 ];
 
-        const zSpawn = -350;
-        const sides = [ -1, 1 ];
+            sides.forEach(side => {
+                const spawnChance = sceneryConfig.density !== undefined ? sceneryConfig.density : 0.8;
+                if (Math.random() < spawnChance) {
+                    // On exclut tous les types de billboards des décors classiques
+                    const standardConfig = sceneryConfig.elements.filter(el =>
+                        el.class !== "PropagandaBillboard" && el.class !== PropagandaBillboard &&
+                        el.class !== "PropagandaBillboardFloating" && el.class !== PropagandaBillboardFloating
+                    );
 
-        sides.forEach(side => {
-            const spawnChance = sceneryConfig.density !== undefined ? sceneryConfig.density : 0.8;
-            if (Math.random() < spawnChance) {
-                // Choix de la classe d'élément de manière pondérée
-                const ElementClass = this.getRandomElementClass(sceneryConfig.elements);
+                    if (standardConfig.length > 0) {
+                        const ElementClass = this.getRandomElementClass(standardConfig);
+                        if (typeof ElementClass === 'function') {
+                            const element = new ElementClass(side, zSpawn, getProjection, state.params.color);
+                            if (element) {
+                                this.scene.add(element.mesh);
+                                this.scenery.push(element);
+                            }
+                        }
+                    }
+                }
+            });
+            this.lastSceneryZ = currentDistance;
+        }
 
-                const element = new ElementClass(side, zSpawn, getProjection, state.params.color);
-                if (element) {
-                    this.scene.add(element.mesh);
-                    this.scenery.push(element);
+        // --- 2. GESTION DES BILLBOARDS (PropagandaBillboard ou PropagandaBillboardFloating) ---
+        const billboardInterval = 400;
+
+        if (currentDistance - this.lastBillboardZ >= billboardInterval) {
+            // On cherche l'un ou l'autre dans la configuration de la phase
+            const billboardConfigEntry = sceneryConfig.elements.find(el =>
+                el.class === "PropagandaBillboard" || el.class === PropagandaBillboard ||
+                el.class === "PropagandaBillboardFloating" || el.class === PropagandaBillboardFloating
+            );
+
+            if (billboardConfigEntry) {
+                const spawnChance = billboardConfigEntry.weight !== undefined ? billboardConfigEntry.weight : 0.3;
+
+                if (Math.random() < spawnChance) {
+                    const zHorizonSpawn = -1000;
+                    const sides = [ -1, 1 ];
+                    const randomSide = sides[Math.floor(Math.random() * sides.length)];
+
+                    // Détermination dynamique de la bonne classe à instancier
+                    let TargetBillboardClass = PropagandaBillboard;
+                    if (billboardConfigEntry.class === "PropagandaBillboardFloating" || billboardConfigEntry.class === PropagandaBillboardFloating) {
+                        TargetBillboardClass = PropagandaBillboardFloating;
+                    }
+
+                    const billboard = new TargetBillboardClass(randomSide, zHorizonSpawn, getProjection, state.params.color);
+                    if (billboard) {
+                        this.scene.add(billboard.mesh);
+                        this.scenery.push(billboard);
+                    }
                 }
             }
-        });
-
-        this.lastSceneryZ = currentDistance;
+            this.lastBillboardZ = currentDistance;
+        }
     }
 
     update(state, getProjection) {
@@ -225,14 +268,17 @@ export class World {
         const speed = state.params.speed || 0.5;
         this.gridMaterial.map.offset.y += speed * 0.05;
 
+        // Défilement de la texture du sol si active
+        if (this.mesh.material.map) {
+            this.mesh.material.map.offset.y += speed * 0.05;
+        }
+
         for (let i = 0; i < pos.count; i++) {
             const ix = this.baseVertices[i * 3];
             const iz = this.baseVertices[i * 3 + 2];
 
-            // On passe bien ix pour le calcul de l'inclinaison (slope)
             const proj = getProjection(iz, ix);
 
-            // IMPORTANT : On garde ix et on AJOUTE la courbure proj.x
             let finalX = ix + proj.x;
             let finalY = proj.y;
 
@@ -248,12 +294,48 @@ export class World {
         this.grid.geometry.attributes.position.copy(pos);
         this.grid.geometry.attributes.position.needsUpdate = true;
 
-        const targetOpacity = state.params.gridOpacity !== undefined ? state.params.gridOpacity : 1;
-        const currentOpacity = isGlitch ? Math.random() : targetOpacity;
+        // --- GESTION DE LA CONDITION hideGrid & floorTexture ---
+        const hideGrid = state.phase.theme.hideGrid === true || state.phase.theme.solidFloor === true;
+        const textureUrl = state.phase.theme.floorTexture;
 
-        this.grid.material.opacity = currentOpacity;
-        this.grid.material.color.copy(state.params.color);
-        this.mesh.material.opacity = currentOpacity;
+        if (hideGrid) {
+            // On masque la grille
+            this.grid.visible = false;
+
+            // Si une texture est configurée pour cette phase
+            if (textureUrl) {
+                const tex = this.getTexture(textureUrl);
+                if (this.mesh.material.map !== tex) {
+                    this.mesh.material.map = tex;
+                    this.mesh.material.needsUpdate = true;
+                }
+                this.mesh.material.color.setHex(0xffffff); // Blanc pour garder les couleurs de la texture
+            } else {
+                // Pas de texture, on passe sur un sol de couleur unie (couleur du thème)
+                this.mesh.material.map = null;
+                this.mesh.material.needsUpdate = true;
+                if (state.params.color) {
+                    this.mesh.material.color.copy(state.params.color);
+                }
+            }
+        } else {
+            // Mode normal : on affiche la grille et on remet le sol par défaut
+            this.grid.visible = true;
+            this.mesh.material.map = null;
+            this.mesh.material.needsUpdate = true;
+            this.mesh.material.color.setHex(0x000000); // Fond noir classique sous la grille
+
+            const targetOpacity = state.params.gridOpacity !== undefined ? state.params.gridOpacity : 1;
+            const currentOpacity = isGlitch ? Math.random() : targetOpacity;
+
+            this.grid.material.opacity = currentOpacity;
+            this.grid.material.color.copy(state.params.color);
+        }
+
+        // Opacité globale du sol
+        const baseMeshOpacity = state.params.floorOpacity !== undefined ? state.params.floorOpacity : 1.0;
+        this.mesh.material.opacity = isGlitch ? Math.random() : baseMeshOpacity;
+        // --------------------------------------------------------
 
         if (this.horizonCityInstance && this.horizonCityInstance.isActive) {
             this.horizonCityInstance.updatePosition(state.speed, state.delta, getProjection);
@@ -292,27 +374,20 @@ export class World {
         this.lCtx.clearRect(0, 0, this.lCanvas.width, this.lCanvas.height);
         for (let i = this.activeArcs.length - 1; i >= 0; i--) {
             const arc = this.activeArcs[i];
-
-            // Recalcul des positions 2D à chaque frame
             const p1 = this.getCanvasPos(arc.startNode);
             const p2 = this.getCanvasPos(arc.endNode);
 
-            // Dessin
             this.drawArcUpdate(p1, p2, arc.color, arc.life, arc.seed);
 
-            // Réduction de la vie
             arc.life -= arc.decay;
             if (arc.life <= 0) {
                 this.activeArcs.splice(i, 1);
             }
         }
-
     }
 
     triggerScreenFlash(colorHex) {
         const flashDiv = document.createElement('div');
-
-        // Conversion du hex (0xffffff) en string CSS (#ffffff)
         const cssColor = `#${colorHex.toString(16).padStart(6, '0')}`;
 
         flashDiv.style.cssText = `
@@ -328,24 +403,18 @@ export class World {
         `;
 
         document.body.appendChild(flashDiv);
-
-        // Suppression rapide pour l'effet de flash
         setTimeout(() => {
             flashDiv.remove();
-        }, 60); // Durée du flash en ms
+        }, 60);
     }
 
     triggerLightning() {
-        // 1. Nettoyage de sécurité avant de dessiner
         this.lCtx.clearRect(0, 0, this.lCanvas.width, this.lCanvas.height);
-
-        // 2. Configuration du style
         this.lCtx.strokeStyle = '#ffffff';
         this.lCtx.lineWidth = 3;
         this.lCtx.shadowBlur = 15;
         this.lCtx.shadowColor = '#ffffff';
 
-        // 3. Dessin de la trajectoire
         this.lCtx.beginPath();
         let x = Math.random() * this.lCanvas.width;
         let y = 0;
@@ -358,8 +427,6 @@ export class World {
         }
         this.lCtx.stroke();
 
-        // 4. EFFACEMENT AUTOMATIQUE (Le secret de la brièveté)
-        // 50ms à 80ms est la durée idéale pour un éclair réaliste
         setTimeout(() => {
             this.lCtx.clearRect(0, 0, this.lCanvas.width, this.lCanvas.height);
         }, 60);
@@ -368,7 +435,6 @@ export class World {
     triggerCityLightning(state, camera, threshold = 0.98) {
         if (Math.random() < threshold) return;
 
-        // Filtrer les candidats visibles
         const candidates = this.scenery.filter(el => el.z < 0 && el.z > -300);
         if (candidates.length < 2) return;
 
@@ -376,14 +442,13 @@ export class World {
         const endNode = candidates[Math.floor(Math.random() * candidates.length)];
         if (startNode === endNode) return;
 
-        // On stocke l'arc avec une durée de vie (life)
         this.activeArcs.push({
             startNode: startNode,
             endNode: endNode,
-            life: 1.0, // de 1.0 à 0.0
-            decay: 0.15, // Vitesse de disparition
+            life: 1.0,
+            decay: 0.15,
             color: state.params.color.getStyle(),
-            seed: Math.random() // Pour garder le même "jitter" pendant l'éclair
+            seed: Math.random()
         });
     }
 
@@ -404,7 +469,6 @@ export class World {
             let y = p1.y + (p2.y - p1.y) * t;
 
             if (i < steps) {
-                // Utilisation du seed pour une forme stable mais vibrante
                 const jitter = 30 * life;
                 x += (Math.sin(i + seed * 10) * jitter);
                 y += (Math.cos(i + seed * 10) * jitter);
@@ -429,11 +493,10 @@ export class World {
         }
 
         // 1. Nettoyage des éléments de décor (Buildings, Ships)
-        // On doit les retirer de la scène ET vider le tableau
         this.scenery.forEach(el => {
             if (el.mesh) {
                 this.scene.remove(el.mesh);
-                if (el.dispose) el.dispose(); // Nettoyage de la géométrie/matériaux si implémenté
+                if (el.dispose) el.dispose();
             }
         });
         this.scenery = [];
@@ -453,28 +516,29 @@ export class World {
             this.scene.add(this.grid);
         }
 
-        // Remise à zéro du défilement de la texture
+        // Remise à zéro du défilement des textures
         if (this.gridMaterial && this.gridMaterial.map) {
             this.gridMaterial.map.offset.y = 0;
             this.gridMaterial.map.offset.x = 0;
         }
+        if (this.mesh.material.map) {
+            this.mesh.material.map.offset.y = 0;
+            this.mesh.material.map.offset.x = 0;
+        }
 
         // 4. Remise à plat de la géométrie du terrain
-        // On réinitialise les sommets (Y=0) pour éviter de commencer avec une bosse ou un glitch
         const pos = this.mesh.geometry.attributes.position;
         for (let i = 0; i < pos.count; i++) {
-            // On utilise les valeurs initiales stockées dans baseVertices pour X et Z, et 0 pour Y
             pos.setY(i, 0);
         }
         pos.needsUpdate = true;
 
-        // Synchronisation de la grille filaire sur le mesh de base
         if (this.grid.geometry.attributes.position) {
             this.grid.geometry.attributes.position.copy(pos);
             this.grid.geometry.attributes.position.needsUpdate = true;
         }
 
-        // 5. Reset du Fog (Brouillard) au cas où il aurait été modifié
+        // 5. Reset du Fog (Brouillard)
         if (this.scene.fog) {
             this.scene.fog.near = 600;
             this.scene.fog.far = 1000;

@@ -6,19 +6,24 @@ import { Player } from './Player.js';
 import { BackgroundManager } from './Environment/BackgroundManager.js';
 import { MusicController } from './Audio/MusicController.js';
 import { SoundEffects } from './Audio/SoundEffects.js';
-import { DEV_MODE } from './Config.js';
+import { DEV_MODE, SONG_STRUCTURE } from './Config.js';
 
 const DEFAULT_PHASE = {
     label: "UNKNOWN",
     speed: 1,
     theme: {
         background: {
-            // Cover de l'album A Brilliant Future de Maanen Faces
-            imageUrl: "https://f4.bcbits.com/img/a2164237503_10.jpg",
-            videoId: null
+            imageUrl: "/game_v2/assets/background-blue-sky-with-white-clouds.jpg",
+            videoId: null,
+            opacity: 1,
+            defaultOpacity: 0.5
         },
         colors: [0x00ff00],
-        gridOpacity: 1
+        gridOpacity: 1,
+        solidFloor: false,
+        floorTexture: "/game_v2/assets/78537d19-4291-449f-8f95-a4acfc4a245a.jpg",
+        glitchedRoad: false,
+        glitchedWall: false
     },
     bonuses: {
         density: 0.05,
@@ -30,52 +35,35 @@ const DEFAULT_PHASE = {
         ]
     },
     obstacles: {
-        density: 0,
+        density: 0.3,
         distribution: [
-            { entity: "Wall", percent: 25 },
-            { entity: "MovingWall", percent: 25 },
-            { entity: "FallingWall", percent: 25 },
-            { entity: "ChasingWall", percent: 25 }
+            { entity: "Wall", percent: 100 }
         ]
     },
     scenery: {
         density: 0.8,
         spawnInterval: 40,
         elements: [
-            { class: "Building", weight: 0.2 },
-            { class: "ExplodingBuilding", weight: 0.1 },
-            { class: "BurningFlyingShip", weight: 0.1 },
-            { class: "GiantRobot",  weight: 0.2 },
-            { class: "GiantRobot2", weight: 0.2 },
-            { class: "GiantRobot3", weight: 0.2 }
-        ],
-        horizonCity: {
-            enabled: true,
-            duration: 120
-        },
-        bigBossMachine: {
-            enabled: true,
-            duration: 120,
-            appearStartTime: 5.0
-        }
+            { class: "Building", weight: 1 }
+        ]
     },
     effects: {
-        city_lightning: { intensity: 0.5 },
-        curve:     { intensity: 0.5 },
-        flash:     { intensity: 0 },
-        glitch:    { intensity: 0.1 },
-        lightning: { intensity: 0 },
-        reverse:   { enabled: false },
-        roll:      { intensity: 0 },
-        wave:      { intensity: 0 }
+        city_lightning: { intensity: 0 },
+        curve:          { intensity: 0.5 },
+        flash:          { intensity: 0 },
+        glitch:         { intensity: 0 },
+        lightning:      { intensity: 0 },
+        reverse:        { enabled: false },
+        roll:           { intensity: 0 },
+        wave:           { intensity: 0 }
     }
 };
 
 export class GameEngine {
-    constructor(scene, camera, songPhases) {
+    constructor(scene, camera) {
         this.scene = scene;
         this.camera = camera;
-        this.songPhases = songPhases;
+        this.songPhases = this.consolidateSongStructure(SONG_STRUCTURE);
         this.time = 0;
         this.zOffset = 0;
         this.isPaused = true;
@@ -91,7 +79,8 @@ export class GameEngine {
         this.entityManager = new EntityManager(scene);
         this.player = new Player(scene);
         this.backgroundManager = new BackgroundManager();
-        this.musicController = new MusicController();
+        this.musicController = new MusicController(this.songPhases);
+        this.devMode = DEV_MODE;
 
         this.colorTimer = 0;
         this.colorIndex = 0;
@@ -152,6 +141,17 @@ export class GameEngine {
         };
 
         return merge(previousPhase, newPhase);
+    }
+
+    consolidateSongStructure(structure) {
+        return structure.map((item, index, arr) => {
+            const newItem = { ...item };
+            if (newItem.end === undefined) {
+                const nextItem = arr[index + 1];
+                newItem.end = (nextItem && nextItem.start !== undefined) ? nextItem.start : 999;
+            }
+            return newItem;
+        });
     }
 
     getProjection(z, xOffset = 0) {
@@ -325,7 +325,8 @@ export class GameEngine {
         if (triggers.reverse !== this.isReversed) {
             this.isReversed = triggers.reverse;
             const eventName = this.isReversed ? 'effectReverseOn' : 'effectReverseOff';
-            window.dispatchEvent(new CustomEvent(eventName, { detail: { phase: p.label } }));
+            const label = p.label ? p.label : '';
+            window.dispatchEvent(new CustomEvent(eventName, { detail: { phase: label } }));
         }
 
         // 7. GESTION DU BONUS & VITESSE TOTALE

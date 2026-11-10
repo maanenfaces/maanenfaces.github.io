@@ -10,6 +10,8 @@ export class BaseScapeElement {
         this.laneWidth = 6; // Utilisé pour le calcul de base
     }
 
+    animate(time) {}
+
     updatePosition(speed, delta, getProjection) {
         this.z += speed * delta;
 

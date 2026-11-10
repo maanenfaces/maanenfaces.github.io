@@ -7,6 +7,9 @@ export class Road {
         this.length = 600;
         this.repetitions = 15;
 
+        // Variable demandée pour activer/désactiver le mode glitch de la route
+        this.isGlitched = false;
+
         const width = 24;
         const geo = new THREE.PlaneGeometry(width, this.length, 20, 150);
         geo.rotateX(-Math.PI / 2);
@@ -157,33 +160,46 @@ export class Road {
             this.glitchMaterial.color.copy(state.params.color).addScalar(0.4);
         }
 
+        // Mise à jour de la variable isGlitched selon la phase de la chanson
+        this.isGlitched = Boolean(
+            state.phase &&
+            state.phase.theme &&
+            state.phase.theme.glitchedRoad
+        );
+
         const speed = state.params.speed || 0.5;
         const unitLength = this.length / this.repetitions;
         const scroll = speed / unitLength;
 
         this.material.map.offset.y += scroll;
 
-        // --- LOGIQUE DU GLITCH STABILISÉ ---
-        this.glitchTimer += state.delta;
+        // --- LOGIQUE DU GLITCH STABILISÉ (uniquement si isGlitched est actif) ---
+        if (this.isGlitched) {
+            this.glitchTimer += state.delta;
 
-        // Synchronisation : si le glitch est visible, il doit défiler comme la route
-        if (this.glitchMaterial.opacity > 0) {
-            this.glitchAlphaMap.offset.y += scroll;
-            // On diminue l'opacité selon la durée de vie (0.5s à 1s)
-            this.glitchMaterial.opacity -= state.delta / this.glitchLifeSpan;
-        }
+            // Synchronisation : si le glitch est visible, il doit défiler comme la route
+            if (this.glitchMaterial.opacity > 0) {
+                this.glitchAlphaMap.offset.y += scroll;
+                // On diminue l'opacité selon la durée de vie (0.5s à 1s)
+                this.glitchMaterial.opacity -= state.delta / this.glitchLifeSpan;
+            }
 
-        if (this.glitchTimer > this.nextGlitchTime) {
-            this.generateOrganicShape();
-            this.glitchMaterial.opacity = 1.0;
-            this.glitchLifeSpan = 0.6 + Math.random() * 0.4; // Stable entre 0.6s et 1s
+            if (this.glitchTimer > this.nextGlitchTime) {
+                this.generateOrganicShape();
+                this.glitchMaterial.opacity = 1.0;
+                this.glitchLifeSpan = 0.6 + Math.random() * 0.4; // Stable entre 0.6s et 1s
 
-            this.glitchAlphaMap.offset.x = Math.random();
-            // Zone d'apparition proche (entre 0 et 10% de la longueur de la route)
-            this.glitchAlphaMap.offset.y = Math.random() * 0.1;
+                this.glitchAlphaMap.offset.x = Math.random();
+                // Zone d'apparition proche (entre 0 et 10% de la longueur de la route)
+                this.glitchAlphaMap.offset.y = Math.random() * 0.1;
 
+                this.glitchTimer = 0;
+                this.nextGlitchTime = 4 + Math.random() * 4;
+            }
+        } else {
+            // Si la route n'est plus glitchée, on s'assure d'éteindre le mesh de glitch
+            this.glitchMaterial.opacity = 0;
             this.glitchTimer = 0;
-            this.nextGlitchTime = 4 + Math.random() * 4;
         }
 
         // --- DÉFORMATION ET RENDU ---
@@ -199,10 +215,11 @@ export class Road {
             let finalX = ix + proj.x;
             let finalY = proj.y + 0.1;
 
-            if (isGlitch) {
-                const sliceEffect = Math.sin(iz * 0.1) * 3.0;
+            // Le glitch global (déclencheur) ou local (isGlitched) applique la déformation
+            if (isGlitch || this.isGlitched) {
+                const sliceEffect = Math.sin(iz * 0.1) * (this.isGlitched ? 1.5 : 3.0);
                 finalX += sliceEffect;
-                finalY += (Math.random() - 0.5) * 0.5;
+                finalY += (Math.random() - 0.5) * (this.isGlitched ? 0.2 : 0.5);
             }
 
             pos.setXYZ(i, finalX, finalY, iz);

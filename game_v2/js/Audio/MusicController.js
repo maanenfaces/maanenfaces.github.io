@@ -1,7 +1,9 @@
-import { SONG_START_AT, SONG_STRUCTURE } from '../Config.js';
+import { SONG_START_AT } from '../Config.js';
 
 export class MusicController {
-    constructor(videoIdAudio = null, videoIdVisual = null) {
+    constructor(songStructure, videoIdAudio = null, videoIdVisual = null) {
+        this.songStructure = songStructure;
+
         this.audio = document.getElementById('game-audio');
         this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -112,8 +114,8 @@ export class MusicController {
             ? this.players.audio.getCurrentTime()
             : this.audio.currentTime;
 
-        const phase = SONG_STRUCTURE.find(p => time >= p.start && time < p.end)
-                    || SONG_STRUCTURE[SONG_STRUCTURE.length - 1];
+        const phase = this.songStructure.find(p => time >= p.start && time < p.end)
+                    || this.songStructure[this.songStructure.length - 1];
 
         // CRÉATION DU HASH
         // On transforme l'objet de la phase en chaîne de caractères unique
@@ -164,7 +166,7 @@ export class MusicController {
         // Temps réel que la porte va mettre pour toucher le joueur
         const travelTime = totalDistance / speedPerSecond;
 
-        const nextPhase = SONG_STRUCTURE.find(p => {
+        const nextPhase = this.songStructure.find(p => {
             const timeUntilPhase = p.start - time;
             return !p.gateSpawned &&
                    timeUntilPhase > 0 &&

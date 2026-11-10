@@ -1,11 +1,11 @@
 import * as THREE from 'three';
 import { GameEngine } from './GameEngine.js';
 import { Screens } from './Screens.js';
-import { DEV_MODE, SONG_STRUCTURE } from './Config.js';
 
 export class Main {
     constructor() {
         this.lastTime = 0;
+        this.targetFPS = 30;
         this.init();
     }
 
@@ -23,7 +23,7 @@ export class Main {
 
         document.getElementById('game-canvas').appendChild(this.renderer.domElement);
 
-        this.engine = new GameEngine(this.scene, this.camera, SONG_STRUCTURE);
+        this.engine = new GameEngine(this.scene, this.camera);
         this.ui = new Screens(this.engine);
 
         const rotationAlert = document.getElementById('rotation-alert');
@@ -40,7 +40,6 @@ export class Main {
     }
 
     animate(now) {
-        const start = performance.now();
         requestAnimationFrame((t) => this.animate(t));
 
         if (!this.lastTime) {
@@ -48,15 +47,25 @@ export class Main {
             return;
         }
 
-        const delta = Math.min((now - this.lastTime) / 1000, 0.1);
-        this.lastTime = now;
+        // Intervalle calculé dynamiquement en fonction de targetFPS
+        const fpsInterval = 1000 / this.targetFPS;
+        const elapsed = now - this.lastTime;
+
+        if (elapsed < fpsInterval) {
+            return;
+        }
+
+        this.lastTime = now - (elapsed % fpsInterval);
+
+        const delta = Math.min(elapsed / 1000, 0.1);
+        const start = performance.now();
 
         if (this.engine) {
             this.engine.update(now / 1000, delta);
             this.ui.update();
             this.renderer.render(this.scene, this.camera);
 
-            if (DEV_MODE) {
+            if (this.engine.devMode) {
                 this.updateDevTools(now / 1000, start, delta);
             }
         }
