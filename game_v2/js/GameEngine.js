@@ -25,6 +25,14 @@ const DEFAULT_PHASE = {
         glitchedRoad: false,
         glitchedWall: false
     },
+    glitchScreen: {
+        enabled: false,
+        parts: [
+            "texte 1",
+            "texte 2",
+            "texte 3"
+        ]
+    },
     bonuses: {
         density: 0.05,
         distribution: [

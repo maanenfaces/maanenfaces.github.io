@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { BaseCityScapeElement } from './BaseCityScapeElement.js';
+import { BaseCityScapeElement } from '../BaseCityScapeElement.js';
 
 const SLOGANS = [
     // --- 1. SURVEILLANCE ÉTATIQUE ET BIOMÉTRIE ---

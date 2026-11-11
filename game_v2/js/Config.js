@@ -13,13 +13,32 @@ export const SONG_STRUCTURE = [
 
     { label: "INTRO 1",
       start: 0,
+      theme: {
+        solidFloor: true,
+        floorTexture: "/game_v2/assets/seamless_pbr_green_grass_ground_texture_with_small_white_flowers_and_leaves.png"
+      },
+      glitchScreen: {
+          enabled: true,
+          parts: [
+              "En 2026, nous assistons aux prémices de la plus grosse révolution technologique de l'histoire.",
+              "L'humanité est destiné à un futur brillant.",
+              "Démarrage de la partie..."
+          ]
+      },
+      bonuses: { density: 0 },
+      obstacles: { density: 0 },
+      scenery: { density: 0 },
+    },
+
+    /*
+    { label: "INTRO 1",
+      start: 0,
       bonuses: { density: 0 },
       obstacles: { density: 0.05 },
       scenery: {
         density: 0.05,
         elements: [
-          { class: "PropagandaBillboardFloating", weight: 0.3 },
-          { class: "GiantFlower", weight: 0.4 }
+          { class: "PropagandaBillboard", weight: 0.3 }
         ]
       },
       theme: {
@@ -33,9 +52,12 @@ export const SONG_STRUCTURE = [
       bonuses: { density: 0.1 },
       obstacles: { density: 0.9 }
     },
+    */
+
     { label: "INTRO 1",
       start: 14,
       speed: 1.3,
+      glitchScreen: { enabled: false },
       obstacles: { density: 0.21 }
     },
 

@@ -2,8 +2,11 @@ import * as THREE from 'three';
 
 import { BigBossMachine } from './BigBossMachine.js';
 import { HorizonCity } from './HorizonCity.js';
-import { PropagandaBillboard } from './PropagandaBillboard.js';
-import { PropagandaBillboardFloating } from './PropagandaBillboardFloating.js';
+
+// Texts
+import { GlitchTextScreen } from './Texts/GlitchTextScreen.js';
+import { PropagandaBillboard } from './Texts/PropagandaBillboard.js';
+import { PropagandaBillboardFloating } from './Texts/PropagandaBillboardFloating.js';
 
 // Buildings
 import { Building } from './Buildings/Building.js';
@@ -32,6 +35,7 @@ export class World {
         this.activeArcs = [];
         this.horizonCityInstance = null;
         this.bigBossMachineInstance = null;
+        this.glitchScreenInstance = null;
 
         // Cache pour éviter de recharger la même texture en boucle
         this.textureCache = {};
@@ -132,14 +136,15 @@ export class World {
         const classRegistry = {
             "Building": Building,
             "Building2": Building2,
-            "ExplodingBuilding": ExplodingBuilding,
             "BurningBuilding": BurningBuilding,
             "BurningBuilding2": BurningBuilding2,
             "BurningFlyingShip": BurningFlyingShip,
+            "ExplodingBuilding": ExplodingBuilding,
             "FlyingShip": FlyingShip,
             "GiantRobot": GiantRobot,
             "GiantRobot2": GiantRobot2,
             "GiantRobot3": GiantRobot3,
+            "GlitchTextScreen": GlitchTextScreen,
             "PropagandaBillboard": PropagandaBillboard,
             "PropagandaBillboardFloating": PropagandaBillboardFloating
         };
@@ -357,6 +362,21 @@ export class World {
             }
         }
 
+        console.log(state);
+        if (state.phase && state.phase.glitchScreen && state.phase.glitchScreen.enabled && state.phase.glitchScreen.enabled == true) {
+            if (!this.glitchScreenInstance) {
+                this.glitchScreenInstance = new GlitchTextScreen(state.phase.glitchScreen);
+            }
+            this.glitchScreenInstance.update(state.delta);
+        } else {
+            console.log("shoud dispose glitchScreenInstance");
+            if (this.glitchScreenInstance) {
+                console.log("dispose glitchScreenInstance");
+                this.glitchScreenInstance.dispose();
+                this.glitchScreenInstance = null;
+            }
+        }
+
         this.spawnScenery(state, getProjection);
 
         for (let i = this.scenery.length - 1; i >= 0; i--) {
@@ -490,6 +510,11 @@ export class World {
             this.scene.remove(this.bigBossMachineInstance.mesh);
             this.bigBossMachineInstance.dispose();
             this.bigBossMachineInstance = null;
+        }
+
+        if (this.glitchScreenInstance) {
+            this.glitchScreenInstance.dispose();
+            this.glitchScreenInstance = null;
         }
 
         // 1. Nettoyage des éléments de décor (Buildings, Ships)
