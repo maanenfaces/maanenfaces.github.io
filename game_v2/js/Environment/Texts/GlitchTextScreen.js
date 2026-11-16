@@ -27,6 +27,7 @@ export class GlitchTextScreen {
             width: 100vw;
             height: 100vh;
             background-color: #000000;
+            background: radial-gradient(circle, #1a0000 0%, #000000 100%);
             z-index: 1;
             display: flex;
             align-items: center;

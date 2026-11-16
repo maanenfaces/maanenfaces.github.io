@@ -668,9 +668,23 @@
             z-index: 99999;
             animation: superPowerFlash 0.6s ease-out forwards;
         }
+
+        #global-vignette {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none; /* Laisse passer les clics vers le jeu et les menus */
+            z-index: 1000; /* Juste en dessous des overlays critiques (glitches/flashs) mais au-dessus de tout le reste */
+            background: radial-gradient(circle, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.35) 100%);
+            box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.4);
+        }
     </style>
 </head>
 <body>
+    <div id="global-vignette"></div>
+
     <div id="audio-layers">
         <audio id="game-audio" src="./track.mp3" preload="auto"></audio>
         <div id="yt-audio-container" style="position:absolute; visibility:hidden; pointer-events:none;">
