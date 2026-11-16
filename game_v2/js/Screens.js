@@ -52,7 +52,22 @@ export class Screens {
 
             switch(this.step) {
                 case 'NAME':
-                    if (e.key === 'Enter') this.validateName();
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        this.validateName();
+                    } else if (e.key === 'Backspace') {
+                        e.preventDefault();
+                        this.nameInput.value = this.nameInput.value.slice(0, -1);
+                        SoundEffects.keystroke();
+                    } else {
+                        e.preventDefault();
+                        const char = e.key.toUpperCase();
+                        const regex = /^[A-Z0-9]$/;
+                        if (regex.test(char) && this.nameInput.value.length < 12) {
+                            this.nameInput.value += char;
+                            SoundEffects.keystroke();
+                        }
+                    }
                     break;
                 case 'SELECTION':
                     if (e.key === 'Escape') this.reloadPage();

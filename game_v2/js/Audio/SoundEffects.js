@@ -46,6 +46,11 @@ export class SoundEffects {
         this.playTone(80, 'sawtooth', 0.15, 0.4, 40);
     }
 
+    static keystroke() {
+        // Un petit clic ou bip très court et étouffé
+        this.playTone(300, 'sine', 0.04, 0.1, 100);
+    }
+
     // Bruit de glissement pour les mouvements latéraux (latéral / slide)
     static move() {
         if (this.ctx.state === 'suspended') this.ctx.resume();
