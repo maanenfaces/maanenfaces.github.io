@@ -3,16 +3,17 @@ import * as THREE from 'three';
 export class GlitchTextScreen {
     constructor(config = {}) {
         this.config = Object.assign({
-            delay: 1.0,               // Secondes avant le début de la séquence
-            typingSpeed: 20,          // Nombre de caractères affichés par seconde
-            readTimeAfterTyping: 3,   // Temps de lecture fixe une fois que la phrase est entièrement écrite
-            pauseDuration: 1.0,       // Temps de blanc (silence visuel) entre chaque partie
-            parts: []                 // Tableau des textes
+            delay: 1.0,           // Secondes avant le début de la séquence
+            typingSpeed: 25,      // Nombre de caractères affichés par seconde
+            readTimeAfterTyping: 2.5, // Temps de lecture fixe une fois écrit
+            pauseDuration: 1.0,   // Temps de blanc entre chaque partie
+            parts: []             // Tableau des textes
         }, config);
 
         this.isActive = true;
         this.age = 0;
         this.currentPartIndex = -1;
+        this.lastHTML = "";       // Pour éviter de réécrire le DOM à chaque frame
 
         this._initDOM();
     }
@@ -52,7 +53,13 @@ export class GlitchTextScreen {
                 line-height: 1.6;
                 text-shadow: 0 0 10px var(--neon-red), 0 0 20px var(--neon-red), 0 0 40px var(--dark-red);
                 opacity: 1;
-                text-transform: uppercase;
+            }
+            @keyframes blink-dots {
+                0%, 100% { opacity: 0.1; }
+                50% { opacity: 1; }
+            }
+            .blinking-dots {
+                animation: blink-dots 0.6s infinite steps(1);
             }
         `;
         document.head.appendChild(style);
@@ -71,11 +78,13 @@ export class GlitchTextScreen {
         const timeSinceStart = this.age - this.config.delay;
 
         if (timeSinceStart < 0) {
-            this.textElement.textContent = '';
+            if (this.lastHTML !== '') {
+                this.textElement.innerHTML = '';
+                this.lastHTML = '';
+            }
             return;
         }
 
-        // On parcourt les parties pour trouver celle qui correspond au temps écoulé
         let accumulatedTime = 0;
         let currentPart = -1;
         let timeInPart = 0;
@@ -93,25 +102,51 @@ export class GlitchTextScreen {
             accumulatedTime += partTotalDuration;
         }
 
-        // Si on a dépassé la dernière partie, on vide l'écran
         if (currentPart === -1) {
-            this.textElement.textContent = '';
+            if (this.lastHTML !== '') {
+                this.textElement.innerHTML = '';
+                this.lastHTML = '';
+            }
             return;
         }
 
-        const text = this.config.parts[currentPart];
-        const typingDuration = text.length / this.config.typingSpeed;
+        const fullText = this.config.parts[currentPart];
+        const typingDuration = fullText.length / this.config.typingSpeed;
 
-        // Si on est dans la zone de pause (la fin de la tranche)
         if (timeInPart >= typingDuration + this.config.readTimeAfterTyping) {
-            this.textElement.textContent = '';
+            if (this.lastHTML !== '') {
+                this.textElement.innerHTML = '';
+                this.lastHTML = '';
+            }
             this.currentPartIndex = currentPart;
             return;
         }
 
-        // Sinon, on calcule l'affichage progressif du texte
-        const charsToShow = Math.min(text.length, Math.floor(timeInPart * this.config.typingSpeed));
-        this.textElement.textContent = text.substring(0, charsToShow);
+        const charsToShow = Math.min(fullText.length, Math.floor(timeInPart * this.config.typingSpeed));
+        const currentTypedText = fullText.substring(0, charsToShow);
+
+        let dotCountToBlink = 0;
+        if (currentPart === 0 || currentPart === 1) {
+            dotCountToBlink = 1;
+        } else if (currentPart === 2) {
+            dotCountToBlink = 3;
+        }
+
+        let newHTML = "";
+        if (currentTypedText.length >= fullText.length - dotCountToBlink) {
+            const mainPart = fullText.substring(0, fullText.length - dotCountToBlink);
+            const dotsPart = fullText.substring(fullText.length - dotCountToBlink);
+            newHTML = mainPart + `<span class="blinking-dots">${dotsPart}</span>`;
+        } else {
+            newHTML = currentTypedText;
+        }
+
+        // On ne met à jour le DOM que si le contenu change (évite de casser l'animation CSS)
+        if (this.lastHTML !== newHTML) {
+            this.textElement.innerHTML = newHTML;
+            this.lastHTML = newHTML;
+        }
+
         this.currentPartIndex = currentPart;
     }
 
