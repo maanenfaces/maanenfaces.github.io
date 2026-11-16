@@ -4,7 +4,9 @@ import { BigBossMachine } from './BigBossMachine.js';
 import { HorizonCity } from './HorizonCity.js';
 
 // Texts
+import { BurningLyricsBillboard } from './Texts/BurningLyricsBillboard.js';
 import { GlitchTextScreen } from './Texts/GlitchTextScreen.js';
+import { LyricsBillboard } from './Texts/LyricsBillboard.js';
 import { PropagandaBillboard } from './Texts/PropagandaBillboard.js';
 import { PropagandaBillboardFloating } from './Texts/PropagandaBillboardFloating.js';
 
@@ -36,6 +38,7 @@ export class World {
         this.horizonCityInstance = null;
         this.bigBossMachineInstance = null;
         this.glitchScreenInstance = null;
+        this.instantiatedLyricsPhases = new Set();
 
         // Cache pour éviter de recharger la même texture en boucle
         this.textureCache = {};
@@ -132,13 +135,14 @@ export class World {
         };
     }
 
-    getRandomElementClass(elementsConfig) {
-        const classRegistry = {
+    getClassRegistry() {
+        return {
             "Building": Building,
             "Building2": Building2,
             "BurningBuilding": BurningBuilding,
             "BurningBuilding2": BurningBuilding2,
             "BurningFlyingShip": BurningFlyingShip,
+            "BurningLyricsBillboard": BurningLyricsBillboard,
             "ExplodingBuilding": ExplodingBuilding,
             "FlyingShip": FlyingShip,
             "GiantRobot": GiantRobot,
@@ -146,9 +150,38 @@ export class World {
             "GiantRobot3": GiantRobot3,
             "GlitchTextScreen": GlitchTextScreen,
             "PropagandaBillboard": PropagandaBillboard,
-            "PropagandaBillboardFloating": PropagandaBillboardFloating
+            "PropagandaBillboardFloating": PropagandaBillboardFloating,
+            "LyricsBillboard": LyricsBillboard
         };
+    }
 
+    getClassNameFromRegistry(target) {
+        if (!target) return null;
+
+        const registry = this.getClassRegistry();
+
+        // Si c'est une chaîne, on s'assure qu'elle existe bien dans le registre
+        if (typeof target === 'string') {
+            return registry.hasOwnProperty(target) ? target : null;
+        }
+
+        // Si c'est une référence de classe, on cherche sa clé correspondante
+        for (const [name, cls] of Object.entries(registry)) {
+            if (cls === target) {
+                return name;
+            }
+        }
+
+        // Fallback basé sur le nom natif de la classe si elle est présente dans le registre
+        if (target.name && registry.hasOwnProperty(target.name)) {
+            return target.name;
+        }
+
+        return null;
+    }
+
+    getRandomElementClass(elementsConfig) {
+        const classRegistry = this.getClassRegistry();
         const totalWeight = elementsConfig.reduce((sum, el) => sum + el.weight, 0);
         let randomVal = Math.random() * totalWeight;
 
@@ -201,7 +234,16 @@ export class World {
         if (this.lastSceneryZ === undefined) this.lastSceneryZ = currentDistance;
         if (this.lastBillboardZ === undefined) this.lastBillboardZ = currentDistance;
 
-        // --- 1. GESTION DES ÉLÉMENTS DE DÉCOR CLASSIQUES (on exclut TOUS les billboards) ---
+        // Tableau des classes considérées comme des Billboards (à exclure des décors classiques, et à filtrer strictement pour les panneaux)
+        const billboardClasses = [
+            "BurningLyricsBillboard", BurningLyricsBillboard,
+            "LyricsBillboard", LyricsBillboard,
+            "PropagandaBillboard", PropagandaBillboard,
+            "PropagandaBillboardFloating", PropagandaBillboardFloating
+        ];
+        const billboardClassNames = billboardClasses.map(item => this.getClassNameFromRegistry(item)).filter(Boolean);
+
+        // --- 1. GESTION DES ÉLÉMENTS DE DÉCOR CLASSIQUES (on exclut tous les billboards) ---
         const densityInterval = sceneryConfig.spawnInterval || 40;
         if (currentDistance - this.lastSceneryZ >= densityInterval) {
             const zSpawn = -350;
@@ -210,11 +252,10 @@ export class World {
             sides.forEach(side => {
                 const spawnChance = sceneryConfig.density !== undefined ? sceneryConfig.density : 0.8;
                 if (Math.random() < spawnChance) {
-                    // On exclut tous les types de billboards des décors classiques
-                    const standardConfig = sceneryConfig.elements.filter(el =>
-                        el.class !== "PropagandaBillboard" && el.class !== PropagandaBillboard &&
-                        el.class !== "PropagandaBillboardFloating" && el.class !== PropagandaBillboardFloating
-                    );
+                    const standardConfig = sceneryConfig.elements.filter(el => {
+                        const elName = this.getClassNameFromRegistry(el.class);
+                        return !billboardClassNames.includes(elName);
+                    });
 
                     if (standardConfig.length > 0) {
                         const ElementClass = this.getRandomElementClass(standardConfig);
@@ -231,38 +272,71 @@ export class World {
             this.lastSceneryZ = currentDistance;
         }
 
-        // --- 2. GESTION DES BILLBOARDS (PropagandaBillboard ou PropagandaBillboardFloating) ---
-        const billboardInterval = 400;
+        // --- 2. GESTION DES BILLBOARDS ---
+        const phaseKey = state.phase.label || state.phase.start;
+        const hasLyrics = state.phase.billboardLyrics && state.phase.billboardLyrics !== "";
 
-        if (currentDistance - this.lastBillboardZ >= billboardInterval) {
-            // On cherche l'un ou l'autre dans la configuration de la phase
-            const billboardConfigEntry = sceneryConfig.elements.find(el =>
-                el.class === "PropagandaBillboard" || el.class === PropagandaBillboard ||
-                el.class === "PropagandaBillboardFloating" || el.class === PropagandaBillboardFloating
-            );
+        // Cas prioritaire : Si la phase possède des paroles et qu'elles n'ont pas encore été instanciées
+        if (hasLyrics && !this.instantiatedLyricsPhases.has(phaseKey)) {
+            const lyricConfigEntry = sceneryConfig.elements.find(el => {
+                const name = this.getClassNameFromRegistry(el.class);
+                return name === "BurningLyricsBillboard" || name === "LyricsBillboard";
+            });
 
-            if (billboardConfigEntry) {
-                const spawnChance = billboardConfigEntry.weight !== undefined ? billboardConfigEntry.weight : 0.3;
+            if (lyricConfigEntry) {
+                const configName = this.getClassNameFromRegistry(lyricConfigEntry.class);
+                const registry = this.getClassRegistry();
+                const TargetBillboardClass = registry[configName];
 
-                if (Math.random() < spawnChance) {
+                if (TargetBillboardClass) {
                     const zHorizonSpawn = -1000;
                     const sides = [ -1, 1 ];
                     const randomSide = sides[Math.floor(Math.random() * sides.length)];
+                    const customText = state.phase.billboardLyrics;
 
-                    // Détermination dynamique de la bonne classe à instancier
-                    let TargetBillboardClass = PropagandaBillboard;
-                    if (billboardConfigEntry.class === "PropagandaBillboardFloating" || billboardConfigEntry.class === PropagandaBillboardFloating) {
-                        TargetBillboardClass = PropagandaBillboardFloating;
-                    }
-
-                    const billboard = new TargetBillboardClass(randomSide, zHorizonSpawn, getProjection, state.params.color);
-                    if (billboard) {
+                    const billboard = new TargetBillboardClass(randomSide, zHorizonSpawn, getProjection, state.params.color, customText);
+                    if (billboard && billboard.mesh) {
                         this.scene.add(billboard.mesh);
                         this.scenery.push(billboard);
+                        // On marque immédiatement la phase comme instanciée pour ne pas recréer de panneau en boucle
+                        this.instantiatedLyricsPhases.add(phaseKey);
                     }
                 }
             }
-            this.lastBillboardZ = currentDistance;
+        }
+        else {
+            // Cas classique : Panneaux de propagande soumis à l'intervalle de distance et au weight (spawn chance)
+            const billboardInterval = 400;
+
+            if (currentDistance - this.lastBillboardZ >= billboardInterval) {
+                const propagandaConfigEntry = sceneryConfig.elements.find(el => {
+                    const name = this.getClassNameFromRegistry(el.class);
+                    return name === "PropagandaBillboard" || name === "PropagandaBillboardFloating";
+                });
+
+                if (propagandaConfigEntry) {
+                    const spawnChance = propagandaConfigEntry.weight !== undefined ? propagandaConfigEntry.weight : 0.3;
+
+                    if (Math.random() < spawnChance) {
+                        const zHorizonSpawn = -1000;
+                        const sides = [ -1, 1 ];
+                        const randomSide = sides[Math.floor(Math.random() * sides.length)];
+
+                        const configName = this.getClassNameFromRegistry(propagandaConfigEntry.class);
+                        const registry = this.getClassRegistry();
+                        const TargetBillboardClass = registry[configName];
+
+                        if (TargetBillboardClass) {
+                            const billboard = new TargetBillboardClass(randomSide, zHorizonSpawn, getProjection, state.params.color, null);
+                            if (billboard && billboard.mesh) {
+                                this.scene.add(billboard.mesh);
+                                this.scenery.push(billboard);
+                            }
+                        }
+                    }
+                }
+                this.lastBillboardZ = currentDistance;
+            }
         }
     }
 
@@ -362,16 +436,13 @@ export class World {
             }
         }
 
-        console.log(state);
         if (state.phase && state.phase.glitchScreen && state.phase.glitchScreen.enabled && state.phase.glitchScreen.enabled == true) {
             if (!this.glitchScreenInstance) {
                 this.glitchScreenInstance = new GlitchTextScreen(state.phase.glitchScreen);
             }
             this.glitchScreenInstance.update(state.delta);
         } else {
-            console.log("shoud dispose glitchScreenInstance");
             if (this.glitchScreenInstance) {
-                console.log("dispose glitchScreenInstance");
                 this.glitchScreenInstance.dispose();
                 this.glitchScreenInstance = null;
             }
@@ -516,6 +587,8 @@ export class World {
             this.glitchScreenInstance.dispose();
             this.glitchScreenInstance = null;
         }
+
+        this.instantiatedLyricsPhases.clear();
 
         // 1. Nettoyage des éléments de décor (Buildings, Ships)
         this.scenery.forEach(el => {

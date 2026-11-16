@@ -25,6 +25,7 @@ const DEFAULT_PHASE = {
         glitchedRoad: false,
         glitchedWall: false
     },
+    billboardLyrics: "",
     glitchScreen: {
         enabled: false,
         parts: [
@@ -51,9 +52,7 @@ const DEFAULT_PHASE = {
     scenery: {
         density: 0.8,
         spawnInterval: 40,
-        elements: [
-            { class: "Building", weight: 1 }
-        ]
+        elements: []
     },
     effects: {
         city_lightning: { intensity: 0 },
