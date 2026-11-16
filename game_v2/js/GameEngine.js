@@ -13,7 +13,7 @@ const DEFAULT_PHASE = {
     speed: 1,
     theme: {
         background: {
-            imageUrl: "/game_v2/assets/background-blue-sky-with-white-clouds.jpg",
+            imageUrl: "/game_v2/assets/earth-from-moon.jpg",
             videoId: null,
             opacity: 1,
             defaultOpacity: 0.5

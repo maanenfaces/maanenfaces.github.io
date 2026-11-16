@@ -11,18 +11,19 @@ export const SONG_STRUCTURE = [
     // INTRO
     // ---------------------------------------------------------
 
-    { label: "INTRO 1",
+    { label: "SCREEN INTRO",
       start: 0,
       theme: {
+        colors: [0xdddddd],
         solidFloor: true,
-        floorTexture: "/game_v2/assets/seamless_pbr_green_grass_ground_texture_with_small_white_flowers_and_leaves.png"
+        floorTexture: "/game_v2/assets/aged-pale-blotted-wall.jpg"
       },
       glitchScreen: {
           enabled: true,
           parts: [
-              "En 2026, nous assistons aux prémices de la plus grosse révolution technologique de l'histoire.",
-              "L'humanité est destiné à un futur brillant.",
-              "Démarrage de la partie..."
+              "The greatest technological revolution in history is slowly beginning right in front of our eyes.",
+              "On Earth, the ruling elites promise a brilliant future for humanity.",
+              "Loading, please wait..."
           ]
       },
       bonuses: { density: 0 },
@@ -30,33 +31,9 @@ export const SONG_STRUCTURE = [
       scenery: { density: 0 },
     },
 
-    /*
-    { label: "INTRO 1",
-      start: 0,
-      bonuses: { density: 0 },
-      obstacles: { density: 0.05 },
-      scenery: {
-        density: 0.05,
-        elements: [
-          { class: "PropagandaBillboard", weight: 0.3 }
-        ]
-      },
-      theme: {
-        solidFloor: true,
-        floorTexture: "/game_v2/assets/seamless_pbr_green_grass_ground_texture_with_small_white_flowers_and_leaves.png"
-      }
-    },
-    { label: "INTRO 1",
-      start: 5,
+    { label: "START",
+      start: 17.5,
       speed: 1.2,
-      bonuses: { density: 0.1 },
-      obstacles: { density: 0.9 }
-    },
-    */
-
-    { label: "INTRO 1",
-      start: 14,
-      speed: 1.3,
       glitchScreen: { enabled: false },
       obstacles: { density: 0.21 }
     },
@@ -68,8 +45,9 @@ export const SONG_STRUCTURE = [
     { label: "VERSE 1 WARMUP",
       start: 28,
       effects: { curve: { intensity: 1 } },
+      bonuses: { density: 0.1 },
       obstacles: { density: 0.25 },
-      theme: { colors: [0xffff00] }
+      theme: { colors: [0xffff00] },
     },
     { label: "VERSE 1 WARMUP",
       start: 35,
@@ -89,12 +67,20 @@ export const SONG_STRUCTURE = [
       colors: [0xffff00, 0xffa500, 0x00ff00],
       effects: { wave: { intensity: 0.1 } }
     },
-    { label: "VERSE 1",
-      start: 74,
+    { label: "VERSE 1 LYRICS END 1",
+      start: 62,
+      billboardLyrics: "I FEEL TROUBLE, I FEEL TROUBLE LOOKING AT THIS",
+      scenery: { density: 1, elements: [{ class: "LyricsBillboard", weight: 1 }] },
+    },
+    { label: "VERSE 1 LYRICS END 2",
+      start: 67,
+      billboardLyrics: "I FEEL TROUBLE LOOKING AT ALL THIS FUCKING SHIT",
+      scenery: { density: 1, elements: [{ class: "LyricsBillboard", weight: 1 }] },
     },
     { label: "VERSE 1 BUILD-UP",
       start: 81,
-      effects: { curve: { intensity: 3 }, wave: { intensity: 0.3 } }
+      effects: { curve: { intensity: 3 }, wave: { intensity: 0.3 } },
+      scenery: { density: 0, elements: [] }
     },
 
     // ---------------------------------------------------------
@@ -124,11 +110,17 @@ export const SONG_STRUCTURE = [
     },
     {
         label: "BRIDGE 1 BUILD-UP",
+        start: 110,
+        billboardLyrics: "BURN EVERYTHING, BURN EVERYTHING",
+        scenery: { density: 1, elements: [{ class: "BurningLyricsBillboard", weight: 1 }] },
+    },
+    {
+        label: "BRIDGE 1 BUILD-UP",
         start: 116,
-        theme: { colors: [0xffff00] },
-        obstacles: { density: 0.02 },
-        scenery: { horizonCity: { enabled: false } },
-        effects: { curve: { intensity: 0 }, wave: { intensity: 0.2 }, roll: { intensity: 50 } }
+        theme: { colors: [0xff8800, 0xffff00] },
+        obstacles: { density: 0.15 },
+        effects: { curve: { intensity: 0 }, wave: { intensity: 0.2 }, roll: { intensity: 50 } },
+        billboardLyrics: ""
     },
 
     // ---------------------------------------------------------
@@ -217,7 +209,9 @@ export const SONG_STRUCTURE = [
         speed: 2,
         theme: { colors: [0xffff00] },
         obstacles: { density: 0.15 },
-        effects: { curve: { intensity: 2 }, wave: { intensity: 0.6 } }
+        effects: { curve: { intensity: 2 }, wave: { intensity: 0.6 } },
+        billboardLyrics: "GET READY FOR THE RESET",
+        scenery: { density: 1, elements: [{ class: "BurningLyricsBillboard", weight: 1 }] }
     },
 
     // ---------------------------------------------------------
@@ -226,18 +220,24 @@ export const SONG_STRUCTURE = [
     {
         label: "MID-SONG BREAK",
         start: 217,
-        speed: 0.8,
-        theme: { colors: [0xffff00] },
+        speed: 0.7,
+        theme: {
+          colors: [0x000000],
+          background: { opacity: 0 },
+          gridOpacity: 0,
+          solidFloor: false
+        },
         obstacles: { density: 0.03 },
-        effects: { curve: { intensity: 2 }, wave: { intensity: 0 } }
+        effects: { curve: { intensity: 2 }, wave: { intensity: 0 }, reverse: { enabled: true } },
+        billboardLyrics: ""
     },
     {
         label: "VERSE 2 WARMUP",
         start: 237,
-        speed: 0.7,
+        speed: 0.8,
         theme: { colors: [0xffff00] },
         obstacles: { density: 0.02 },
-        effects: { curve: { intensity: 2 }, wave: { intensity: 0 } }
+        effects: { curve: { intensity: 2 }, wave: { intensity: 0 }, reverse: { enabled: false } }
     },
     {
         label: "VERSE 2",
