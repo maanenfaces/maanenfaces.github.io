@@ -310,17 +310,17 @@ export class GameEngine {
         this.camera.position.x += (targetCameraX - this.camera.position.x) * cameraLerpFactor;
         this.camera.position.y += (targetCameraY - this.camera.position.y) * cameraLerpFactor;
 
-        // Rotation de la caméra (Reverse)
-        const targetRotation = triggers.reverse ? Math.PI : 0;
-        this.cameraRotation += (targetRotation - this.cameraRotation) * (lerpS * 5);
-        this.camera.rotation.z = this.cameraRotation;
-
         // Regard vers l'avant stable
         this.camera.lookAt(
             this.player.mesh.position.x * 0.1,
             this.player.mesh.position.y,
             this.player.mesh.position.z - 15
         );
+
+        // Rotation de la caméra (Reverse)
+        const targetRotation = triggers.reverse ? Math.PI : 0;
+        this.cameraRotation += (targetRotation - this.cameraRotation) * (lerpS * 5);
+        this.camera.rotation.z = this.cameraRotation;
 
         // Événements de rotation (UI)
         const currentlyRotating = Math.abs(targetRotation - this.cameraRotation) > 0.1;
